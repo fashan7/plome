@@ -1,0 +1,16 @@
+
+username: A unique identifier for the user. It is commonly used for authentication and URL routing.
+
+password: The hashed password of the user. It is stored securely and cannot be retrieved in its original form.
+
+email: The email address associated with the user.
+
+first_name and last_name: The user's first name and last name.
+
+is_active: A boolean flag indicating whether the user account is active. Inactive accounts typically cannot log in.
+
+is_staff: A boolean flag indicating whether the user has staff privileges. Staff users often have access to administrative functionality.
+
+is_superuser: A boolean flag indicating whether the user has superuser privileges. Superusers have full control over the Django admin site.
+
+date_joined: The timestamp representing when the user joined.
