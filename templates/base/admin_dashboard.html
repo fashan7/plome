@@ -8,7 +8,7 @@
         <meta name="description" content="">
         <meta name="author" content="">
         <link rel="icon" href="{% static 'favicon.ico' %}">
-        <title>Admin Dashboard</title>
+        <title>Super Admin Dashboard</title>
         <!-- Simple bar CSS -->
         <link rel="stylesheet" href="{% static 'css/simplebar.css' %}">
         <!-- Fonts CSS -->
@@ -61,9 +61,10 @@
                             </span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-                            <a class="dropdown-item" href="#">Profile</a>
-                            <a class="dropdown-item" href="#">Settings</a>
-                            <a class="dropdown-item" href="#">Activities</a>
+                             <a class="dropdown-item" href="{% url 'profile' %}">Profile</a>
+             <a class="dropdown-item" href="{% url 'admin_dashboard' %}">Dashboard</a>
+              <a class="dropdown-item" href="{% url 'profile_settings' %}">Settings</a>
+              <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
                         </div>
                     </li>
                 </ul>
@@ -124,26 +125,26 @@
                         <span>Components</span>
                     </p>
                     <ul class="navbar-nav flex-fill w-100 mb-2">
-                        <li class="nav-item w-100">
+                        {% comment %} <li class="nav-item w-100">
                             <a class="nav-link" href="calendar.html">
                                 <i class="fe fe-user fe-16"></i>
                                 <span class="ml-3 item-text">View All Users</span>
                             </a>
-                        </li>
+                        </li> {% endcomment %}
                         <li class="nav-item dropdown">
                             <a href="#ui-elements" data-toggle="collapse" aria-expanded="false"
                                 class="dropdown-toggle nav-link">
                                 <i class="fe fe-user fe-16"></i>
-                                <span class="ml-3 item-text">Add New Users</span>
+                                <span class="ml-3 item-text">Users</span>
                             </a>
                            
                             <ul class="collapse list-unstyled pl-4 w-100" id="ui-elements">
                                 <li class="nav-item">
                                     <a class="nav-link pl-3" href="{% url 'add_new_user' %}"><span
-                                            class="ml-1 item-text">add_new_user</span>
+                                            class="ml-1 item-text">Add new users</span>
                                     </a>
                                 </li>
-                                <li class="nav-item">
+                                {% comment %} <li class="nav-item">
                                     <a class="nav-link pl-3" href="./ui-typograpy.html"><span
                                             class="ml-1 item-text">Typograpy</span></a>
                                 </li>
@@ -170,35 +171,35 @@
                                 <li class="nav-item">
                                     <a class="nav-link pl-3" href="./ui-progress.html"><span
                                             class="ml-1 item-text">Progress</span></a>
-                                </li>
+                                </li> {% endcomment %}
                             </ul>
                         </li>
-                        <li class="nav-item w-100">
+                        {% comment %} <li class="nav-item w-100">
                             <a class="nav-link" href="widgets.html">
                                 <i class="fe fe-layers fe-16"></i>
                                 <span class="ml-3 item-text">Widgets</span>
                                 <span class="badge badge-pill badge-primary">New</span>
                             </a>
-                        </li>
+                        </li> {% endcomment %}
                         <li class="nav-item dropdown">
                             <a href="#forms" data-toggle="collapse" aria-expanded="false"
                                 class="dropdown-toggle nav-link">
                                 <i class="fe fe-credit-card fe-16"></i>
-                                <span class="ml-3 item-text">Forms</span>
+                                <span class="ml-3 item-text">Leads</span>
                             </a>
                             <ul class="collapse list-unstyled pl-4 w-100" id="forms">
                                 <li class="nav-item">
                                     <a class="nav-link pl-3" href="./form_elements.html"><span
-                                            class="ml-1 item-text">Basic Elements</span></a>
+                                            class="ml-1 item-text">Add Leads</span></a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link pl-3" href="./form_advanced.html"><span
-                                            class="ml-1 item-text">Advanced Elements</span></a>
+                                            class="ml-1 item-text">Facebook Leads</span></a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link pl-3" href="./form_validation.html"><span
-                                            class="ml-1 item-text">Validation</span></a>
-                                </li>
+                                            class="ml-1 item-text">Ringover Leads</span></a>
+                                {% comment %} </li>
                                 <li class="nav-item">
                                     <a class="nav-link pl-3" href="./form_wizard.html"><span
                                             class="ml-1 item-text">Wizard</span></a>
@@ -210,9 +211,26 @@
                                 <li class="nav-item">
                                     <a class="nav-link pl-3" href="./form_upload.html"><span class="ml-1 item-text">File
                                             upload</span></a>
-                                </li>
+                                </li> {% endcomment %}
                             </ul>
                         </li>
+                        <li class="nav-item dropdown">
+                        <a href="#profile" data-toggle="collapse" aria-expanded="false"
+                            class="dropdown-toggle nav-link">
+                            <i class="fe fe-user fe-16"></i>
+                            <span class="ml-3 item-text">Profile</span>
+                        </a>
+                        <ul class="collapse list-unstyled pl-4 w-100" id="profile">
+                            <a class="nav-link pl-3" href="{% url 'profile' %}"><span class="ml-1">Overview</span></a>
+                            <a class="nav-link pl-3" href="{% url 'profile_settings' %}"><span
+                                    class="ml-1">Settings</span></a>
+                            {% comment %} <a class="nav-link pl-3" href="./profile-security.html"><span
+                                    class="ml-1">Security</span></a>
+                            <a class="nav-link pl-3" href="./profile-notification.html"><span
+                                    class="ml-1">Notifications</span></a> {% endcomment %}
+                        </ul>
+                    </li>
+                    
                         <li class="nav-item dropdown">
                             <a href="#tables" data-toggle="collapse" aria-expanded="false"
                                 class="dropdown-toggle nav-link">
@@ -285,20 +303,20 @@
                                         Contact</span></a>
                             </ul>
                         </li>
-                        <li class="nav-item dropdown">
+                        {% comment %} <li class="nav-item dropdown">
                             <a href="#profile" data-toggle="collapse" aria-expanded="false"
                                 class="dropdown-toggle nav-link">
                                 <i class="fe fe-user fe-16"></i>
                                 <span class="ml-3 item-text">Profile</span>
-                            </a>
+                            </a> {% endcomment %}
                             <ul class="collapse list-unstyled pl-4 w-100" id="profile">
-                                <a class="nav-link pl-3" href="./profile.html"><span class="ml-1">Overview</span></a>
-                                <a class="nav-link pl-3" href="./profile-settings.html"><span
-                                        class="ml-1">Settings</span></a>
-                                <a class="nav-link pl-3" href="./profile-security.html"><span
+                                {% comment %} <a class="nav-link pl-3" href="{% url 'profile' %}"><span class="ml-1">Overview</span></a>
+                                <a class="nav-link pl-3" href="{% url 'profile_settings' %}"><span
+                                        class="ml-1">Settings</span></a> {% endcomment %}
+                                {% comment %} <a class="nav-link pl-3" href="./profile-security.html"><span
                                         class="ml-1">Security</span></a>
                                 <a class="nav-link pl-3" href="./profile-notification.html"><span
-                                        class="ml-1">Notifications</span></a>
+                                        class="ml-1">Notifications</span></a> {% endcomment %}
                             </ul>
                         </li>
                         <li class="nav-item dropdown">

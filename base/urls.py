@@ -12,6 +12,9 @@ urlpatterns = [
     path('edit-user/<int:user_id>/', edit_user, name='edit-user'),
     path('delete-user/<int:user_id>/',delete_user, name='delete-user'),
     path('sendemail/', sendemail, name='sendemail'),
+    path('profile/',profile,name ="profile"),
+    path('profile_settings/',profile_settings,name ="profile_settings"),
+    
 ]
 
 
