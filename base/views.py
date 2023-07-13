@@ -21,6 +21,8 @@ from django.utils.html import strip_tags
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import get_user_model
 
+from django.contrib.auth.hashers import make_password
+
 # @login_required
 def admin_dashboard(request):
     if request.user.is_authenticated:
@@ -116,7 +118,6 @@ User = get_user_model()
 from django.http import JsonResponse
 
 
-
 def edit_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
 
@@ -126,14 +127,53 @@ def edit_user(request, user_id):
         user.email = request.POST['Email']
         user.first_name = request.POST['firstname']
         user.last_name = request.POST['lastname']
-        user.is_sales = request.POST.get('user_type') == 'Sales'
-        user.is_advisor = request.POST.get('user_type') == 'Advisor'
-        user.is_admin = request.POST.get('user_type') == 'Admin'
+
+        # Check if user type is included in the request
+        user_type = request.POST.get('user_type', '')
+
+        if user_type == 'Sales':
+            user.is_sales = True
+            user.is_advisor = False
+            user.is_admin = False
+        elif user_type == 'Advisor':
+            user.is_sales = False
+            user.is_advisor = True
+            user.is_admin = False
+        elif user_type == 'Admin':
+            user.is_sales = False
+            user.is_advisor = False
+            user.is_admin = True
+            
+        password = request.POST.get('password')
+        if password:
+            user.password = make_password(password)
+
         user.save()
 
         return JsonResponse({'success': True})
 
     return render(request, 'base/edit_user.html', {'user': user})
+
+
+
+
+# def edit_user(request, user_id):
+#     user = get_object_or_404(User, id=user_id)
+
+#     if request.method == 'POST':
+#         # Update the user fields
+#         user.username = request.POST['Username']
+#         user.email = request.POST['Email']
+#         user.first_name = request.POST['firstname']
+#         user.last_name = request.POST['lastname']
+#         user.is_sales = request.POST.get('user_type') == 'Sales'
+#         user.is_advisor = request.POST.get('user_type') == 'Advisor'
+#         user.is_admin = request.POST.get('user_type') == 'Admin'
+#         user.save()
+
+#         return JsonResponse({'success': True})
+
+#     return render(request, 'base/edit_user.html', {'user': user})
 
 
 
@@ -166,6 +206,29 @@ def sendemail(request):
 
     return render(request, 'base/sendemail.html')
 
+def profile(request):
+    return render(request,'base/profile.html')
+def profile_settings(request):
+    user = request.user
+
+    if request.method == 'POST':
+        # Update the user fields
+        user.first_name = request.POST.get('firstname', '')
+        user.last_name = request.POST.get('lastname', '')
+        user.email = request.POST.get('inputEmail4', '')
+        # Update other fields as needed
+
+        # Check if the password fields are provided and match
+        new_password = request.POST.get('inputPassword5')
+        confirm_password = request.POST.get('inputPassword6')
+        if new_password and new_password == confirm_password:
+            user.set_password(new_password)
+
+        user.save()
+        return redirect('profile')
+
+
+    return render(request, 'base/profile_setting.html', {'user': user})
 
 # def sendemail(request):
 #     user_id = request.GET.get('user_id')  # Get the user_id from the query parameters
