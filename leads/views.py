@@ -3,13 +3,29 @@ from accounts.models import CustomUserTypes
 from django.contrib.auth.models import User
 from .models import Lead
 from accounts.models import User
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+
 
 def assign_user_to_lead(lead, user_id):
     assigned_user = CustomUserTypes.objects.get(id=user_id)
     lead.assigned_to = assigned_user
     lead.save()
+    
+    
+def delete_lead(request, lead_id):
+    lead = get_object_or_404(Lead, id=lead_id)
 
-def lead_add(request):
+    if request.method == 'POST':
+        # Delete the lead
+        lead.delete()
+
+        return JsonResponse({'message': 'Lead deleted successfully.'})
+
+    return JsonResponse({'error': 'Invalid request.'})
+
+
+def lead_dashboard(request):
     if request.method == 'POST':
         # Retrieve form data
         date_de_soumission = request.POST['date_de_soumission']
@@ -36,27 +52,26 @@ def lead_add(request):
         )
         lead.save()
         
-        lead = Lead.objects.all()
-        
         assigned_to_id = request.POST.get('assigned_to')
         if assigned_to_id:
             assigned_user = CustomUserTypes.objects.get(id=assigned_to_id)
             lead.assigned_to = assigned_user
             lead.save()
+        return redirect('lead_dashboard')
+            
 
-        # return redirect('lead_add')
-
-    # Fetch all users
+    # Fetch all leads
+    leads = Lead.objects.all()
     users = CustomUserTypes.objects.all()
-    
 
-    return render(request, 'lead/leads_dashboard.html', {'users': users})
 
+    return render(request, 'lead/leads_dashboard.html', {'leads': leads,'users': users})
 
 
 # def lead_list(request):
-#     leads = Lead.objects.all()
-#     return render(request, 'lead/lead_list.html', {'leads': leads})
+#     users = CustomUserTypes.objects.all()
+#     return render(request, 'lead/leads_dashboard.html', {'users': users})
+
 
 def lead_edit(request, lead_id):
     lead = Lead.objects.get(id=lead_id)
@@ -78,10 +93,15 @@ def lead_edit(request, lead_id):
     
     return render(request, 'lead/lead_edit.html', {'lead': lead})
 
-def lead_delete(request, lead_id):
-    lead = Lead.objects.get(id=lead_id)
-    lead.delete()
-    return redirect('lead_add')
+
+
+
+
+
+# def lead_delete(request, lead_id):
+#     lead = Lead.objects.get(id=lead_id)
+#     lead.delete()
+#     return redirect('lead_add')
 
 
 
