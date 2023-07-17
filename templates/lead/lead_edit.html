@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Edit Lead</h1>
+  <form method="post">
+    {% csrf_token %}
+    <label for="date_de_soumission">Date de Soumission:</label>
+    <input type="date" id="date_de_soumission" name="date_de_soumission" value="{{ lead.date_de_soumission }}" required>
+    <!-- Add other form fields here -->
+    
+    <!-- Assign task to user -->
+    {% if user.is_superuser %}
+      <label for="assigned_to">Assign To:</label>
+      <select id="assigned_to" name="assigned_to">
+        <option value="">-- Select User --</option>
+        {% for user in users %}
+          <option value="{{ user.id }}" {% if user.id == lead.assigned_to.id %}selected{% endif %}>{{ user.username }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+    
+    <button type="submit">Update</button>
+  </form>
+{% endblock %}
