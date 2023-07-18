@@ -272,10 +272,45 @@
       </main> <!-- main -->
 
       <script>
+        var csrfToken = $('#csrfmiddlewaretoken').val();
+        function fillSpan(id) {
+          if (document.getElementById('changeCon'+id).checked) {
+            document.getElementById('viewCon'+id).innerHTML = '(Yes)';
+          }
+          else {
+            document.getElementById('viewCon'+id).innerHTML = '(No)';
+          }
+        }
+
+        function getUserPrivileges(id) {
+          if (document.getElementById('userid').value != '') {
+            if (document.getElementById('changeCon'+id).checked) {
+              sign = "True";
+            }
+            else {
+              sign = "False";
+            }
+
+            var user = $("#users").val();
+            $.ajax({
+              url: "{% url 'get_page_priv' %}",
+              headers: { "X-CSRFToken": csrfToken },
+              type: 'POST',
+              data: {
+                user:user,
+                id:id,
+                sign:sign
+              }, 
+              success: function(data, status){
+                $("#loadAllDetailsPrivilage").empty();
+                $("#loadAllDetailsPrivilage").append(data);
+              }
+            });
+          }
+        }
         $(document).ready(function (){
             $("#users").change(function() {
                 var user = $("#users").val();
-                var csrfToken = $('#csrfmiddlewaretoken').val();
                 $.ajax({
                   url: "{% url 'get_page_priv' %}",
                   headers: { "X-CSRFToken": csrfToken },
