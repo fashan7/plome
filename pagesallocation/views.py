@@ -3,15 +3,13 @@ from accounts.models import CustomUserTypes
 from pagesallocation.models import PageAllocation,Privilege
 from django.http import JsonResponse
 
-from django.db.models import OuterRef, Subquery
-from django.db.models import Q, F
+from django.db.models import OuterRef, Subquery, Q, F,Count
 
 # Create your views here.
 def setup_privilege(request):
 
     user = CustomUserTypes.objects.all()
     return render(request,'base/set_priviledge.html',  {'users': user})
-
 
 
 
@@ -24,24 +22,24 @@ def get_primary_section():
     return items
 
 def get_new_pages_not_set(section):
-    # Subquery to get the pageallocation_id values in the Userpriviledge (Privilege) table
-    subquery = Privilege.objects.filter(pageallocation_id=OuterRef('id')).values('pageallocation_id')   
-
-    # Query to get the Pageallocation items where there is no corresponding Userpriviledge (Privilege) entry
-    # and other filtering conditions
-    items = PageAllocation.objects.filter(
-        psection=section,
-        is_active=True,
-        privileges__pageallocation_id__isnull=True
-    ).exclude(
-        id__in=Subquery(subquery)
-    ).values('name', 'route', 'id')
-
+    
+    subquery = Privilege.objects.filter(pageallocation_id=OuterRef('pk')).values('pageallocation_id')
+    pageallocations_with_privileges = PageAllocation.objects.annotate(privilege_count=Count(Subquery(subquery)))
+    # Query to get the desired items using Django ORM
+    items = pageallocations_with_privileges.filter(
+        Q(psection=section) &
+        Q(is_active=True) &
+        Q(privilege_count=0)
+    ).order_by('pposition').values(
+        'name',
+        'route',
+        'id'
+    )
 
     if items is not None:
         data = list()
         for row in items:
-            data.append({'name': row[0], 'route': row[1], 'page_id': row[2]})
+            data.append({'name': row['name'], 'route': row['route'], 'page_id': row['id']})
         return data
     else:
         return None
@@ -62,14 +60,16 @@ def get_priv_pages(section, user_id):
 
 def process_load_privledge(user_id):
     pages = get_primary_section()
-    print("_______")
-    print(pages)
     for key, value in pages.items():
         section_name = value
         data_not_set = get_new_pages_not_set(section_name)
+        print("****")
+        print(data_not_set)
         if data_not_set:
             for row in data_not_set:
                 page_id = row.get('page_id')
+                print('OOSOS')
+                print(page_id)
                 register_privledges(page_id)
 
     form_dict = dict()
@@ -86,10 +86,14 @@ def process_load_privledge(user_id):
 def register_privledges(page_id):
     #todo need to check status is_active
     for user in CustomUserTypes.objects.all():
+        
+        try:
+            page_allocation = PageAllocation.objects.get(id=page_id)
+        except PageAllocation.DoesNotExist:
+            # Handle the case when the PageAllocation with the given page_id does not exist
+            return
 
-        privilege = Privilege()
-        privilege.pageallocation_id = page_id
-        privilege.is_active = False
+        privilege = Privilege.objects.create(pageallocation=page_allocation, is_active=True)
         privilege.assigned_users.set([user])
 
         privilege.save()
