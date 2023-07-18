@@ -24,7 +24,7 @@ class Privilege(models.Model):
     )
 
     def __str__(self):
-        return self.id
+        return str(self.id)
 
 
 class PageAllocation(models.Model):
@@ -38,5 +38,5 @@ class PageAllocation(models.Model):
     is_active = models.BooleanField(default=True)
 
     def __str__(self) -> int:
-        return self.id
+        return str(self.id)
     
