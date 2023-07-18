@@ -8,6 +8,8 @@ urlpatterns = [
     path('deactivated_leads/', views.deactivated_leads, name='deactivated_leads'),
     path('facebook_leads/', views.facebook_leads, name='facebook_leads'),
     path('lead_edit/<int:lead_id>/', views.lead_edit, name='lead_edit'),
+    path('import_leads/', views.import_leads, name='import_leads'),
+     path('delete-leads/', views.delete_leads, name='delete_leads'),
     
 ]
 
