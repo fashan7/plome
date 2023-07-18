@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render,get_object_or_404
 from accounts.models import CustomUserTypes
 from pagesallocation.models import PageAllocation,Privilege
 from django.http import JsonResponse
@@ -92,9 +92,9 @@ def register_privledges(page_id):
         except PageAllocation.DoesNotExist:
             # Handle the case when the PageAllocation with the given page_id does not exist
             return
-
-        privilege = Privilege.objects.create(pageallocation=page_allocation, is_active=True)
-        privilege.assigned_users.set([user])
+        
+        user = get_object_or_404(CustomUserTypes, id=user.id)
+        privilege = Privilege.objects.create(pageallocation=page_allocation, is_active=True, assigned_users=user)
 
         privilege.save()
 
