@@ -62,6 +62,8 @@ def get_priv_pages(section, user_id):
 
 def process_load_privledge(user_id):
     pages = get_primary_section()
+    print("_______")
+    print(pages)
     for key, value in pages.items():
         section_name = value
         data_not_set = get_new_pages_not_set(section_name)
