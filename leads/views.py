@@ -5,6 +5,16 @@ from .models import Lead
 from accounts.models import User
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
+from django.http import JsonResponse
+import csv
+import pandas as pd
+from django.contrib import messages
+from .models import Lead
+from datetime import datetime
+from datetime import datetime, timezone, timedelta
+import openpyxl
+from django.contrib import messages
+from .models import Lead
 
 
 def assign_user_to_lead(lead, user_id):
@@ -102,6 +112,73 @@ def toggle_lead_status(request, lead_id):
 def deactivated_leads(request):
     leads = Lead.objects.filter(is_active=False)
     return render(request, 'lead/deactivated_lead.html', {'leads': leads})
+
+
+
+def import_leads(request):
+    if request.method == 'POST' and request.FILES.get('excel_file'):
+        file = request.FILES['excel_file']
+        try:
+            if file.name.endswith('.xlsx'):
+                # Read all sheets/pages from the Excel file
+                xls = pd.ExcelFile(file)
+                imported_leads = []
+                for sheet_name in xls.sheet_names:
+                    df = pd.read_excel(xls, sheet_name)
+                    df = df.where(pd.notna(df), None)  # Convert NaN to None
+                    sheet_leads = [
+                        Lead(
+                            date_de_soumission=parse_date(row[0]),
+                            nom_de_la_campagne=row[1],
+                            avez_vous_travaille=row[2],
+                            nom=row[3],
+                            prenom=row[4],
+                            telephone=row[5],
+                            email=row[6],
+                            qualification=row[7],
+                            comments=row[8]
+                        ) for _, row in df.iterrows()
+                    ]
+                    imported_leads.extend(sheet_leads)
+                Lead.objects.bulk_create(imported_leads)
+            else:
+                raise ValueError('Unsupported file format. Please provide an XLSX file.')
+
+            messages.success(request, f'{len(imported_leads)} leads imported successfully.')
+            return redirect('lead_dashboard')
+        except Exception as e:
+            messages.error(request, f'Error importing leads: {str(e)}')
+
+    return redirect('lead_dashboard')
+
+def parse_date(date_str):
+    try:
+        # Try parsing with format '%Y-%m-%d %H:%M:%S'
+        return datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+    except ValueError:
+        try:
+            # Try parsing with format '44764,59196'
+            timestamp = float(date_str.replace(',', '.')) * 86400
+            min_datetime = datetime(1970, 1, 1, tzinfo=timezone.utc)
+            max_datetime = datetime(9999, 12, 31, 23, 59, 59, tzinfo=timezone.utc)
+
+            # Check if the parsed timestamp is within a reasonable range
+            if min_datetime.timestamp() <= timestamp <= max_datetime.timestamp():
+                return datetime.fromtimestamp(timestamp)
+            else:
+                return None
+        except ValueError:
+            return None
+        
+
+
+def delete_leads(request):
+    if request.method == 'POST' and request.is_ajax():
+        lead_ids = request.POST.getlist('lead_ids[]')
+        Lead.objects.filter(id__in=lead_ids).delete()
+        return JsonResponse({'success': True, 'message': 'Selected leads deleted successfully.'})
+    return JsonResponse({'success': False, 'message': 'Invalid request.'})
+
 
 
 def facebook_leads(request):
