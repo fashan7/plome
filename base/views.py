@@ -41,8 +41,6 @@ def add_new_user(request):
         return render(request, 'base/add_new_user.html')
     
 
-
-
 @csrf_exempt
 def check_username(request):
     username = request.POST.get('Username')
