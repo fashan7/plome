@@ -4,10 +4,14 @@ from . import views
 urlpatterns = [
     # Other URL patterns
     path('lead_dashboard/', views.lead_dashboard, name='lead_dashboard'),
-   path('lead/delete/<int:lead_id>/', views.delete_lead, name='lead_delete'),
-
-
+    path('lead/toggle/<int:lead_id>/', views.toggle_lead_status, name='toggle_lead_status'),
+    path('deactivated_leads/', views.deactivated_leads, name='deactivated_leads'),
+    path('facebook_leads/', views.facebook_leads, name='facebook_leads'),
+    path('lead_edit/<int:lead_id>/', views.lead_edit, name='lead_edit'),
+    
 ]
+
+
 
 # from django.urls import path
 # from .views import  lead_dashboard
