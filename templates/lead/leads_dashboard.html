@@ -114,107 +114,229 @@
           <div class="card shadow">
             <div class="card-body">
               <!-- table -->
-              <table class="table table-hover table-bordered datatables" id="dataTable-1">
-                <thead class="fw-bold">
-                  <tr>
-                    <th>
-                      <div class="custom-control custom-checkbox">
-                        <input type="checkbox" class="custom-control-input" id="all2">
-                        <label class="custom-control-label" for="all2"></label>
-                      </div>
-                    </th>
-                    <th>Date de Soumission</th>
-                    <th>Nom de la Campagne </th>
-                    <th>Avez-vous travaillé</th>
-                    <th>Nom</th>
-                    <th>Prénom</th>
-                    <th>Téléphone</th>
-                    <th>Email</th>
-                    <th>Qualification</th>
-                    <th>Comments</th>
-                    <th>Assign to</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for lead in leads %}
-                  <tr>
-                    <td>
-                      <div class="custom-control custom-checkbox">
-                        <input type="checkbox" class="custom-control-input" id="{{ lead.id }}">
-                        <label class="custom-control-label" for="{{ lead.id }}"></label>
-                      </div>
-                    </td>
-                    {% comment %} <td>{{ forloop.counter }}</td> {% endcomment %}
-                    <td>{{ lead.date_de_soumission }}</td>
-                    <td>{{ lead.nom_de_la_campagne }}</td>
-                    <td>{{ lead.avez_vous_travaille }}</td>
-                    <td>{{ lead.nom }}</td>
-                    <td>{{ lead.prenom }}</td>
-                    <td>{{ lead.telephone }}</td>
-                    <td>{{ lead.email }}</td>
-                    <td>{{ lead.qualification }}</td>
-                    <td>{{ lead.comments }}</td>
-                    <td>{{ lead.assigned_to }}</td>
-                    <td>
-                      <button class="btn btn-sm dropdown-toggle more-horizontal" type="button" data-toggle="dropdown"
-                        aria-haspopup="true" aria-expanded="false">
-                        <span class="text-muted sr-only">Action</span>
-                      </button>
-                      <script>
-                        function deleteLead(leadId) {
-                          // Create an AJAX request to the `lead_delete` URL
-                          var xhr = new XMLHttpRequest();
-                          var url = '/lead/delete/' + leadId + '/'; // Replace with the actual delete-lead URL
-                          var csrfToken = document.getElementById('csrfmiddlewaretoken').value;
-                          xhr.open('POST', url, true);
-                          xhr.setRequestHeader('Content-Type', 'application/json');
-                          xhr.setRequestHeader('X-CSRFToken', csrfToken);
-                          // Send the request
-                          xhr.send();
-                          // Handle the response
-                          xhr.onload = function() {
-                            if (xhr.status === 200) {
-                              // The lead was deleted successfully
-                              var data = JSON.parse(xhr.responseText);
-                              Swal.fire(
-                                'Success!',
-                                'Lead deleted successfully!',
-                                'success'
-                              ).then(function() {
-                                window.location.reload();
-                              });
-                            } else {
-                              // An error occurred
-                              Swal.fire({
-                                icon: 'error',
-                                title: 'Oops...',
-                                text: 'An error occurred!',
-                              });
-                            }
-                          };
-                        }
-                      </script>
+              <div class="table-responsive">
+                <table class="table table-hover table-bordered datatables" id="dataTable-1">
+                  <thead class="fw-bold">
+                    <tr>
+                      <th>
+                        <div class="custom-control custom-checkbox">
+                          <input type="checkbox" class="custom-control-input" id="all2">
+                          <label class="custom-control-label" for="all2"></label>
+                        </div>
+                      </th>
+                      <th>Date de Soumission</th>
+                      <th>Nom de la Campagne </th>
+                      <th>Avez-vous travaillé</th>
+                      <th>Nom</th>
+                      <th>Prénom</th>
+                      <th>Téléphone</th>
+                      <th>Email</th>
+                      <th>Qualification</th>
+                      <th>Comments</th>
+                      <th>Assign to</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for lead in leads %}
+                    <tr>
+                      <td>
+                        <div class="custom-control custom-checkbox">
+                          <input type="checkbox" class="custom-control-input" id="{{ lead.id }}">
+                          <label class="custom-control-label" for="{{ lead.id }}"></label>
+                        </div>
+                      </td>
+                      {% comment %} <td>{{ forloop.counter }}</td> {% endcomment %}
+                      <td>{{ lead.date_de_soumission }}</td>
+                      <td>{{ lead.nom_de_la_campagne }}</td>
+                      <td>{{ lead.avez_vous_travaille }}</td>
+                      <td>{{ lead.nom }}</td>
+                      <td>{{ lead.prenom }}</td>
+                      <td>{{ lead.telephone }}</td>
+                      <td>{{ lead.email }}</td>
+                      <td>{{ lead.qualification }}</td>
+                      <td>{{ lead.comments }}</td>
+                      <td>{{ lead.assigned_to }}</td>
+                      <td>
+                        {% comment %} <button class="btn btn-sm dropdown-toggle more-horizontal" type="button"
+                          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                          <span class="text-muted sr-only">Action</span>
+                        </button> {% endcomment %}
+                        <div class="dropdown">
+                          <button class="btn btn-sm dropdown-toggle" type="button" id="dr4" data-toggle="dropdown"
+                            aria-haspopup="true" aria-expanded="false">
+                            <span class="text-muted sr-only">Action</span>
+                          </button>
+                          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dr4">
 
-                      <div class="dropdown-menu dropdown-menu-right">
-                        <a class="dropdown-item" href="#">Edit</a>
-                        <a class="dropdown-item" href="javascript:void(0)" onclick="deleteLead('{{ lead.id }}')"
-                          id="delete-lead-{{ lead.id }}">Remove</a>
+                            <a class="dropdown-item" href="javascript:void(0)" data-toggle="modal"
+                              data-target="#editModal-{{ lead.id }}">Edit</a>
+                            <a class="dropdown-item" href="{% url 'toggle_lead_status' lead.id %}">
+                              {% if lead.is_active %}
+                              Deactivate
+                              {% else %}
+                              Activate
+                              {% endif %}
+                            </a>
+                            <a class="dropdown-item" href="#">Assign</a>
+                          </div>
+                        </div>
 
-                        <a class="dropdown-item" href="#">Assign</a>
-                      </div>
-                    </td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
+                        <!-- edit modal -->
+                        <div class="modal fade" id="editModal-{{ lead.id }}" tabindex="-1" role="dialog"
+                          aria-labelledby="editModalLabel" aria-hidden="true">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="editModalLabel">Edit Lead
+                                </h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                                </button>
+                              </div>
+                              <div class="modal-body">
+                                <form id="editForm-{{ lead.id }}" method="post" action="{% url 'lead_edit' lead.id %}">
+                                  {% csrf_token %}
+                                  <!-- Add form fields for user data editing -->
+                                  <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                      <label for="date_de_soumission">Date de Soumission</label>
+                                      <input type="date" name="date_de_soumission" id="date_de_soumission"
+                                        class="form-control" value="{{ lead.date_de_soumission|date:'Y-m-d' }}" required
+                                        autocomplete="off">
+                                    </div>
+
+                                    <div class="form-group col-md-6">
+                                      <label for="nom_de_la_campagne">Nom de la campagne</label>
+                                      <input type="text" name="nom_de_la_campagne" id="nom_de_la_campagne"
+                                        class="form-control" placeholder="nom_de_la_campagne"
+                                        value="{{ lead.nom_de_la_campagne }}" required autocomplete="off">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                      <label for="avez_vous_travaille">Avez vous travaille</label>
+                                      <input type="text" name="avez_vous_travaille" id="avez_vous_travaille"
+                                        class="form-control" placeholder="avez_vous_travaille"
+                                        value="{{ lead.avez_vous_travaille }}" required autocomplete="off">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                      <label for="nom">Nom</label>
+                                      <input type="text" name="nom" id="nom" class="form-control" placeholder="nom"
+                                        value="{{ lead.nom }}" required autocomplete="off">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                      <label for="prenom">Prenom</label>
+                                      <input type="text" name="prenom" id="prenom" class="form-control"
+                                        placeholder="prenom" value="{{ lead.prenom }}" required autocomplete="off">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                      <label for="telephone">Telephone</label>
+                                      <input type="text" name="telephone" id="telephone" class="form-control"
+                                        placeholder="telephone" value="{{ lead.telephone }}" required
+                                        autocomplete="off">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                      <label for="email">Email</label>
+                                      <input type="email" name="email" id="email" class="form-control"
+                                        placeholder="email" value="{{ lead.email }}" required autocomplete="off">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                      <label for="qualification">Qualification</label>
+                                      <select name="qualification" id="qualification" class="form-control" required>
+                                        <option value="nrp1" {% if lead.qualification == 'nrp1' %} selected {% endif %}>
+                                          NRP1
+                                        </option>
+                                        <option value="nrp2" {% if lead.qualification == 'nrp2' %} selected {% endif %}>
+                                          NRP2
+                                        </option>
+                                        <option value="nrp3" {% if lead.qualification == 'nrp3' %} selected {% endif %}>
+                                          NRP3
+                                        </option>
+                                        <option value="en_cours" {% if lead.qualification == 'en_cours' %} selected
+                                          {% endif %}>En cours</option>
+                                        <option value="rappel" {% if lead.qualification == 'rappel' %} selected
+                                          {% endif %}>
+                                          Rappel</option>
+                                        <option value="faux_numero" {% if lead.qualification == 'faux_numero' %}
+                                          selected {% endif %}>Faux numéro</option>
+                                        <option value="pas_de_budget" {% if lead.qualification == 'pas_de_budget' %}
+                                          selected {% endif %}>Pas de budget</option>
+                                        <option value="pas_interesse" {% if lead.qualification == 'pas_interesse' %}
+                                          selected {% endif %}>Pas intéressé</option>
+                                        <option value="ne_pas_rappele" {% if lead.qualification == 'ne_pas_rappele' %}
+                                          selected {% endif %}>Ne pas rappeler</option>
+                                        <option value="signe_pole_emploi"
+                                          {% if lead.qualification == 'signe_pole_emploi' %} selected {% endif %}>
+                                          Signé Pôle Emploi</option>
+                                        <option value="signe_cpf" {% if lead.qualification == 'signe_cpf' %} selected
+                                          {% endif %}>Signé CPF</option>
+                                      </select>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                      <label for="comments">Comments</label>
+                                      <textarea name="comments" id="comments" class="form-control"
+                                        required>{{ lead.comments }}</textarea>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                      <label for="assigned_to">Assign To</label>
+                                      <select name="assigned_to" id="assigned_to" class="form-control" required>
+                                        <option value="">-- Select User --</option>
+                                        {% for user in users %}
+                                        <option value="{{ user.id }}"
+                                          {% if user.id == lead.assigned_to.id %}selected{% endif %}>{{ user.username }}
+                                        </option>
+                                        {% endfor %}
+                                      </select>
+                                    </div>
+
+                                  </div>
+                                </form>
+                              </div>
+                              <!-- Your form fields -->
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                              <button type="button" class="btn btn-primary" onclick="updateLead('{{ lead.id }}')">Save</button>
+
+                              </div>
+
+                              <!-- Your JavaScript code -->
+
+                              <script>
+                                function updateLead(leadId) {
+                                  console.log('updateLead function called');
+                                  var form = document.getElementById('editForm-' + leadId);
+                                  var formData = new FormData(form);
+                                  var xhr = new XMLHttpRequest();
+                                  xhr.open('POST', form.action, true);
+                                  xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+                                  xhr.onreadystatechange = function() {
+                                    if (xhr.readyState === 4 && xhr.status === 200) {
+                                      var response = JSON.parse(xhr.responseText);
+                                      if (response.success) {
+                                        // Perform any other desired actions
+                                        $('#editModal-' + leadId).modal('hide');
+                                        alert('Lead data updated successfully!');
+                                        location.reload(); // Reload the page
+                                      }
+                                    }
+                                  };
+                                  xhr.send(formData);
+                                }
+                              </script>
+
+                      </td>
+
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        </div> <!-- simple table -->
-      </div>
-    </div> <!-- end section -->
-  </div> <!-- .col-12 -->
+          </div> <!-- simple table -->
+        </div>
+      </div> <!-- end section -->
+    </div> <!-- .col-12 -->
   </div> <!-- .row -->
+  </div>
   </div> <!-- .container-fluid -->
   <div class="modal fade modal-notif modal-slide" tabindex="-1" role="dialog" aria-labelledby="defaultModalLabel"
     aria-hidden="true">
