@@ -8,6 +8,12 @@
         <h2 class="mb-2 page-title">Leads table</h2>
         <button type="button" class="btn mb-2 btn-outline-primary" data-toggle="modal" data-target="#defaultModal"> Add
           lead </button>
+        <button type="button" class="btn btn-primary mb-2" data-toggle="modal"
+          data-target="#importModal">Import</button>
+        <button type="button" class="btn btn-danger mb-2" id="deleteLeadsBtn" data-toggle="modal"
+          data-target="#deleteModal">
+          Delete Leads
+        </button>
         <!-- Modal -->
         <div class="modal fade" id="defaultModal" tabindex="-1" role="dialog" aria-labelledby="defaultModalLabel"
           aria-hidden="true">
@@ -107,6 +113,54 @@
         </div>
       </div>
       <!-- and Modal -->
+
+      <!-- Import Leads Modal -->
+      <div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-labelledby="importModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="importModalLabel">Import Leads</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form method="post" enctype="multipart/form-data" action="{% url 'import_leads' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                  <label for="file">Select CSV or Excel File</label>
+                  <input type="file" name="file" id="file" class="form-control-file" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Import</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Delete Leads Modal -->
+      <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="deleteModalLabel">Delete Leads</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <p>Are you sure you want to delete the selected leads?</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-danger" id="deleteSelectedLeadsBtn">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
 
       <!-- Small table -->
       <div class="row my-2">
@@ -294,7 +348,8 @@
                               <!-- Your form fields -->
                               <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                              <button type="button" class="btn btn-primary" onclick="updateLead('{{ lead.id }}')">Save</button>
+                                <button type="button" class="btn btn-primary"
+                                  onclick="updateLead('{{ lead.id }}')">Save</button>
 
                               </div>
 
@@ -465,5 +520,42 @@
   </div>
 
 </main> <!-- main -->
+<script>
+  // JavaScript code for handling lead deletion
+
+  document.getElementById('deleteLeadsBtn').addEventListener('click', function () {
+    const selectedLeads = Array.from(document.querySelectorAll('input[name="lead_ids[]"]:checked')).map(checkbox => checkbox.value);
+    if (selectedLeads.length > 0) {
+      const formData = new FormData();
+      formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+      selectedLeads.forEach(leadId => {
+        formData.append('lead_ids[]', leadId);
+      });
+      fetch('{% url "delete_leads" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest' // Add this header to identify AJAX requests
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert(data.message);
+          location.reload();
+        } else {
+          alert(data.message);
+        }
+      })
+      .catch(error => {
+        console.error(error);
+        alert('An error occurred while deleting leads.');
+      });
+    } else {
+      alert('Please select at least one lead to delete.');
+    }
+  });
+
+</script>
 
 {% endblock %}
