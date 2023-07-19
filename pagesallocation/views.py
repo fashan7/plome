@@ -7,11 +7,65 @@ from django.db.models import OuterRef, Subquery, Q, F,Count
 
 # Create your views here.
 def setup_privilege(request):
-
+    if not request.user.is_authenticated:
+        return render(request, 'accounts/auth-login.html')
+        
+    
+    user_auth = request.user
+    nav_data = navigation_data(user_auth.id)
+    
     user = CustomUserTypes.objects.all()
-    return render(request,'base/set_priviledge.html',  {'users': user})
+    return render(request,'base/set_priviledge.html',  {'users': user, 'sections' : nav_data})
 
 
+def group_sections(user_id):
+    pages_sections = PageAllocation.objects.filter(
+        is_active=True,
+        privileges__is_active=True,
+        privileges__assigned_users_id=user_id
+    ).annotate(countP=Count('id')).order_by('psection')
+
+    if pages_sections:
+        data = [{
+            'psection': page_section.psection,
+            'count': pages_sections.filter(psection=page_section).count(),
+        } for page_section in pages_sections]
+        return data
+    else:
+        return None
+    
+def get_sub_sections(user_id, section_id):
+    subsections = Privilege.objects.filter(
+        pageallocation__psection=section_id,
+        pageallocation__is_active=True,
+        assigned_users_id=user_id
+    ).order_by('pageallocation__sposition').values(
+        'pageallocation__name',
+        'is_active',
+        'id',
+        'pageallocation__route'
+    )
+    
+    if subsections:
+        data = [{
+            'sub_section_name': subsection.get('pageallocation__name'),
+            'is_active': subsection.get('is_active'),
+            'priv_id': subsection.get('id'), 
+            'route': subsection.get('pageallocation__route'),
+        } for subsection in subsections]
+        return data
+    else:
+        return None
+
+
+def navigation_data(user_id):
+    response_section = group_sections(user_id)
+    nav_bar = dict()
+    for data in response_section:
+        temp = list(data.values())
+        response_sub_section = get_sub_sections(user_id, temp[0])
+        nav_bar.update({temp[0]: response_sub_section})
+    return nav_bar
 
 def get_primary_section():
     items = dict()
