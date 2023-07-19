@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from accounts.models import CustomUserTypes
+from pagesallocation.models import PageAllocation,Privilege
 from django.contrib import messages
 
 from django.views.decorators.csrf import csrf_exempt
@@ -39,7 +40,15 @@ def add_new_user(request):
         return render(request, 'base/add_new_user.html', locals())
     else:
         return render(request, 'base/add_new_user.html')
-    
+
+
+def set_privilege(user_id):
+    pages = PageAllocation.objects.all()
+    for page in pages:
+        privilege = Privilege()
+        privilege.pageallocation = page
+        privilege.assigned_users = User.objects.get(id=user_id)
+        privilege.save()
 
 @csrf_exempt
 def check_username(request):
@@ -94,6 +103,8 @@ def save_user(request):
                 new_user.is_admin = True
             new_user.set_password(password)        
             new_user.save()
+
+            set_privilege(new_user.id)
 
         except Exception as e:
             messages.error(request, "An error occurred while saving the user.")
