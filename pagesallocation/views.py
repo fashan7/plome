@@ -63,13 +63,9 @@ def process_load_privledge(user_id):
     for key, value in pages.items():
         section_name = value
         data_not_set = get_new_pages_not_set(section_name)
-        print("****")
-        print(data_not_set)
         if data_not_set:
             for row in data_not_set:
                 page_id = row.get('page_id')
-                print('OOSOS')
-                print(page_id)
                 register_privledges(page_id)
 
     form_dict = dict()
@@ -78,10 +74,6 @@ def process_load_privledge(user_id):
         data = get_priv_pages(section_name, user_id)
         form_dict.update({section_name: data})
     return form_dict
-
-
-
-
 
 def register_privledges(page_id):
     #todo need to check status is_active
@@ -99,8 +91,24 @@ def register_privledges(page_id):
         privilege.save()
 
 
+def update_priviledge(id, status):
+    status = False if ('False' in status or 'false' in status) else True
+    # Assuming you have the 'id' and 'status' variables available.
+    # Convert 'status' to a boolean based on 'False' or 'false' in the input.   
+    try:
+        item = Privilege.objects.get(pk=id)
+    except Privilege.DoesNotExist:
+        # Handle the case when the Privilege with the given id does not exist
+        return
+    
+    item.is_active = status
+    item.save()
+
 def get_page_priv(request):
     user = request.POST.get('user')
-    a =process_load_privledge(user)
-    print(a)
-    return render(request,'base/loadprivPages.html')
+    if request.POST.get('id'):
+        id = request.POST.get('id')
+        sign = request.POST.get('sign')
+        update_priviledge(id, sign)
+    pages = process_load_privledge(user)
+    return render(request,'base/loadprivPages.html', {'user':user, 'pages':pages})
