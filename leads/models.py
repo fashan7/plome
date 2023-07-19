@@ -1,15 +1,14 @@
 from django.db import models
-
 from accounts.models import User
 
 class Lead(models.Model):
-    date_de_soumission = models.DateField()
-    nom_de_la_campagne = models.CharField(max_length=100)
-    avez_vous_travaille = models.CharField(max_length=100)
-    nom = models.CharField(max_length=100)
-    prenom = models.CharField(max_length=100)
-    telephone = models.CharField(max_length=20)
-    email = models.EmailField()
+    date_de_soumission = models.DateField(null=True, blank=True)
+    nom_de_la_campagne = models.CharField(max_length=100, null=True, blank=True)
+    avez_vous_travaille = models.CharField(max_length=100, null=True, blank=True)
+    nom_prenom = models.CharField(max_length=100, null=True, blank=True)
+    # prenom = models.CharField(max_length=100)
+    telephone = models.CharField(max_length=20, null=True, blank=True)
+    email = models.EmailField(null=True, blank=True)
     QUALIFICATION_CHOICES = (
         ('nrp1', 'NRP1'),
         ('nrp2', 'NRP2'),
@@ -23,6 +22,8 @@ class Lead(models.Model):
         ('signe_pole_emploi', 'Signé Pôle Emploi'),
         ('signe_cpf', 'Signé CPF'),
     )
-    qualification = models.CharField(max_length=100, choices=QUALIFICATION_CHOICES)
-    comments = models.TextField()
+    qualification = models.CharField(max_length=100, choices=QUALIFICATION_CHOICES, null=True, blank=True)
+    comments = models.TextField(null=True, blank=True)
     assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_tasks')
+    
+    is_active = models.BooleanField(default=True)
