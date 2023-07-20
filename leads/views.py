@@ -1,47 +1,66 @@
-
-
 from django.contrib.auth.models import User
-
 from accounts.models import User
 from django.shortcuts import get_object_or_404
-
 from django.http import JsonResponse
-
-
-
-
 from datetime import datetime
 from datetime import datetime, timezone, timedelta
-
-
-
-
 import csv
 import pandas as pd
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .models import Lead
 from accounts.models import CustomUserTypes
-from datetime import datetime, timezone
+from pagesallocation.views import navigation_data
+import os
+import importlib.util
+from .models import Lead
+
+
+
+
+
+
 
 
 def assign_user_to_lead(lead, user_id):
     assigned_user = CustomUserTypes.objects.get(id=user_id)
     lead.assigned_to = assigned_user
     lead.save()
+
+def delete_duplicate_leads():
+    # Get all leads
+    all_leads = Lead.objects.all()
+
+    # Create a set to store unique lead data (using tuples of fields)
+    unique_leads = set()
+    duplicates_count = 0
+
+    # Iterate through all leads
+    for lead in all_leads:
+        # Create a tuple of all lead fields (except id)
+        lead_data = (
+            lead.date_de_soumission,
+            lead.nom_de_la_campagne,
+            lead.avez_vous_travaille,
+            lead.nom_prenom,
+            lead.telephone,
+            lead.email,
+            lead.qualification,
+            lead.comments,
+        )
+
+        # Check if the lead_data tuple already exists in the set
+        if lead_data in unique_leads:
+            # Delete the duplicate lead
+            lead.delete()
+            duplicates_count += 1
+        else:
+            # If the tuple does not exist, add it to the set
+            unique_leads.add(lead_data)
+
+    return duplicates_count
+
     
     
-# def delete_lead(request, lead_id):
-#     lead = get_object_or_404(Lead, id=lead_id)
-#     print('________________-',lead)
-
-#     if request.method == 'POST':
-#         # Delete the lead
-#         lead.delete()
-
-#         return JsonResponse({'message': 'Lead deleted successfully.'})
-
-#     return JsonResponse({'error': 'Invalid request.'})
 
 
 def lead_dashboard(request):
@@ -65,20 +84,23 @@ def lead_dashboard(request):
             assigned_user = CustomUserTypes.objects.get(id=assigned_to_id)
             lead.assigned_to = assigned_user
             lead.save()
-        
+        duplicates_deleted = delete_duplicate_leads()
+        messages.success(request, f'{lead.nom_de_la_campagne} leads added successfully. {duplicates_deleted} duplicate leads deleted.')
         return redirect('lead_dashboard')
 
     # Fetch active leads
     active_leads = Lead.objects.filter(is_active=True)
     users = CustomUserTypes.objects.all()
+    ##fashan------------------------------------
+    nav_data = navigation_data(request.user.id)
 
-    return render(request, 'lead/leads_dashboard.html', {'leads': active_leads, 'users': users})
+
+    return render(request, 'lead/leads_dashboard.html', {'leads': active_leads, 'users': users,'sections': nav_data})
 
 
 # def lead_list(request):
 #     users = CustomUserTypes.objects.all()
 #     return render(request, 'lead/leads_dashboard.html', {'users': users})
-
 
 def lead_edit(request, lead_id):
     lead = get_object_or_404(Lead, id=lead_id)
@@ -107,6 +129,7 @@ def lead_edit(request, lead_id):
 
         # Save the lead instance to the database
         lead.save()
+        messages.success(request, 'Lead edited successfully.')
 
         return JsonResponse({'success': True})
 
@@ -126,6 +149,10 @@ def toggle_lead_status(request, lead_id):
 def deactivated_leads(request):
     leads = Lead.objects.filter(is_active=False)
     return render(request, 'lead/deactivated_lead.html', {'leads': leads})
+
+
+
+        
 
 
 def parse_date(date_str):
@@ -148,6 +175,9 @@ def parse_date(date_str):
                 return None
         except ValueError:
             return None
+        
+        
+
 
 import pandas as pd
 
@@ -205,12 +235,16 @@ def import_leads(request):
 
             else:
                 raise ValueError('Unsupported file format. Please provide a CSV or XLSX file.')
+# Delete duplicate leads
+            duplicates_deleted = delete_duplicate_leads()
 
-            messages.success(request, f'{len(imported_leads)} leads imported successfully.')
+            messages.success(request, f'{len(imported_leads)} leads imported successfully. {duplicates_deleted} duplicate leads deleted.')
         except Exception as e:
             messages.error(request, f'Error importing leads: {str(e)}')
 
     return redirect('lead_dashboard')
+
+
 
 
 def delete_leads(request):
@@ -220,10 +254,7 @@ def delete_leads(request):
         return JsonResponse({'success': True, 'message': 'Selected leads deleted successfully.'})
     return JsonResponse({'success': False, 'message': 'Invalid request.'})
 
-import os
-import importlib.util
-from django.shortcuts import render
-from .models import Lead
+
 
 def facebook_leads(request):
     file_path = r'E:\games 2\plome-main\fake_api.py'
@@ -326,7 +357,26 @@ def export_leads(request, file_format):
 #     return render(request, 'lead/facebook_leads.html')
 
 
+# def parse_date(date_str):
+#     try:
+#         # Try parsing with format '%Y-%m-%d %H:%M:%S'
+#         return datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+#     except ValueError:
+#         try:
+#             # Try parsing with format '44764,59196'
+#             if isinstance(date_str, pd.Timestamp):
+#                 date_str = str(date_str)
+#             timestamp = float(date_str.replace(',', '.')) * 86400
+#             min_datetime = datetime(1970, 1, 1, tzinfo=timezone.utc)
+#             max_datetime = datetime(9999, 12, 31, 23, 59, 59, tzinfo=timezone.utc)
 
+#             # Check if the parsed timestamp is within a reasonable range
+#             if min_datetime.timestamp() <= timestamp <= max_datetime.timestamp():
+#                 return datetime.fromtimestamp(timestamp)
+#             else:
+#                 return None
+#         except ValueError:
+#             return None
 
 # def import_leads(request):
 #     if request.method == 'POST' and request.FILES.get('file'):
@@ -424,3 +474,16 @@ def export_leads(request, file_format):
 #                 return None
 #         except ValueError:
 #             return None
+
+
+# def delete_lead(request, lead_id):
+#     lead = get_object_or_404(Lead, id=lead_id)
+#     print('________________-',lead)
+
+#     if request.method == 'POST':
+#         # Delete the lead
+#         lead.delete()
+
+#         return JsonResponse({'message': 'Lead deleted successfully.'})
+
+#     return JsonResponse({'error': 'Invalid request.'})
