@@ -1,0 +1,596 @@
+{% extends 'sales_base.html' %}
+{% load static %}
+{% block content %}
+<main role="main" class="main-content">
+  <div class="container-fluid">
+    <div class="container-fluid">
+            {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <script>
+    // Function to handle form submission
+    function handleFormSubmit(event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const formData = new FormData(form);
+        const leadId = form.getAttribute('data-lead-id');
+
+        fetch(`/lead/lead_edit/${leadId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: formData,
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success) {
+                    // Update the lead data on the page
+                    updateLeadData(data.lead_data);
+                    // Show a success message (optional)
+                    showMessage('Lead edited successfully.', 'success');
+                } else {
+                    // Show an error message (optional)
+                    showMessage('Error editing lead.', 'danger');
+                }
+            })
+            .catch((error) => {
+                // Show an error message (optional)
+                showMessage('Error editing lead.', 'danger');
+            });
+    }
+
+    // Function to update the lead data on the page
+    function updateLeadData(leadData) {
+        document.getElementById('date_de_soumission').innerText = leadData.date_de_soumission;
+        document.getElementById('nom_de_la_campagne').innerText = leadData.nom_de_la_campagne;
+        document.getElementById('avez_vous_travaille').innerText = leadData.avez_vous_travaille;
+        document.getElementById('nom_prenom').innerText = leadData.nom_prenom;
+        document.getElementById('telephone').innerText = leadData.telephone;
+        document.getElementById('email').innerText = leadData.email;
+        document.getElementById('qualification').innerText = leadData.qualification;
+        document.getElementById('comments').innerText = leadData.comments;
+    }
+
+    // Function to show a message
+    function showMessage(message, messageType) {
+        const alertElement = document.createElement('div');
+        alertElement.classList.add('alert', `alert-${messageType}`, 'mt-3');
+        alertElement.role = 'alert';
+        alertElement.textContent = message;
+
+        const container = document.querySelector('.container');
+        container.insertBefore(alertElement, container.firstChild);
+    }
+
+    // Attach event listener to the form submit event
+    const form = document.querySelector('form');
+    form.addEventListener('submit', handleFormSubmit);
+</script>
+
+      <div class="row justify-content-center">
+        <div class="col-12">
+          <h2 class="mb-2 page-title">Sales Leads table</h2>
+          {% comment %} <button type="button" class="btn mb-2 btn-outline-primary" data-toggle="modal" data-target="#defaultModal">
+            Add
+            lead </button> {% endcomment %}
+          {% comment %} <button type="button" class="btn mb-2 btn-outline-primary" data-toggle="modal"
+            data-target="#importModal">Import</button> {% endcomment %}
+          <!-- Add these buttons to your template -->
+          <a href="{% url 'export_leads' 'csv' %}" class="btn mb-2 btn-outline-primary">Export Leads as CSV</a>
+          <a href="{% url 'export_leads' 'xlsx' %}" class="btn mb-2 btn-outline-primary">Export Leads as XLSX</a>
+
+          <!-- Use button tags for the export buttons -->
+          {% comment %} <button type="button" class="btn btn-danger mb-2" id="deleteLeadsBtn" data-toggle="modal"
+            data-target="#deleteModal">
+            Delete Leads
+          </button> {% endcomment %}
+
+          <!-- Modal -->
+          <div class="modal fade" id="defaultModal" tabindex="-1" role="dialog" aria-labelledby="defaultModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="defaultModalLabel">Add lead</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <div class="card shadow mb-4">
+                    <div class="card-body">
+                      <form class="needs-validation" method="POST" action="{% url 'lead_dashboard' %}" novalidate="">
+                        {% csrf_token %}
+                        <div class="form-row">
+                          <div class="col-md-6 mb-3">
+                            <label for="date_de_soumission">Date de Soumission</label>
+                            {% comment %} <input type="text" class="form-control" id="prenom" name="prenom" required>
+                            {% endcomment %}
+                            <input type="date" name="date_de_soumission" class="form-control" required>
+                            <div class="invalid-feedback">Please provide a valid Date.</div>
+                          </div>
+                          <div class="col-md-6 mb-3">
+                            <label for="nom_de_la_campagne">Nom de la Campagne</label>
+                            {% comment %} <input type="text" class="form-control" id="nom" name="nom" required>
+                            {% endcomment %}
+                            <input type="text" name="nom_de_la_campagne" class="form-control" maxlength="100" required>
+                            <div class="invalid-feedback">Please provide a valid nom.</div>
+                          </div>
+                          <div class="col-md-6 mb-3">
+                            <label for="avez_vous_travaille">Avez-vous travaillé</label>
+                            <input type="text" name="avez_vous_travaille" class="form-control" maxlength="100" required>
+                            <div class="invalid-feedback">Please provide a valid email.</div>
+                          </div>
+                          <div class="col-md-6 mb-3">
+                            <label for="telephone">Nom & Prenom</label>
+                            <input type="text" name="nom_prenom" class="form-control" maxlength="100" required>
+                            <div class="invalid-feedback">Please provide a valid telephone number.</div>
+                          </div>
+                          {% comment %} <div class="col-md-6 mb-3">
+                            <label for="date_de_soumission">Prénom</label>
+                            <input type="text" name="prenom" class="form-control" maxlength="100" required>
+                            <div class="invalid-feedback">Please provide a valid date de soumission.</div>
+                          </div> {% endcomment %}
+                          <div class="col-md-6 mb-3">
+                            <label for="Téléphone">Téléphone</label>
+                            <input type="text" name="telephone" class="form-control" maxlength="20" required>
+                            <div class="invalid-feedback">Please provide a valid nom de la campagne.</div>
+                          </div>
+                          <div class="form-group col-md-6 mb-3">
+                            <label for="qualification">Qualification</label>
+                            {% comment %} <select class="form-control" id="qualification" name="qualification" required>
+                              {% endcomment %}
+                              <select class="form-control qualification-select" data-lead-id="{{ lead.id }}"
+                                required>
+                                <option value="nrp1">NRP1</option>
+                                <option value="nrp2">NRP2</option>
+                                <option value="nrp3">NRP3</option>
+                                <option value="en_cours">En cours</option>
+                                <option value="rappel">Rappel</option>
+                                <option value="faux_numero">Faux numéro</option>
+                                <option value="pas_de_budget">Pas de budget</option>
+                                <option value="pas_interesse">Pas intéressé</option>
+                                <option value="ne_pas_rappele">Ne pas rappeler</option>
+                                <option value="signe_pole_emploi">Signé Pôle Emploi</option>
+                                <option value="signe_cpf">Signé CPF</option>
+                              </select>
+                              <div class="invalid-feedback">Please select a qualification.</div>
+                          </div>
+                          <div class="form-group col-md-6 mb-3">
+                            <label for="Email">Email</label>
+                            <input type="email" name="email" class="form-control" required>
+                          </div>
+                          <div class="col-md-6 mb-3">
+                            <label for="Comments">Comments</label>
+                            <textarea name="comments" class="form-control" required></textarea>
+                            <div class="invalid-feedback">Please provide a valid nom de la campagne.</div>
+                          </div>
+                          {% comment %} <div class="col-md-6 mb-3">
+                            <label for="assigned_to">Assign To</label>
+                            <select name="assigned_to" class="form-control">
+                              <option value="">-- Select User --</option>
+                              {% for user in users %}
+                              <option value="{{ user.id }}">{{ user.username }}</option>
+                              {% endfor %}
+                            </select>
+                          </div> {% endcomment %}
+                          <button class="btn btn-primary" type="submit">Submit</button>
+                      </form>
+                    </div> <!-- /.card-body -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- and Modal -->
+
+        <!-- Import Leads Modal -->
+        {% comment %} <div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-labelledby="importModalLabel"
+          aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="importModalLabel">Import Leads</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <form method="post" enctype="multipart/form-data" action="{% url 'import_leads' %}">
+                  {% csrf_token %}
+                  <div class="form-group">
+                    <label for="file">Select CSV or Excel File</label>
+                    <input type="file" name="file" id="file" class="form-control-file" required>
+                  </div>
+                  <button type="submit" class="btn btn-primary">Import</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div> {% endcomment %}
+
+        <!-- Small table -->
+        <div class="row my-2">
+          <div class="col-md-12">
+            <div class="card shadow">
+              <div class="card-body">
+                <!-- table -->
+                <div class="table-responsive">
+                   <table id="example" class="table table-bordered display nowrap" cellspacing="0" style="width:100%">
+                    <thead class="fw-bold">
+                      <tr>
+                        <th>
+                          <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="all2">
+                            <label class="custom-control-label" for="all2"></label>
+                          </div>
+                        </th>
+                        <th>Date de Soumission</th>
+                        <th>Nom de la Campagne </th>
+                        <th>Avez-vous travaillé</th>
+                        <th>Nom & Prenom</th>
+
+                        <th>Téléphone</th>
+                        <th>Email</th>
+                        <th>Qualification</th>
+                        <th>Comments</th>
+                        
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for lead in leads %}
+                      <tr>
+                        <td>
+                          <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="{{ lead.id }}">
+                            <label class="custom-control-label" for="{{ lead.id }}"></label>
+                          </div>
+                        </td>
+                        {% comment %} <td>{{ forloop.counter }}</td> {% endcomment %}
+                        <td>{{ lead.date_de_soumission }}</td>
+                        <td>{{ lead.nom_de_la_campagne }}</td>
+                        <td>{{ lead.avez_vous_travaille }}</td>
+                        <td>{{ lead.nom_prenom }}</td>
+                        {% comment %} <td>{{ lead.prenom }}</td> {% endcomment %}
+                        <td>{{ lead.telephone }}</td>
+                        <td>{{ lead.email }}</td>
+                        <td>{{ lead.qualification }}</td>
+                        <td>{{ lead.comments }}</td>
+                        {% comment %} <td>{{ lead.assigned_to }}</td> {% endcomment %}
+                        <td>
+                          {% comment %} <button class="btn btn-sm dropdown-toggle more-horizontal" type="button"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="text-muted sr-only">Action</span>
+                          </button> {% endcomment %}
+                          <div class="dropdown">
+                            <button class="btn btn-sm dropdown-toggle" type="button" id="dr4" data-toggle="dropdown"
+                              aria-haspopup="true" aria-expanded="false">
+                              <span class="text-muted sr-only">Action</span>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dr4">
+
+                              <a class="dropdown-item" href="javascript:void(0)" data-toggle="modal"
+                                data-target="#editModal-{{ lead.id }}">Edit</a>
+                              <a class="dropdown-item" href="{% url 'toggle_lead_status' lead.id %}">
+                                {% if lead.is_active %}
+                                Deactivate
+                                {% else %}
+                                Activate
+                                {% endif %}
+                              </a>
+                              {% comment %} <a class="dropdown-item" href="#">Assign</a> {% endcomment %}
+                            </div>
+                          </div>
+
+                          <!-- edit modal -->
+                          <div class="modal fade" id="editModal-{{ lead.id }}" tabindex="-1" role="dialog"
+                            aria-labelledby="editModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                  <h5 class="modal-title" id="editModalLabel">Edit Lead
+                                  </h5>
+                                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                  </button>
+                                </div>
+                                <div class="modal-body">
+                                  <form id="editForm-{{ lead.id }}" method="post"
+                                    action="{% url 'lead_edit' lead.id %}">
+                                    {% csrf_token %}
+                                    <!-- Add form fields for user data editing -->
+                                    <div class="form-row">
+                                      <div class="form-group col-md-6">
+                                        <label for="date_de_soumission">Date de Soumission</label>
+                                        <input type="date" name="date_de_soumission" id="date_de_soumission"
+                                          class="form-control" value="{{ lead.date_de_soumission|date:'Y-m-d' }}"
+                                          required autocomplete="off">
+                                      </div>
+
+                                      <div class="form-group col-md-6">
+                                        <label for="nom_de_la_campagne">Nom de la campagne</label>
+                                        <input type="text" name="nom_de_la_campagne" id="nom_de_la_campagne"
+                                          class="form-control" placeholder="nom_de_la_campagne"
+                                          value="{{ lead.nom_de_la_campagne }}" required autocomplete="off">
+                                      </div>
+                                      <div class="form-group col-md-6">
+                                        <label for="avez_vous_travaille">Avez vous travaille</label>
+                                        <input type="text" name="avez_vous_travaille" id="avez_vous_travaille"
+                                          class="form-control" placeholder="avez_vous_travaille"
+                                          value="{{ lead.avez_vous_travaille }}" required autocomplete="off">
+                                      </div>
+                                      <div class="form-group col-md-6">
+                                        <label for="nom">Nom & Prenom</label>
+                                        <input type="text" name="nom_prenom" id="nom_prenom" class="form-control"
+                                          placeholder="nom" value="{{ lead.nom_prenom }}" required autocomplete="off">
+                                      </div>
+                                      {% comment %} <div class="form-group col-md-6">
+                                        <label for="prenom">Prenom</label>
+                                        <input type="text" name="prenom" id="prenom" class="form-control"
+                                          placeholder="prenom" value="{{ lead.prenom }}" required autocomplete="off">
+                                      </div> {% endcomment %}
+                                      <div class="form-group col-md-6">
+                                        <label for="telephone">Telephone</label>
+                                        <input type="text" name="telephone" id="telephone" class="form-control"
+                                          placeholder="telephone" value="{{ lead.telephone }}" required
+                                          autocomplete="off">
+                                      </div>
+                                      <div class="form-group col-md-6">
+                                        <label for="email">Email</label>
+                                        <input type="email" name="email" id="email" class="form-control"
+                                          placeholder="email" value="{{ lead.email }}" required autocomplete="off">
+                                      </div>
+                                      <div class="form-group col-md-6">
+                                        <label for="qualification">Qualification</label>
+                                        <select name="qualification" id="qualification" class="form-control" required>
+                                          <option value="nrp1" {% if lead.qualification == 'nrp1' %} selected
+                                            {% endif %}>
+                                            NRP1
+                                          </option>
+                                          <option value="nrp2" {% if lead.qualification == 'nrp2' %} selected
+                                            {% endif %}>
+                                            NRP2
+                                          </option>
+                                          <option value="nrp3" {% if lead.qualification == 'nrp3' %} selected
+                                            {% endif %}>
+                                            NRP3
+                                          </option>
+                                          <option value="en_cours" {% if lead.qualification == 'en_cours' %} selected
+                                            {% endif %}>En cours</option>
+                                          <option value="rappel" {% if lead.qualification == 'rappel' %} selected
+                                            {% endif %}>
+                                            Rappel</option>
+                                          <option value="faux_numero" {% if lead.qualification == 'faux_numero' %}
+                                            selected {% endif %}>Faux numéro</option>
+                                          <option value="pas_de_budget" {% if lead.qualification == 'pas_de_budget' %}
+                                            selected {% endif %}>Pas de budget</option>
+                                          <option value="pas_interesse" {% if lead.qualification == 'pas_interesse' %}
+                                            selected {% endif %}>Pas intéressé</option>
+                                          <option value="ne_pas_rappele" {% if lead.qualification == 'ne_pas_rappele' %}
+                                            selected {% endif %}>Ne pas rappeler</option>
+                                          <option value="signe_pole_emploi"
+                                            {% if lead.qualification == 'signe_pole_emploi' %} selected {% endif %}>
+                                            Signé Pôle Emploi</option>
+                                          <option value="signe_cpf" {% if lead.qualification == 'signe_cpf' %} selected
+                                            {% endif %}>Signé CPF</option>
+                                        </select>
+                                      </div>
+                                      <div class="form-group col-md-6">
+                                        <label for="comments">Comments</label>
+                                        <textarea name="comments" id="comments" class="form-control"
+                                          required>{{ lead.comments }}</textarea>
+                                      </div>
+                                      {% comment %} <div class="form-group col-md-6">
+                                        <label for="assigned_to">Assign To</label>
+                                        <select name="assigned_to" id="assigned_to" class="form-control" required>
+                                          <option value="">-- Select User --</option>
+                                          {% for user in users %}
+                                          <option value="{{ user.id }}"
+                                            {% if user.id == lead.assigned_to.id %}selected{% endif %}>
+                                            {{ user.username }}
+                                          </option>
+                                          {% endfor %}
+                                        </select>
+                                      </div> {% endcomment %}
+
+                                    </div>
+                                  </form>
+                                </div>
+                                <!-- Your form fields -->
+                                <div class="modal-footer">
+                                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                  <button type="button" class="btn btn-primary"
+                                    onclick="updateLead('{{ lead.id }}')">Save</button>
+
+                                </div>
+
+                                <!-- Your JavaScript code -->
+
+                                <script>
+                                  function updateLead(leadId) {
+                                    console.log('updateLead function called');
+                                    var form = document.getElementById('editForm-' + leadId);
+                                    var formData = new FormData(form);
+                                    var xhr = new XMLHttpRequest();
+                                    xhr.open('POST', form.action, true);
+                                    xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+                                    xhr.onreadystatechange = function() {
+                                      if (xhr.readyState === 4 && xhr.status === 200) {
+                                        var response = JSON.parse(xhr.responseText);
+                                        if (response.success) {
+                                          // Perform any other desired actions
+                                          $('#editModal-' + leadId).modal('hide');
+                                          alert('Lead data updated successfully!');
+                                          location.reload(); // Reload the page
+                                        }
+                                      }
+                                    };
+                                    xhr.send(formData);
+                                  }
+                                </script>
+
+                        </td>
+
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div> <!-- simple table -->
+          </div>
+        </div> <!-- end section -->
+      </div> <!-- .col-12 -->
+    </div> <!-- .row -->
+  </div>
+  </div> <!-- .container-fluid -->
+  <div class="modal fade modal-notif modal-slide" tabindex="-1" role="dialog" aria-labelledby="defaultModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-sm" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="defaultModalLabel">Notifications</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="list-group list-group-flush my-n3">
+            <div class="list-group-item bg-transparent">
+              <div class="row align-items-center">
+                <div class="col-auto">
+                  <span class="fe fe-box fe-24"></span>
+                </div>
+                <div class="col">
+                  <small><strong>Package has uploaded successfully</strong></small>
+                  <div class="my-0 text-muted small">Package is zipped and uploaded</div>
+                  <small class="badge badge-pill badge-light text-muted">1m ago</small>
+                </div>
+              </div>
+            </div>
+            <div class="list-group-item bg-transparent">
+              <div class="row align-items-center">
+                <div class="col-auto">
+                  <span class="fe fe-download fe-24"></span>
+                </div>
+                <div class="col">
+                  <small><strong>Widgets are updated successfully</strong></small>
+                  <div class="my-0 text-muted small">Just create new layout Index, form, table</div>
+                  <small class="badge badge-pill badge-light text-muted">2m ago</small>
+                </div>
+              </div>
+            </div>
+            <div class="list-group-item bg-transparent">
+              <div class="row align-items-center">
+                <div class="col-auto">
+                  <span class="fe fe-inbox fe-24"></span>
+                </div>
+                <div class="col">
+                  <small><strong>Notifications have been sent</strong></small>
+                  <div class="my-0 text-muted small">Fusce dapibus, tellus ac cursus commodo</div>
+                  <small class="badge badge-pill badge-light text-muted">30m ago</small>
+                </div>
+              </div> <!-- / .row -->
+            </div>
+            <div class="list-group-item bg-transparent">
+              <div class="row align-items-center">
+                <div class="col-auto">
+                  <span class="fe fe-link fe-24"></span>
+                </div>
+                <div class="col">
+                  <small><strong>Link was attached to the menu</strong></small>
+                  <div class="my-0 text-muted small">New layout has been attached to the menu</div>
+                  <small class="badge badge-pill badge-light text-muted">1h ago</small>
+                </div>
+              </div>
+            </div> <!-- / .row -->
+          </div> <!-- / .list-group -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Clear All</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade modal-shortcut modal-slide" tabindex="-1" role="dialog" aria-labelledby="defaultModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="defaultModalLabel">Shortcuts</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body px-5">
+          <div class="row align-items-center">
+            <div class="col-6 text-center">
+              <div class="squircle bg-success justify-content-center">
+                <i class="fe fe-cpu fe-32 align-self-center text-white"></i>
+              </div>
+              <p>Control area</p>
+            </div>
+            <div class="col-6 text-center">
+              <div class="squircle bg-primary justify-content-center">
+                <i class="fe fe-activity fe-32 align-self-center text-white"></i>
+              </div>
+              <p>Activity</p>
+            </div>
+          </div>
+          <div class="row align-items-center">
+            <div class="col-6 text-center">
+              <div class="squircle bg-primary justify-content-center">
+                <i class="fe fe-droplet fe-32 align-self-center text-white"></i>
+              </div>
+              <p>Droplet</p>
+            </div>
+            <div class="col-6 text-center">
+              <div class="squircle bg-primary justify-content-center">
+                <i class="fe fe-upload-cloud fe-32 align-self-center text-white"></i>
+              </div>
+              <p>Upload</p>
+            </div>
+          </div>
+          <div class="row align-items-center">
+            <div class="col-6 text-center">
+              <div class="squircle bg-primary justify-content-center">
+                <i class="fe fe-users fe-32 align-self-center text-white"></i>
+              </div>
+              <p>Users</p>
+            </div>
+            <div class="col-6 text-center">
+              <div class="squircle bg-primary justify-content-center">
+                <i class="fe fe-settings fe-32 align-self-center text-white"></i>
+              </div>
+              <p>Settings</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main> <!-- main -->
+
+{% endblock %}
+{% block javascript %}
+ 
+    <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+
+    <script>
+        new DataTable('#example', {
+            responsive: true
+        });
+    </script>
+{% endblock %}
