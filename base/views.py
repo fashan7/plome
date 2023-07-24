@@ -42,12 +42,15 @@ def add_new_user(request):
         return render(request, 'base/add_new_user.html')
 
 
+
 from django.contrib.admin.models import LogEntry
 @login_required
 def log_entry_list(request):
     log_entries = LogEntry.objects.all()
     #print("___________________",log_entries)
     return render(request,'base/log_entry_list.html',{'log_entries':log_entries})
+
+
 
 
 def set_privilege(user_id):

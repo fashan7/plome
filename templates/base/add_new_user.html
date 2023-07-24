@@ -1,3 +1,4 @@
+
 {% extends 'base.html' %}
 {% load static %}
 
@@ -5,7 +6,15 @@
     <div class="wrapper">
         
 
-        <!-- data -->
+
+{% extends './common/base.html' %}
+{% load static %}
+
+
+
+{% block content %}
+
+
         <main role="main" class="main-content">
             <div class="container-fluid">
                 <div class="row justify-content-center">
@@ -400,8 +409,7 @@
             <!--	end	section	-->
     </div>
     <!--	.col-12	-->
-    </div>
-    <!--	.row	-->
+
     <input type="hidden" name="csrfmiddlewaretoken" id="csrfmiddlewaretoken" value="{{ csrf_token }}">
     <!--	.container-fluid	-->
     <div class="modal fade modal-notif modal-slide" tabindex="-1" role="dialog" aria-labelledby="defaultModalLabel"
@@ -547,6 +555,7 @@
     </div>
     </div>
     </div>
+
 </main>
 
 {% endblock %}
@@ -567,6 +576,25 @@
                         data: {
                             Username: function() {
                                 return $("#Username").val();
+=======
+   
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $(document).ready(function() {
+            $("#user-form").validate({
+                rules: {
+                    Username: {
+                        required: true,
+                        remote: {
+                            url: $("#user-form").data("url"),
+                            type: 'POST',
+                            data: {
+                                Username: function() {
+                                    return $("#Username").val();
+                                },
+
                             },
                         },
                     },
@@ -621,6 +649,11 @@
                 });
             }
         });
+
     });
 </script>
 {% endblock %}
+
+    </script>
+    {% endblock %}
+

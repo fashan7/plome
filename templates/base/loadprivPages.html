@@ -1,0 +1,42 @@
+<div class="row mb-4">
+    <div class="col-md-12">
+      <div class="card shadow">
+        <div class="card-body">
+          <h5 class="card-title">Set Privilege</h5>
+          <input type="hidden" class="form-control" id="userid" name="userid" value="{{ user }}">
+          <table class="table table-hover">
+            {% for category, page_list in pages.items %} 
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>View (Yes/No)</th>
+                <th>Edit</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in page_list %}
+                <tr>
+                  <td>{{ row.pageallocation__name }}</td>
+                  <td>
+                    <div class="custom-control custom-switch">
+                      <input type="checkbox" class="custom-control-input" id="changeCon{{row.id}}" name="changeCon{{row.id}}" {% if row.is_active %}checked{% endif %}>
+                      <label class="custom-control-label" for="changeCon{{row.id}}"></label>
+                    </div>
+                    <span id="viewCon{{ row.id }}">
+                    {% if row.is_active %}
+                        (Yes)
+                    {% else %}
+                        (No)
+                    {% endif %}
+                  </span>
+                  </td>
+                  <td><a href="javascript:getUserPrivileges('{{ row.id }}')">Edit</a></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+            {% endfor %}
+          </table>
+        </div>
+      </div>
+    </div>
+  </div> <!-- end section -->
