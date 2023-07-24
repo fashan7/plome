@@ -42,6 +42,17 @@ def add_new_user(request):
         return render(request, 'base/add_new_user.html')
 
 
+
+from django.contrib.admin.models import LogEntry
+@login_required
+def log_entry_list(request):
+    log_entries = LogEntry.objects.all()
+    #print("___________________",log_entries)
+    return render(request,'base/log_entry_list.html',{'log_entries':log_entries})
+
+
+
+
 def set_privilege(user_id):
     pages = PageAllocation.objects.all()
     for page in pages:
@@ -215,8 +226,21 @@ def sendemail(request):
 
     return render(request, 'base/sendemail.html')
 
+
 def profile(request):
-    return render(request,'base/profile.html')
+    # Check if the user is authenticated (logged in)
+    if request.user.is_authenticated:
+        # Get the user's profile (no need to use .profile since request.user is an instance of CustomUserTypes)
+        user = request.user
+
+        return render(request, 'base/profile.html', {'user': user})
+
+    # If the user is not logged in, you can redirect them to the login page or handle it as you prefer
+    # For example, you can redirect them to the homepage with a message
+    # return redirect('home')
+    return render(request, 'base/profile.html')  # You can pass an empty dictionary if you don't need to display any profile info
+
+
 def profile_settings(request):
     user = request.user
 

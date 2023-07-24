@@ -1,0 +1,46 @@
+<!-- log_entry_list.html -->
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Log Entry List{% endblock %}
+
+{% block content %}
+    <h1>Log Entry List</h1>
+    <div class="table-responsive">
+                   <table id="example" class="table table-bordered display nowrap" cellspacing="0" style="width:100%">
+                    <thead class="fw-bold">
+            <tr>
+                <th>ID</th>
+                <th>Object ID</th>
+                <th>Object</th>
+                <th>User</th>
+                <th>Action Time</th>
+                <th>Change Message</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log_entry in log_entries %}
+                <tr>
+                    <td>{{ log_entry.id }}</td>
+                    <td>{{ log_entry.object_id }}</td>
+                    <td>{{ log_entry.object_repr }}</td>
+                    <td>{{ log_entry.user }}</td>
+                    <td>{{ log_entry.action_time }}</td>
+                    <td>{{ log_entry.change_message }}</td>
+                </tr>
+            {% endfor %}
+    </div>
+        </tbody>
+    </table>
+{% endblock %}
+{% block javascript %}
+ 
+    <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+
+    <script>
+        new DataTable('#example', {
+            responsive: true
+        });
+    </script>
+{% endblock %}

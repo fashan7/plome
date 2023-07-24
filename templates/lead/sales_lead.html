@@ -1,83 +1,89 @@
-{% extends 'base.html' %}
+{% extends 'sales_base.html' %}
 {% load static %}
 {% block content %}
 <main role="main" class="main-content">
   <div class="container-fluid">
     <div class="container-fluid">
-      {% if messages %}
-      <div class="container mt-3">
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}" role="alert">
-          {{ message }}
+            {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">
+                {{ message }}
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-      </div>
-      {% endif %}
+        {% endif %}
 
-      <script>
-        // Function to handle form submission
-        function handleFormSubmit(event) {
-          event.preventDefault();
-          const form = event.target;
-          const formData = new FormData(form);
-          const leadId = form.getAttribute('data-lead-id');
-          fetch(`/lead/lead_edit/${leadId}/`, {
-              method: 'POST',
-              headers: {
+        <script>
+    // Function to handle form submission
+    function handleFormSubmit(event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const formData = new FormData(form);
+        const leadId = form.getAttribute('data-lead-id');
+
+        fetch(`/lead/lead_edit/${leadId}/`, {
+            method: 'POST',
+            headers: {
                 'X-CSRFToken': '{{ csrf_token }}',
-              },
-              body: formData,
-            })
+            },
+            body: formData,
+        })
             .then((response) => response.json())
             .then((data) => {
-              if (data.success) {
-                // Update the lead data on the page
-                updateLeadData(data.lead_data);
-                // Show a success message (optional)
-                showMessage('Lead edited successfully.', 'success');
-              } else {
-                // Show an error message (optional)
-                showMessage('Error editing lead.', 'danger');
-              }
+                if (data.success) {
+                    // Update the lead data on the page
+                    updateLeadData(data.lead_data);
+                    // Show a success message (optional)
+                    showMessage('Lead edited successfully.', 'success');
+                } else {
+                    // Show an error message (optional)
+                    showMessage('Error editing lead.', 'danger');
+                }
             })
             .catch((error) => {
-              // Show an error message (optional)
-              showMessage('Error editing lead.', 'danger');
+                // Show an error message (optional)
+                showMessage('Error editing lead.', 'danger');
             });
-        }
-        // Function to update the lead data on the page
-        function updateLeadData(leadData) {
-          document.getElementById('date_de_soumission').innerText = leadData.date_de_soumission;
-          document.getElementById('nom_de_la_campagne').innerText = leadData.nom_de_la_campagne;
-          document.getElementById('avez_vous_travaille').innerText = leadData.avez_vous_travaille;
-          document.getElementById('nom_prenom').innerText = leadData.nom_prenom;
-          document.getElementById('telephone').innerText = leadData.telephone;
-          document.getElementById('email').innerText = leadData.email;
-          document.getElementById('qualification').innerText = leadData.qualification;
-          document.getElementById('comments').innerText = leadData.comments;
-        }
-        // Function to show a message
-        function showMessage(message, messageType) {
-          const alertElement = document.createElement('div');
-          alertElement.classList.add('alert', `alert-${messageType}`, 'mt-3');
-          alertElement.role = 'alert';
-          alertElement.textContent = message;
-          const container = document.querySelector('.container');
-          container.insertBefore(alertElement, container.firstChild);
-        }
-        // Attach event listener to the form submit event
-        const form = document.querySelector('form');
-        form.addEventListener('submit', handleFormSubmit);
-      </script>
+    }
+
+    // Function to update the lead data on the page
+    function updateLeadData(leadData) {
+        document.getElementById('date_de_soumission').innerText = leadData.date_de_soumission;
+        document.getElementById('nom_de_la_campagne').innerText = leadData.nom_de_la_campagne;
+        document.getElementById('avez_vous_travaille').innerText = leadData.avez_vous_travaille;
+        document.getElementById('nom_prenom').innerText = leadData.nom_prenom;
+        document.getElementById('telephone').innerText = leadData.telephone;
+        document.getElementById('email').innerText = leadData.email;
+        document.getElementById('qualification').innerText = leadData.qualification;
+        document.getElementById('comments').innerText = leadData.comments;
+    }
+
+    // Function to show a message
+    function showMessage(message, messageType) {
+        const alertElement = document.createElement('div');
+        alertElement.classList.add('alert', `alert-${messageType}`, 'mt-3');
+        alertElement.role = 'alert';
+        alertElement.textContent = message;
+
+        const container = document.querySelector('.container');
+        container.insertBefore(alertElement, container.firstChild);
+    }
+
+    // Attach event listener to the form submit event
+    const form = document.querySelector('form');
+    form.addEventListener('submit', handleFormSubmit);
+</script>
 
       <div class="row justify-content-center">
         <div class="col-12">
-          <h2 class="mb-2 page-title">Leads table</h2>
-          <button type="button" class="btn mb-2 btn-outline-primary" data-toggle="modal" data-target="#defaultModal">
+          <h2 class="mb-2 page-title">Sales Leads table</h2>
+          {% comment %} <button type="button" class="btn mb-2 btn-outline-primary" data-toggle="modal" data-target="#defaultModal">
             Add
-            lead </button>
-          <button type="button" class="btn mb-2 btn-outline-primary" data-toggle="modal"
-            data-target="#importModal">Import</button>
+            lead </button> {% endcomment %}
+          {% comment %} <button type="button" class="btn mb-2 btn-outline-primary" data-toggle="modal"
+            data-target="#importModal">Import</button> {% endcomment %}
           <!-- Add these buttons to your template -->
           <a href="{% url 'export_leads' 'csv' %}" class="btn mb-2 btn-outline-primary">Export Leads as CSV</a>
           <a href="{% url 'export_leads' 'xlsx' %}" class="btn mb-2 btn-outline-primary">Export Leads as XLSX</a>
@@ -143,7 +149,7 @@
                             <label for="qualification">Qualification</label>
                             {% comment %} <select class="form-control" id="qualification" name="qualification" required>
                               {% endcomment %}
-                              <select name="qualification" class="form-control" id="qualification" name="qualification"
+                              <select class="form-control qualification-select" data-lead-id="{{ lead.id }}"
                                 required>
                                 <option value="nrp1">NRP1</option>
                                 <option value="nrp2">NRP2</option>
@@ -168,7 +174,7 @@
                             <textarea name="comments" class="form-control" required></textarea>
                             <div class="invalid-feedback">Please provide a valid nom de la campagne.</div>
                           </div>
-                          <div class="col-md-6 mb-3">
+                          {% comment %} <div class="col-md-6 mb-3">
                             <label for="assigned_to">Assign To</label>
                             <select name="assigned_to" class="form-control">
                               <option value="">-- Select User --</option>
@@ -176,7 +182,7 @@
                               <option value="{{ user.id }}">{{ user.username }}</option>
                               {% endfor %}
                             </select>
-                          </div>
+                          </div> {% endcomment %}
                           <button class="btn btn-primary" type="submit">Submit</button>
                       </form>
                     </div> <!-- /.card-body -->
@@ -189,7 +195,7 @@
         <!-- and Modal -->
 
         <!-- Import Leads Modal -->
-        <div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-labelledby="importModalLabel"
+        {% comment %} <div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-labelledby="importModalLabel"
           aria-hidden="true">
           <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -211,7 +217,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </div> {% endcomment %}
 
         <!-- Small table -->
         <div class="row my-2">
@@ -220,7 +226,7 @@
               <div class="card-body">
                 <!-- table -->
                 <div class="table-responsive">
-                  <table id="example" class="table table-bordered display nowrap" cellspacing="0" style="width:100%">
+                   <table id="example" class="table table-bordered display nowrap" cellspacing="0" style="width:100%">
                     <thead class="fw-bold">
                       <tr>
                         <th>
@@ -238,7 +244,7 @@
                         <th>Email</th>
                         <th>Qualification</th>
                         <th>Comments</th>
-                        <th>Assign to</th>
+                        
                         <th>Action</th>
                       </tr>
                     </thead>
@@ -261,7 +267,7 @@
                         <td>{{ lead.email }}</td>
                         <td>{{ lead.qualification }}</td>
                         <td>{{ lead.comments }}</td>
-                        <td>{{ lead.assigned_to }}</td>
+                        {% comment %} <td>{{ lead.assigned_to }}</td> {% endcomment %}
                         <td>
                           {% comment %} <button class="btn btn-sm dropdown-toggle more-horizontal" type="button"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -283,7 +289,7 @@
                                 Activate
                                 {% endif %}
                               </a>
-                              <a class="dropdown-item" href="#">Assign</a>
+                              {% comment %} <a class="dropdown-item" href="#">Assign</a> {% endcomment %}
                             </div>
                           </div>
 
@@ -385,7 +391,7 @@
                                         <textarea name="comments" id="comments" class="form-control"
                                           required>{{ lead.comments }}</textarea>
                                       </div>
-                                      <div class="form-group col-md-6">
+                                      {% comment %} <div class="form-group col-md-6">
                                         <label for="assigned_to">Assign To</label>
                                         <select name="assigned_to" id="assigned_to" class="form-control" required>
                                           <option value="">-- Select User --</option>
@@ -396,7 +402,7 @@
                                           </option>
                                           {% endfor %}
                                         </select>
-                                      </div>
+                                      </div> {% endcomment %}
 
                                     </div>
                                   </form>
@@ -579,12 +585,12 @@
 
 {% endblock %}
 {% block javascript %}
-<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
-<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+ 
+    <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
 
-<script>
-  new DataTable('#example', {
-    responsive: true
-  });
-</script>
+    <script>
+        new DataTable('#example', {
+            responsive: true
+        });
+    </script>
 {% endblock %}

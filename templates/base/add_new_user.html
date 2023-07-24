@@ -1,10 +1,19 @@
 
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="wrapper">
+        
+
+
 {% extends './common/base.html' %}
 {% load static %}
 
 
 
 {% block content %}
+
 
         <main role="main" class="main-content">
             <div class="container-fluid">
@@ -95,7 +104,7 @@
                                             id="confirm_password" placeholder="Confirm Password" required>
                                     </div>
                                 </div>
-                                <div class="modal-footer"> 
+                                <div class="modal-footer">
                                     <button type="button" class="btn mb-2 btn-secondary"
                                         data-dismiss="modal">Close</button>
                                     <button type="submit" class="btn mb-2 btn-success">Add New User</button>
@@ -152,7 +161,6 @@
                     };
                 }
             </script>
-            </p>
             <div class="row my-4">
                 <!--	Small	table	-->
                 <div class="col-md-12">
@@ -547,6 +555,28 @@
     </div>
     </div>
     </div>
+
+</main>
+
+{% endblock %}
+<!-- and add user script -->
+{% block adduser %}
+<!-- Include Bootstrap and jQuery dependencies -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    $(document).ready(function() {
+        $("#user-form").validate({
+            rules: {
+                Username: {
+                    required: true,
+                    remote: {
+                        url: $("#user-form").data("url"),
+                        type: 'POST',
+                        data: {
+                            Username: function() {
+                                return $("#Username").val();
+=======
    
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
@@ -564,59 +594,66 @@
                                 Username: function() {
                                     return $("#Username").val();
                                 },
+
                             },
                         },
                     },
-                    password: {
-                        required: true,
-                        minlength: 5
-                    },
-                    confirm_password: {
-                        required: true,
-                        equalTo: "#password"
-                    },
-                    user_type: {
-                        required: true
-                    }
                 },
-                messages: {
-                    Username: {
-                        required: "Please enter a username",
-                        remote: "Username already exists"
-                    },
-                    password: {
-                        required: "Please Fill the Empty Box",
-                        minlength: "Your password must be at least 5 characters long"
-                    },
-                    confirm_password: {
-                        required: "Please Fill the Empty Box",
-                        equalTo: "Password is Not Matched"
-                    },
-                    user_type: {
-                        required: "Please select a profile"
-                    }
+                password: {
+                    required: true,
+                    minlength: 5
                 },
-                errorPlacement: function(error, element) {
-                    error.addClass("invalid-feedback");
-                    element.closest(".form-group").append(error);
+                confirm_password: {
+                    required: true,
+                    equalTo: "#password"
                 },
-                highlight: function(element, errorClass, validClass) {
-                    $(element).addClass("is-invalid").removeClass("is-valid");
-                },
-                unhighlight: function(element, errorClass, validClass) {
-                    $(element).removeClass("is-invalid").addClass("is-valid");
-                },
-                //https://sweetalert2.github.io (Need to explore more)
-                submitHandler: function(form) {
-                    Swal.fire(
-                        'Good job!',
-                        'User Registerd!!!',
-                        'success'
-                    ).then(function() {
-                        form.submit();
-                    });
+                user_type: {
+                    required: true
                 }
-            });
+            },
+            messages: {
+                Username: {
+                    required: "Please enter a username",
+                    remote: "Username already exists"
+                },
+                password: {
+                    required: "Please Fill the Empty Box",
+                    minlength: "Your password must be at least 5 characters long"
+                },
+                confirm_password: {
+                    required: "Please Fill the Empty Box",
+                    equalTo: "Password is Not Matched"
+                },
+                user_type: {
+                    required: "Please select a profile"
+                }
+            },
+            errorPlacement: function(error, element) {
+                error.addClass("invalid-feedback");
+                element.closest(".form-group").append(error);
+            },
+            highlight: function(element, errorClass, validClass) {
+                $(element).addClass("is-invalid").removeClass("is-valid");
+            },
+            unhighlight: function(element, errorClass, validClass) {
+                $(element).removeClass("is-invalid").addClass("is-valid");
+            },
+            //https://sweetalert2.github.io (Need to explore more)
+            submitHandler: function(form) {
+                Swal.fire(
+                    'Good job!',
+                    'User Registerd!!!',
+                    'success'
+                ).then(function() {
+                    form.submit();
+                });
+            }
         });
+
+    });
+</script>
+{% endblock %}
+
     </script>
     {% endblock %}
+

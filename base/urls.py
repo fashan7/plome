@@ -14,6 +14,7 @@ urlpatterns = [
     path('sendemail/', sendemail, name='sendemail'),
     path('profile/',profile,name ="profile"),
     path('profile_settings/',profile_settings,name ="profile_settings"),
+    path('log_entry_list/', log_entry_list, name='log_entry_list'),
     
 ]
 

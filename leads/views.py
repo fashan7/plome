@@ -16,15 +16,11 @@ from .models import Lead
 
 
 
-
-
-
-
-
 def assign_user_to_lead(lead, user_id):
     assigned_user = CustomUserTypes.objects.get(id=user_id)
     lead.assigned_to = assigned_user
     lead.save()
+    
 
 def delete_duplicate_leads():
     # Get all leads
@@ -60,8 +56,6 @@ def delete_duplicate_leads():
     return duplicates_count
 
     
-    
-
 
 def lead_dashboard(request):
     if request.method == 'POST':
@@ -89,7 +83,7 @@ def lead_dashboard(request):
         return redirect('lead_dashboard')
 
     # Fetch active leads
-    active_leads = Lead.objects.filter(is_active=True)
+    active_leads = Lead.objects.filter(is_active=True).order_by('-date_de_soumission')
     users = CustomUserTypes.objects.all()
     ##fashan------------------------------------
     nav_data = navigation_data(request.user.id)
@@ -101,6 +95,9 @@ def lead_dashboard(request):
 # def lead_list(request):
 #     users = CustomUserTypes.objects.all()
 #     return render(request, 'lead/leads_dashboard.html', {'users': users})
+
+from django.contrib.admin.models import LogEntry, CHANGE
+from django.contrib.contenttypes.models import ContentType
 
 def lead_edit(request, lead_id):
     lead = get_object_or_404(Lead, id=lead_id)
@@ -118,6 +115,49 @@ def lead_edit(request, lead_id):
                 messages.error(request, 'Invalid user ID selected for assignment.')
 
         # Update the lead instance with the form data
+        # lead.date_de_soumission = form_data['date_de_soumission']
+        # lead.nom_de_la_campagne = form_data['nom_de_la_campagne']
+        # lead.avez_vous_travaille = form_data['avez_vous_travaille']
+        # lead.nom_prenom = form_data['nom_prenom']
+        # lead.telephone = form_data['telephone']
+        # lead.email = form_data['email']
+        # lead.qualification = form_data['qualification']
+        # lead.comments = form_data['comments']
+        # lead.last_modified_by = request.user
+
+        # Save the lead instance to the database
+
+        changes = {}
+
+        # Check if each field has been changed and update the changes dictionary
+        if lead.date_de_soumission != form_data['date_de_soumission']:
+            changes['Date de soumission'] = form_data['date_de_soumission']
+#avez_vous_travaille
+
+        if lead.avez_vous_travaille != form_data['avez_vous_travaille']:
+            changes['avez_vous_travaille'] = form_data['avez_vous_travaille']
+
+        if lead.nom_de_la_campagne != form_data['nom_de_la_campagne']:
+            changes['Nom de la campagne'] = form_data['nom_de_la_campagne']
+            
+        if lead.nom_prenom != form_data['nom_prenom']:
+            changes['Nom & Prenom'] = form_data['nom_prenom']
+            
+        if lead.telephone != form_data['telephone']:
+            changes['Telephone'] = form_data['telephone']
+        
+        if lead.email != form_data['email']:
+            changes['Email'] = form_data['email']
+        
+        if lead.qualification != form_data['qualification']:
+            changes['Qualification'] = form_data['qualification']
+            
+        if lead.comments != form_data['comments']:
+            changes['Comments'] = form_data['comments']
+
+        # Repeat the above process for other fields
+
+        # Update the lead instance with the form data
         lead.date_de_soumission = form_data['date_de_soumission']
         lead.nom_de_la_campagne = form_data['nom_de_la_campagne']
         lead.avez_vous_travaille = form_data['avez_vous_travaille']
@@ -126,14 +166,72 @@ def lead_edit(request, lead_id):
         lead.email = form_data['email']
         lead.qualification = form_data['qualification']
         lead.comments = form_data['comments']
+    
 
-        # Save the lead instance to the database
+        # Set the last_modified_by field to the current user
+        lead.last_modified_by = request.user
+
         lead.save()
         messages.success(request, 'Lead edited successfully.')
+
+        # Create a LogEntry to track the change made by the user
+        content_type = ContentType.objects.get_for_model(Lead)
+        username = request.user.username
+        change_message = f'{username} edited the Lead. Changes: {", ".join([f"{field}: {value}" for field, value in changes.items()])}'
+        LogEntry.objects.create(
+            user_id=request.user.id,
+            #user_name = request.user.assigned_to,
+            content_type_id=content_type.id,
+            object_id=lead.id,
+            object_repr=f'{lead}',
+            action_flag=CHANGE,
+            change_message=change_message
+        )
+        # print("************************",LogEntry.change_message)
+
+        context = {
+            'lead': lead,
+            'change_message': change_message
+        }
+        print("****************************",context)
+
 
         return JsonResponse({'success': True})
 
     return render(request, 'lead/lead_edit.html', {'lead': lead})
+
+# def lead_edit(request, lead_id):
+#     lead = get_object_or_404(Lead, id=lead_id)
+
+#     if request.method == 'POST':
+#         form_data = request.POST.copy()  # Make a copy of the POST data to modify it
+#         assigned_user_id = form_data.get('assigned_to')  # Get the assigned user ID from the form data
+
+#         if assigned_user_id:
+#             try:
+#                 assigned_user = CustomUserTypes.objects.get(id=assigned_user_id)
+#                 lead.assigned_to = assigned_user  # Set the assigned user for the lead
+#             except CustomUserTypes.DoesNotExist:
+#                 # Handle the case when the selected user does not exist (optional)
+#                 messages.error(request, 'Invalid user ID selected for assignment.')
+
+#         # Update the lead instance with the form data
+#         lead.date_de_soumission = form_data['date_de_soumission']
+#         lead.nom_de_la_campagne = form_data['nom_de_la_campagne']
+#         lead.avez_vous_travaille = form_data['avez_vous_travaille']
+#         lead.nom_prenom = form_data['nom_prenom']
+#         lead.telephone = form_data['telephone']
+#         lead.email = form_data['email']
+#         lead.qualification = form_data['qualification']
+#         lead.comments = form_data['comments']
+
+#         # Save the lead instance to the database
+#         lead.save()
+#         messages.success(request, 'Lead edited successfully.')
+
+#         return JsonResponse({'success': True})
+
+#     return render(request, 'lead/lead_edit.html', {'lead': lead})
 
 def toggle_lead_status(request, lead_id):
     lead = get_object_or_404(Lead, id=lead_id)
@@ -149,10 +247,6 @@ def toggle_lead_status(request, lead_id):
 def deactivated_leads(request):
     leads = Lead.objects.filter(is_active=False)
     return render(request, 'lead/deactivated_lead.html', {'leads': leads})
-
-
-
-        
 
 
 def parse_date(date_str):
@@ -349,6 +443,21 @@ def export_leads(request, file_format):
     return response
 
 
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.contrib import messages
+
+
+
+@login_required
+def sales_lead(request):    
+    user_leads = Lead.objects.filter(assigned_to=request.user, is_active=True)
+    return render(request, 'lead/sales_lead.html', {'leads': user_leads})
+
+    # users = CustomUserTypes.objects.all()
+    # nav_data = navigation_data(request.user.id)
+    # return render(request, 'lead/sales_lead.html', {'leads': user_leads})
 
 
 
