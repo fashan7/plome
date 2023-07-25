@@ -1,6 +1,5 @@
 from django.db import models
 from accounts.models import User
-from django.contrib.postgres.fields import JSONField
 
 class Lead(models.Model):
     date_de_soumission = models.DateField(null=True, blank=True)
