@@ -84,6 +84,16 @@ def lead_dashboard(request):
             assigned_user = CustomUserTypes.objects.get(id=assigned_to_id)
             lead.assigned_to = assigned_user
             lead.save()
+             # Create a notification for the assigned user
+            notification_message = f'You have been assigned a new lead: {lead.nom_de_la_campagne}'
+            notification = Notification(user=assigned_user, message=notification_message)
+            notification.save()
+
+            # Store the notification message in the session for the current user
+            request.session['assigned_message'] = notification_message
+            print("Assigned Message:", request.session['assigned_message'])
+            
+            
         duplicates_deleted = delete_duplicate_leads()
         messages.success(request, f'{lead.nom_de_la_campagne} leads added successfully. {duplicates_deleted} duplicate leads deleted.')
         return redirect('lead_dashboard')
