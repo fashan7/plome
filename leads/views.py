@@ -13,6 +13,7 @@ from pagesallocation.views import navigation_data
 import os
 import importlib.util
 from .models import Lead
+import json
 
 
 
@@ -71,6 +72,11 @@ def lead_dashboard(request):
             qualification=request.POST['qualification'],
             comments=request.POST['comments']
         )
+        custom_field_names = request.POST.getlist('custom_field_name[]')
+        custom_field_values = request.POST.getlist('custom_field_value[]')
+        custom_fields = dict(zip(custom_field_names, custom_field_values))
+        lead.custom_fields = json.dumps(custom_fields)
+
         lead.save()
 
         assigned_to_id = request.POST.get('assigned_to')
@@ -259,31 +265,34 @@ def deactivated_leads(request):
     return render(request, 'lead/deactivated_lead.html', {'leads': leads})
 
 
-def parse_date(date_str):
-    try:
-        # Try parsing with format '%Y-%m-%d %H:%M:%S'
-        return datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
-    except ValueError:
-        try:
-            # Try parsing with format '44764,59196'
-            if isinstance(date_str, pd.Timestamp):
-                date_str = str(date_str)
-            timestamp = float(date_str.replace(',', '.')) * 86400
-            min_datetime = datetime(1970, 1, 1, tzinfo=timezone.utc)
-            max_datetime = datetime(9999, 12, 31, 23, 59, 59, tzinfo=timezone.utc)
 
-            # Check if the parsed timestamp is within a reasonable range
-            if min_datetime.timestamp() <= timestamp <= max_datetime.timestamp():
-                return datetime.fromtimestamp(timestamp)
-            else:
-                return None
-        except ValueError:
-            return None
-        
+
+
         
 
 
 import pandas as pd
+
+
+def parse_date(date_string):
+    try:
+        # Try parsing with format '%m/%d/%Y %H:%M'
+        date_obj = datetime.strptime(date_string, '%m/%d/%Y %H:%M')
+        return date_obj
+    except ValueError:
+        try:
+            # Try parsing with format '%Y-%m-%d %H:%M:%S'
+            date_obj = datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
+            return date_obj
+        except ValueError:
+            try:
+                # Try parsing with format '%m/%d/%Y %H:%M:%S'
+                date_obj = datetime.strptime(date_string, '%m/%d/%Y %H:%M:%S')
+                return date_obj
+            except ValueError:
+                # If none of the formats match, return None
+                return None
+        return None
 
 def import_leads(request):
     if request.method == 'POST' and request.FILES.get('file'):
@@ -295,14 +304,17 @@ def import_leads(request):
                 header = next(csv_reader)  # Get the header row
                 for row in csv_reader:
                     date_de_soumission = parse_date(row[0].strip('“”'))
+                    
                     if not date_de_soumission:
                         continue  # Skip this row if date is not valid
+                        
+                    telephone = int(float(row[4])) if row[4].strip() else None
                     lead = Lead(
                         date_de_soumission=date_de_soumission,
                         nom_de_la_campagne=row[1] or '',
                         avez_vous_travaille=row[2] or '',
                         nom_prenom=row[3] or '',
-                        telephone=row[4] or '',
+                        telephone=telephone,
                         email=row[5] or '',
                         qualification=row[6] or '',
                         comments=row[7] or ''
@@ -310,6 +322,7 @@ def import_leads(request):
                     imported_leads.append(lead)
                 Lead.objects.bulk_create(imported_leads)
             elif file.name.endswith('.xlsx'):
+                
                 # Convert XLSX to CSV
                 df = pd.read_excel(file)
                 csv_tempfile = 'tempfile.csv'

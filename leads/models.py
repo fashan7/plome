@@ -28,6 +28,7 @@ class Lead(models.Model):
     
     is_active = models.BooleanField(default=True)
 
+
     def __str__(self):
         return self.nom_de_la_campagne
     
@@ -44,3 +45,6 @@ class Notification(models.Model):
     def __str__(self):
         return self.message
 # models.py
+
+    custom_fields = models.JSONField(null=True, blank=True)
+

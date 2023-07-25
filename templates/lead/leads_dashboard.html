@@ -69,7 +69,59 @@
         const form = document.querySelector('form');
         form.addEventListener('submit', handleFormSubmit);
       </script>
+      <script>
+      var customFieldCounter = 0; 
 
+      function addCustomField() {
+        var container = document.getElementById('custom-fields-container');
+
+        var customFieldDiv = document.createElement('div');
+        customFieldDiv.className = 'form-row'; 
+
+        var fieldNameDiv = document.createElement('div');
+        fieldNameDiv.className = 'col-md-5 mb-3'; 
+
+        var fieldNameInput = document.createElement('input');
+        fieldNameInput.type = 'text';
+        fieldNameInput.name = 'custom_field_name[]'; 
+        fieldNameInput.className = 'form-control'; 
+        fieldNameInput.placeholder = 'Custom Field Name';
+
+        var fieldValueDiv = document.createElement('div');
+        fieldValueDiv.className = 'col-md-5 mb-3'; 
+
+        var fieldValueInput = document.createElement('input');
+        fieldValueInput.type = 'text';
+        fieldValueInput.name = 'custom_field_value[]'; 
+        fieldValueInput.className = 'form-control'; 
+        fieldValueInput.placeholder = 'Custom Field Value';
+
+        var deleteButtonDiv = document.createElement('div');
+        deleteButtonDiv.className = 'col-md-2 text-right  mb-3'; 
+
+        var deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.className = 'btn btn-danger';
+        deleteButton.textContent = 'Delete';
+        deleteButton.onclick = function () {
+          container.removeChild(customFieldDiv); 
+        };
+
+        fieldNameDiv.appendChild(fieldNameInput);
+        fieldValueDiv.appendChild(fieldValueInput);
+        deleteButtonDiv.appendChild(deleteButton);
+
+        customFieldDiv.appendChild(fieldNameDiv);
+        customFieldDiv.appendChild(fieldValueDiv);
+        customFieldDiv.appendChild(deleteButtonDiv);
+
+        container.appendChild(customFieldDiv);
+
+        // Increment the counter for the next custom fild
+        customFieldCounter++;
+      }
+    </script>
+          
       <div class="row justify-content-center">
         <div class="col-12">
           <h2 class="mb-2 page-title">Leads table</h2>
@@ -177,7 +229,18 @@
                               {% endfor %}
                             </select>
                           </div>
-                          <button class="btn btn-primary" type="submit">Submit</button>
+                          
+                          <div class="col-md-12 mb-3">
+                            <button type="button" class="btn btn-secondary" onclick="addCustomField()">Add Custom Field</button>
+                          </div>
+                          
+                          <div  class="col-md-12 mb-3" id="custom-fields-container">
+                            <!-- Custom Fields will be dynamically added here -->
+                          </div>
+                          <div class="col-md-6 mb-3">
+                            <button class="btn btn-primary" type="submit">Submit</button>
+                          </div>
+                          
                       </form>
                     </div> <!-- /.card-body -->
                   </div>
