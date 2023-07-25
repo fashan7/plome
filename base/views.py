@@ -126,8 +126,31 @@ def save_user(request):
 
 def advisor_dashboard(request):
     return render(request, 'base/advisor_dashboard.html')
+from leads.models import Lead
+from django.contrib import messages
+from leads.models import Notification
+
 def sales_dashboard(request):
-    return render(request, 'base/sales_dashboard.html')
+    user_leads = Lead.objects.filter(assigned_to=request.user)
+
+    # Calculate the number of new leads
+    # new_leads_count = user_leads.filter(is_new=True).count()
+
+    # Fetch the notification message for the current user from the session
+    assigned_message = request.session.get('assigned_message', None)
+
+    # Remove the notification message from the session
+    if assigned_message:
+        del request.session['assigned_message']
+
+    context = {
+        'user_leads': user_leads,
+        'assigned_message': assigned_message,
+        # 'new_leads_count': new_leads_count,
+    }
+
+    return render(request, 'base/sales_dashboard.html', context)
+
 def sadmin_dashboard(request):
     return render(request, 'base/sadmin_dashboard.html')
 
