@@ -27,3 +27,20 @@ class Lead(models.Model):
     assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_tasks')
     
     is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.nom_de_la_campagne
+    
+
+
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    lead = models.ForeignKey(Lead, on_delete=models.CASCADE)
+    message = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+   
+    
+    def __str__(self):
+        return self.message
+# models.py
