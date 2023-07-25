@@ -13,6 +13,7 @@ from pagesallocation.views import navigation_data
 import os
 import importlib.util
 from .models import Lead
+import json
 
 
 
@@ -71,6 +72,11 @@ def lead_dashboard(request):
             qualification=request.POST['qualification'],
             comments=request.POST['comments']
         )
+        custom_field_names = request.POST.getlist('custom_field_name[]')
+        custom_field_values = request.POST.getlist('custom_field_value[]')
+        custom_fields = dict(zip(custom_field_names, custom_field_values))
+        lead.custom_fields = json.dumps(custom_fields)
+        
         lead.save()
 
         assigned_to_id = request.POST.get('assigned_to')
