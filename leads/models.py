@@ -1,5 +1,6 @@
 from django.db import models
 from accounts.models import User
+from django.contrib.postgres.fields import JSONField
 
 class Lead(models.Model):
     date_de_soumission = models.DateField(null=True, blank=True)
@@ -27,3 +28,4 @@ class Lead(models.Model):
     assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_tasks')
     
     is_active = models.BooleanField(default=True)
+    custom_fields = models.JSONField(null=True, blank=True)
