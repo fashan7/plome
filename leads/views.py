@@ -295,7 +295,6 @@ def import_leads(request):
                 for row in csv_reader:
                     date_de_soumission = parse_date(row[0].strip('“”'))
                     
-                    print(date_de_soumission)
                     if not date_de_soumission:
                         continue  # Skip this row if date is not valid
                         
