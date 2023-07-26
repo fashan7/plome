@@ -5,3 +5,4 @@ from .models import *
 
 admin.site.register(Lead)
 admin.site.register(LogEntry)
+admin.site.register(Notification)
