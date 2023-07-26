@@ -224,6 +224,37 @@ def lead_edit(request, lead_id):
     return render(request, 'lead/lead_edit.html', {'lead': lead})
 
 
+def assign_leads(request):
+    if request.method == 'POST':
+        selected_leads = request.POST.get('selected_leads')
+        assign_to_user_id = request.POST.get('assign_to_user')
+        if not selected_leads or not assign_to_user_id:
+            return JsonResponse({'success': False, 'message': 'Invalid data.'}, status=400)
+
+        try:
+            assigned_user = CustomUserTypes.objects.get(id=assign_to_user_id)
+        except CustomUserTypes.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Assigned user not found.'}, status=400)
+
+        try:
+            selected_leads = json.loads(selected_leads)
+            for lead_data in selected_leads:
+                lead_id = lead_data.get('id')
+                
+                lead = Lead.objects.get(id=lead_id)
+                lead.assigned_to = assigned_user
+                lead.save()
+
+                notification_message = f'You have been assigned a new lead: {lead.nom_de_la_campagne}'
+                notification = Notification(user=assigned_user, lead=lead, message=notification_message)
+                notification.save()
+
+            return JsonResponse({'success': True, 'message': 'Leads assigned successfully.'}, status=200)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+    return JsonResponse({'success': False, 'message': 'Invalid request.'}, status=400)
+
 # def lead_edit(request, lead_id):
 #     lead = get_object_or_404(Lead, id=lead_id)
 
