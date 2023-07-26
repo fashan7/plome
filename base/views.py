@@ -50,6 +50,9 @@ def clear_all_notifications(request):
     return JsonResponse({'success': True})
 
 def all_notifications(request):
+    #Reading all notifications when view all 
+    user = request.user
+    Notification.objects.filter(user=user, is_read=False).update(is_read=True)
     return redirect('sales_lead')
 
 @login_required
