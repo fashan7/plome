@@ -15,7 +15,7 @@ urlpatterns = [
     path('profile/',profile,name ="profile"),
     path('profile_settings/',profile_settings,name ="profile_settings"),
     path('log_entry_list/', log_entry_list, name='log_entry_list'),
-    
+    path('get_notifications/', get_notifications, name='get_notifications'),
 ]
 
 

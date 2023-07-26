@@ -1,7 +1,6 @@
 
 # Create your views here.
 
-from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from accounts.models import CustomUserTypes
@@ -12,7 +11,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from django.http import JsonResponse
 
-from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
 
 from django.core.mail import send_mail
@@ -20,9 +18,24 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import get_user_model
 
 from django.contrib.auth.hashers import make_password
+
+from leads.models import Lead
+from django.contrib import messages
+from leads.models import Notification
+
+from django.contrib.admin.models import LogEntry
+
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+
+@login_required
+def get_notifications(request):
+    user = request.user
+    unread_notifications = Notification.objects.filter(user=user, is_read=False).values('message', 'timestamp')
+    return JsonResponse(list(unread_notifications), safe=False)
 
 # @login_required
 def admin_dashboard(request):
@@ -42,15 +55,11 @@ def add_new_user(request):
         return render(request, 'base/add_new_user.html')
 
 
-
-from django.contrib.admin.models import LogEntry
 @login_required
 def log_entry_list(request):
     log_entries = LogEntry.objects.all()
     #print("___________________",log_entries)
     return render(request,'base/log_entry_list.html',{'log_entries':log_entries})
-
-
 
 
 def set_privilege(user_id):
@@ -126,9 +135,7 @@ def save_user(request):
 
 def advisor_dashboard(request):
     return render(request, 'base/advisor_dashboard.html')
-from leads.models import Lead
-from django.contrib import messages
-from leads.models import Notification
+
 
 def sales_dashboard(request):
     user_leads = Lead.objects.filter(assigned_to=request.user)
@@ -157,9 +164,6 @@ def sadmin_dashboard(request):
 
 
 User = get_user_model()
-
-from django.http import JsonResponse
-
 
 def edit_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
@@ -232,9 +236,6 @@ def delete_user(request, user_id):
 
     return JsonResponse({'error': 'Invalid request.'})
 
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
-from django.utils.html import strip_tags
 
 def sendemail(request):
     user_id = request.GET.get('user_id')  # Get the user_id from the query parameters
