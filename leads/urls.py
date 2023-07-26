@@ -11,6 +11,7 @@ urlpatterns = [
     path('import_leads/', views.import_leads, name='import_leads'),
     path('export_leads/<str:file_format>/', views.export_leads, name='export_leads'),
     path('sales_lead/',views.sales_lead,name="sales_lead"),
+    path('assign_leads/', views.assign_leads, name='assign_leads'),
 ]
 
 
