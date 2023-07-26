@@ -31,10 +31,21 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
+from django.db.models import Count
+from django.db.models.functions import Trunc
+
 @login_required
 def get_notifications(request):
     user = request.user
-    unread_notifications = Notification.objects.filter(user=user, is_read=False).values('message', 'timestamp')
+    # unread_notifications = Notification.objects.filter(user=user, is_read=False).values('message', 'timestamp')
+    # return JsonResponse(list(unread_notifications), safe=False)
+    unread_notifications = (
+        Notification.objects.filter(user=user, is_read=False)
+        .annotate(hour=Trunc('timestamp', 'hour'))
+        .values('hour')
+        .annotate(count=Count('id'))
+        .values('hour', 'count', 'message', 'timestamp')
+    )
     return JsonResponse(list(unread_notifications), safe=False)
 
 # @login_required
