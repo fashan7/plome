@@ -371,14 +371,15 @@
 <div class="modal fade modal-notif modal-slide" id="notificationModal" tabindex="-1" role="dialog" aria-labelledby="defaultModalLabel" aria-hidden="true">
   <!-- Your modal content here, but replace the notifications list with the following -->
   <div class="modal-dialog modal-sm" role="document">
-    <div class="modal-content">
+    <div class="modal-content" style="height: 100%; background:white">
       <div class="modal-header">
         <h5 class="modal-title" id="defaultModalLabel">Notifications</h5>
+        <span class="badge badge-pill badge-info" id="unreadNotificationCount">0</span>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" style="overflow-y: auto;">
         <div class="list-group list-group-flush my-n3" id="notificationList">
           <!-- Dynamic notifications will be added here -->
           <div class="list-group-item">Loading notifications...</div>
@@ -401,12 +402,15 @@
         url: '{% url "get_notifications" %}',
         dataType: 'json',
         success: function(data) {
+          var unreadNotificationCount = $('#unreadNotificationCount'); // Reference to the badge
           var notificationList = $('#notificationList');
           notificationList.empty(); // Clear existing notifications
+          unreadNotificationCount.text(0);
   
           if (data.length === 0) {
             notificationList.append('<div class="list-group-item">No new notifications</div>');
           } else {
+            var totalCount = 0;
             data.forEach(function(notification) {
               // Calculate time ago
               var notificationTime = new Date(notification.timestamp);
@@ -441,7 +445,9 @@
                 '</div>';
   
               notificationList.append(itemHtml);
+              totalCount += notification.count;
             });
+            unreadNotificationCount.text(totalCount);
           }
         },
         error: function() {
