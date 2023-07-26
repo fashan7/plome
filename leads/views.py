@@ -12,7 +12,7 @@ from accounts.models import CustomUserTypes
 from pagesallocation.views import navigation_data
 import os
 import importlib.util
-from .models import Lead
+from .models import Lead, Notification
 import json
 
 
@@ -86,7 +86,7 @@ def lead_dashboard(request):
             lead.save()
              # Create a notification for the assigned user
             notification_message = f'You have been assigned a new lead: {lead.nom_de_la_campagne}'
-            notification = Notification(user=assigned_user, message=notification_message)
+            notification = Notification(user=assigned_user, lead=lead, message=notification_message)
             notification.save()
 
             # Store the notification message in the session for the current user
@@ -188,6 +188,13 @@ def lead_edit(request, lead_id):
         lead.last_modified_by = request.user
 
         lead.save()
+        
+        #Saving the notification for assign
+        if assigned_user_id:
+            notification_message = f'You have been assigned a new lead: {lead.nom_de_la_campagne}'
+            user = CustomUserTypes.objects.get(id=assigned_user_id)
+            notification = Notification(user=user, lead=lead, message=notification_message)
+            notification.save()
         messages.success(request, 'Lead edited successfully.')
 
         # Create a LogEntry to track the change made by the user
