@@ -18,6 +18,8 @@ urlpatterns = [
     path('get_notifications/', get_notifications, name='get_notifications'),
     path('mark_notification_read/', mark_notification_read, name='mark_notification_read'),
     path('clear_all_notifications/', clear_all_notifications, name='clear_all_notifications'),
+    path('all_notifications/', all_notifications, name='all_notifications'),
+    
 ]
 
 
