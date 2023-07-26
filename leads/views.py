@@ -223,6 +223,7 @@ def lead_edit(request, lead_id):
 
     return render(request, 'lead/lead_edit.html', {'lead': lead})
 
+
 # def lead_edit(request, lead_id):
 #     lead = get_object_or_404(Lead, id=lead_id)
 

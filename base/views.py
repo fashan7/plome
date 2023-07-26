@@ -38,6 +38,8 @@ from django.views.decorators.http import require_POST
 from django.utils.timezone import now
 from django.utils.timezone import make_aware
 from datetime import timedelta
+from django.utils import timezone
+from leads.views import sales_lead
 
 
 @require_POST
@@ -47,10 +49,13 @@ def clear_all_notifications(request):
 
     return JsonResponse({'success': True})
 
+def all_notifications(request):
+    return redirect('sales_lead')
+
 @login_required
 def get_notifications(request):
     user = request.user
-    current_time = now()
+    current_time = timezone.now()
 
     # Define the time range for each notification group (1 hour in this case)
     time_range = timedelta(hours=1)
@@ -62,7 +67,7 @@ def get_notifications(request):
 
     # Fetch the notifications for the current hour
     unread_notifications = (
-        Notification.objects.filter(user=user, is_read=False, timestamp__range=(start_time, end_time))
+        Notification.objects.filter(user=user, is_read=False) #, timestamp__range=(start_time, end_time)
         .annotate(hour=Trunc('timestamp', 'hour'))
         .values('hour')
         .annotate(count=Count('id'))
