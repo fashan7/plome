@@ -33,20 +33,56 @@ from django.utils.html import strip_tags
 
 from django.db.models import Count
 from django.db.models.functions import Trunc
+from django.views.decorators.http import require_POST
+
+from django.utils.timezone import now
+from django.utils.timezone import make_aware
+from datetime import timedelta
+
+
+@require_POST
+def clear_all_notifications(request):
+    user = request.user
+    Notification.objects.filter(user=user, is_read=False).update(is_read=True)
+
+    return JsonResponse({'success': True})
 
 @login_required
 def get_notifications(request):
     user = request.user
-    # unread_notifications = Notification.objects.filter(user=user, is_read=False).values('message', 'timestamp')
-    # return JsonResponse(list(unread_notifications), safe=False)
+    current_time = now()
+
+    # Define the time range for each notification group (1 hour in this case)
+    time_range = timedelta(hours=1)
+
+    # Calculate the start and end times for the current hour
+    current_time_naive = current_time.replace(minute=0, second=0, microsecond=0)  # Create naive datetime
+    start_time = current_time_naive
+    end_time = start_time + time_range
+
+    # Fetch the notifications for the current hour
     unread_notifications = (
-        Notification.objects.filter(user=user, is_read=False)
+        Notification.objects.filter(user=user, is_read=False, timestamp__range=(start_time, end_time))
         .annotate(hour=Trunc('timestamp', 'hour'))
         .values('hour')
         .annotate(count=Count('id'))
-        .values('hour', 'count', 'message', 'timestamp')
+        .values('hour', 'count', 'message', 'timestamp', 'id')
+        .order_by('-timestamp')
     )
     return JsonResponse(list(unread_notifications), safe=False)
+
+@require_POST
+def mark_notification_read(request):
+    notification_id = request.POST.get('notification_id')
+
+    try:
+        notification = Notification.objects.get(pk=notification_id)
+        notification.is_read = True
+        notification.save()
+
+        return JsonResponse({'success': True})
+    except Notification.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Notification not found'})
 
 # @login_required
 def admin_dashboard(request):

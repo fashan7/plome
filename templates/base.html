@@ -373,7 +373,7 @@
   <div class="modal-dialog modal-sm" role="document">
     <div class="modal-content" style="height: 100%; background:white">
       <div class="modal-header">
-        <h5 class="modal-title" id="defaultModalLabel">Notifications</h5>
+        <h5 class="modal-title" id="defaultModalLabel">Notifications</h5>&nbsp;&nbsp;
         <span class="badge badge-pill badge-info" id="unreadNotificationCount">0</span>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
@@ -386,7 +386,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Clear All</button>
+        <button type="button" class="btn btn-secondary btn-block" onclick="clearAllNotifications()" data-dismiss="modal">Clear All</button>
       </div>
     </div>
   </div>
@@ -441,6 +441,9 @@
                 '<div class="my-0 text-muted small">' + formattedTimestamp + '</div>' +
                 '<div class="my-0 text-muted small">' + formatTimeAgo(timeDiff) + '</div>' +
                 '</div>' +
+                '<div class="col-auto">' +
+                  '<span class="fe fe-x-circle fe-16 text-primary" style="cursor: pointer;" onclick="markNotificationRead(' + notification.id + ')"></span>' +
+                '</div>' +
                 '</div>' +
                 '</div>';
   
@@ -455,7 +458,48 @@
         }
       });
     }
+
+    function markNotificationRead(notificationId) {
+      $.ajax({
+        url: '{% url "mark_notification_read" %}',
+        type: 'POST',
+        data: {
+          notification_id: notificationId,
+          csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        dataType: 'json',
+        success: function(response) {
+          if (response.success) {
+            $('.close').click(); 
+          }
+        },
+        error: function() {
+          console.error('Failed to mark notification as read.');
+        }
+      });
+    }
   
+    function clearAllNotifications() {
+      // Make an AJAX call to mark all notifications as read
+      $.ajax({
+        url: '{% url "clear_all_notifications" %}',
+        type: 'POST',
+        data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+        dataType: 'json',
+        success: function(response) {
+          if (response.success) {
+            // Notifications cleared successfully
+            // Now close the notification slide
+            $('#notificationModal').modal('hide');
+            // Optionally, you can reload the page to refresh the notifications
+            // location.reload();
+          }
+        },
+        error: function() {
+          console.error('Failed to clear all notifications.');
+        }
+      });
+    }
     </script>
 
 </html>
