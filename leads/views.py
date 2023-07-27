@@ -471,11 +471,25 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
 
+def toggle_saleslead_status(request, lead_id):
+    lead = get_object_or_404(Lead, id=lead_id)
+    lead.is_complete = not lead.is_complete  # Toggle the status
+    lead.save()
+
+    if lead.is_complete:
+        return redirect('complete_leads')
+    else:
+        return redirect('sales_lead')
+
+def complete_leads(request):
+    leads = Lead.objects.filter(is_complete=True)
+    return render(request, 'lead/complete_leads.html', {'leads': leads})
+
 
 
 @login_required
 def sales_lead(request):    
-    user_leads = Lead.objects.filter(assigned_to=request.user, is_active=True)
+    user_leads = Lead.objects.filter(assigned_to=request.user, is_active=True, is_complete=False)
     return render(request, 'lead/sales_lead.html', {'leads': user_leads})
 
     # users = CustomUserTypes.objects.all()
