@@ -133,7 +133,16 @@
           <!-- Add these buttons to your template -->
           <a href="{% url 'export_leads' 'csv' %}" class="btn mb-2 btn-outline-primary">Export Leads as CSV</a>
           <a href="{% url 'export_leads' 'xlsx' %}" class="btn mb-2 btn-outline-primary">Export Leads as XLSX</a>
-
+          <div>
+            <label for="assignToUser">Assign to:</label>
+            <select id="assignToUser">
+              <option value="">-- Select User --</option>
+                {% for user in users %}
+                <option value="{{ user.id }}">{{ user.username }}</option>
+                {% endfor %}
+            </select>
+            <button id="assignButton">Assign</button>
+          </div>
           <!-- Use button tags for the export buttons -->
           {% comment %} <button type="button" class="btn btn-danger mb-2" id="deleteLeadsBtn" data-toggle="modal"
             data-target="#deleteModal">
@@ -283,37 +292,27 @@
               <div class="card-body">
                 <!-- table -->
                 <div class="table-responsive">
-                  <table id="example" class="table table-bordered display nowrap" cellspacing="0" style="width:100%">
+                  <table id="exampleDT" class="table table-bordered display nowrap" cellspacing="0" style="width:100%">
                     <thead class="fw-bold">
                       <tr>
-                        <th>
-                          <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="all2">
-                            <label class="custom-control-label" for="all2"></label>
-                          </div>
-                        </th>
-                        <th>Date de Soumission</th>
-                        <th>Nom de la Campagne </th>
-                        <th>Avez-vous travaillé</th>
-                        <th>Nom & Prenom</th>
+                        <th><input type="checkbox" id="selectAllCheckbox"></th>
+                        <th data-toggle="select" data-lead-id="lead_id">Date de Soumission</th>
+                        <th data-toggle="select">Nom de la Campagne </th>
+                        <th data-toggle="select">Avez-vous travaillé</th>
+                        <th data-toggle="select">Nom & Prenom</th>
 
-                        <th>Téléphone</th>
-                        <th>Email</th>
-                        <th>Qualification</th>
-                        <th>Comments</th>
-                        <th>Assign to</th>
-                        <th>Action</th>
+                        <th data-toggle="select">Téléphone</th>
+                        <th data-toggle="select">Email</th>
+                        <th data-toggle="select">Qualification</th>
+                        <th data-toggle="select">Comments</th>
+                        <th data-toggle="select">Assign to</th>
+                        <th data-toggle="select">Action</th>
                       </tr>
                     </thead>
                     <tbody>
                       {% for lead in leads %}
                       <tr>
-                        <td>
-                          <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="{{ lead.id }}">
-                            <label class="custom-control-label" for="{{ lead.id }}"></label>
-                          </div>
-                        </td>
+                        <td data-lead-id="{{ lead.id }}"></td>
                         {% comment %} <td>{{ forloop.counter }}</td> {% endcomment %}
                         <td>{{ lead.date_de_soumission }}</td>
                         <td>{{ lead.nom_de_la_campagne }}</td>
@@ -487,7 +486,7 @@
                                         var response = JSON.parse(xhr.responseText);
                                         if (response.success) {
                                           // Perform any other desired actions
-                                          $('#editModal-' + leadId).modal('hide');
+                                          //$('#editModal-' + leadId).modal('hide');
                                           alert('Lead data updated successfully!');
                                           location.reload(); // Reload the page
                                         }
@@ -512,74 +511,7 @@
     </div> <!-- .row -->
   </div>
   </div> <!-- .container-fluid -->
-  <div class="modal fade modal-notif modal-slide" tabindex="-1" role="dialog" aria-labelledby="defaultModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog modal-sm" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="defaultModalLabel">Notifications</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="list-group list-group-flush my-n3">
-            <div class="list-group-item bg-transparent">
-              <div class="row align-items-center">
-                <div class="col-auto">
-                  <span class="fe fe-box fe-24"></span>
-                </div>
-                <div class="col">
-                  <small><strong>Package has uploaded successfully</strong></small>
-                  <div class="my-0 text-muted small">Package is zipped and uploaded</div>
-                  <small class="badge badge-pill badge-light text-muted">1m ago</small>
-                </div>
-              </div>
-            </div>
-            <div class="list-group-item bg-transparent">
-              <div class="row align-items-center">
-                <div class="col-auto">
-                  <span class="fe fe-download fe-24"></span>
-                </div>
-                <div class="col">
-                  <small><strong>Widgets are updated successfully</strong></small>
-                  <div class="my-0 text-muted small">Just create new layout Index, form, table</div>
-                  <small class="badge badge-pill badge-light text-muted">2m ago</small>
-                </div>
-              </div>
-            </div>
-            <div class="list-group-item bg-transparent">
-              <div class="row align-items-center">
-                <div class="col-auto">
-                  <span class="fe fe-inbox fe-24"></span>
-                </div>
-                <div class="col">
-                  <small><strong>Notifications have been sent</strong></small>
-                  <div class="my-0 text-muted small">Fusce dapibus, tellus ac cursus commodo</div>
-                  <small class="badge badge-pill badge-light text-muted">30m ago</small>
-                </div>
-              </div> <!-- / .row -->
-            </div>
-            <div class="list-group-item bg-transparent">
-              <div class="row align-items-center">
-                <div class="col-auto">
-                  <span class="fe fe-link fe-24"></span>
-                </div>
-                <div class="col">
-                  <small><strong>Link was attached to the menu</strong></small>
-                  <div class="my-0 text-muted small">New layout has been attached to the menu</div>
-                  <small class="badge badge-pill badge-light text-muted">1h ago</small>
-                </div>
-              </div>
-            </div> <!-- / .row -->
-          </div> <!-- / .list-group -->
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Clear All</button>
-        </div>
-      </div>
-    </div>
-  </div>
+  
   <div class="modal fade modal-shortcut modal-slide" tabindex="-1" role="dialog" aria-labelledby="defaultModalLabel"
     aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -644,10 +576,80 @@
 {% block javascript %}
 <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
 <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
-
+<link rel="stylesheet" href="https://cdn.datatables.net/select/1.3.1/css/select.bootstrap.css" />
+<script src="https://cdn.datatables.net/select/1.3.1/js/dataTables.select.min.js"></script>
 <script>
-  new DataTable('#example', {
-    responsive: true
+  $(document).ready(function() {
+    var table = $('#exampleDT').DataTable({
+      responsive: true,
+      columnDefs: [{
+        orderable: false,
+        className: 'select-checkbox',
+        targets: 0
+      }],
+      select: {
+        style: 'multi',
+        selector: 'td:first-child'
+      },
+      order: [[1, 'asc']]
+    });
+
+    // Handle "Select All" checkbox click
+    $('#selectAllCheckbox').on('click', function() {
+      var isChecked = this.checked;
+      table.rows({ page: 'current' }).every(function() {
+        this.select(isChecked);
+      });
+    });
+
+    $('#assignButton').on('click', function() {
+      var selectedLeads = [];
+      var assignToUser = $('#assignToUser').val();
+
+      table.rows({ selected: true }).every(function() {
+        var rowData = this.data();
+        var rowNode = this.node();
+        var leadId = rowNode.querySelector('td:first-child').getAttribute('data-lead-id');
+        var lead = {
+          id: leadId,
+          date_de_soumission: rowData[1],
+          nom_de_la_campagne: rowData[2],
+          avez_vous_travaille: rowData[3],
+          nom_prenom: rowData[4],
+          telephone: rowData[5],
+          email: rowData[6],
+          qualification: rowData[8] || null,
+          comments: rowData[9]  || null, 
+        };
+        selectedLeads.push(lead);
+      });
+
+      if (selectedLeads.length > 0 && assignToUser) {
+        $.ajax({
+          type: 'POST',
+          url: '{% url "assign_leads" %}', 
+          data: {
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            selected_leads: JSON.stringify(selectedLeads),
+            assign_to_user: assignToUser
+          },
+          success: function(response) {
+            location.reload(); 
+          },
+          error: function(error) {
+            alert('When assigning User, something got wrong')
+          }
+        });
+      } else {
+        alert('Please select leads and choose a user to assign.');
+      }
+    });
   });
 </script>
+
+
+
+
+
+  
 {% endblock %}
