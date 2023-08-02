@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<main role="main" class="main-content">
+  <div class="container-fluid">
+    <div class="container-fluid">
+      {% if messages %}
+      <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" role="alert">
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+          
+      <div class="row justify-content-center">
+        <div class="col-12">
+          <h2 class="mb-2 page-title">Form Mapping</h2>
+          
+
+
+        <!-- Small table -->
+        <div class="row my-2">
+          <div class="col-md-12">
+            <div class="card shadow">
+              <div class="card-body">
+                <form method="post" action="{% url 'import_leads' %}" id="mappingform">
+                  {% csrf_token %}
+                  {% for field, field_name in field_map.items %}
+                  <div class="form-group">
+                    <label for="{{ field }}">{{ field_name }}</label>
+                    <select  data-name="fields" id="{{ field }}" name="{{ field }}" class="form-control" required>
+                      <option value="">-- Select Field --</option>
+                      {% for header in headers %}
+                      <option value="{{ header }}">{{ header }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  {% endfor %}
+                  <div class="form-group">
+                    <label for="custom_fields">Custom Fields</label>
+                    <select data-name="fields" id="custom_fields" name="custom_fields" class="form-control" multiple>
+                      {% for header in additional_headers %}
+                      <option value="{{ header }}">{{ header }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <button type="submit" name="mapping" class="btn btn-primary">Submit Mapping</button>
+                  <button  name="skipp" id='skipp' class="btn btn-warning">Skip Excel</button>
+              </form>
+              </div>
+            </div> <!-- simple table -->
+          </div>
+        </div> <!-- end section -->
+      </div> <!-- .col-12 -->
+    </div> <!-- .row -->
+  </div>
+  </div> <!-- .container-fluid -->
+  
+  <div class="modal fade modal-shortcut modal-slide" tabindex="-1" role="dialog" aria-labelledby="defaultModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="defaultModalLabel">Shortcuts</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body px-5">
+          <div class="row align-items-center">
+            <div class="col-6 text-center">
+              <div class="squircle bg-success justify-content-center">
+                <i class="fe fe-cpu fe-32 align-self-center text-white"></i>
+              </div>
+              <p>Control area</p>
+            </div>
+            <div class="col-6 text-center">
+              <div class="squircle bg-primary justify-content-center">
+                <i class="fe fe-activity fe-32 align-self-center text-white"></i>
+              </div>
+              <p>Activity</p>
+            </div>
+          </div>
+          <div class="row align-items-center">
+            <div class="col-6 text-center">
+              <div class="squircle bg-primary justify-content-center">
+                <i class="fe fe-droplet fe-32 align-self-center text-white"></i>
+              </div>
+              <p>Droplet</p>
+            </div>
+            <div class="col-6 text-center">
+              <div class="squircle bg-primary justify-content-center">
+                <i class="fe fe-upload-cloud fe-32 align-self-center text-white"></i>
+              </div>
+              <p>Upload</p>
+            </div>
+          </div>
+          <div class="row align-items-center">
+            <div class="col-6 text-center">
+              <div class="squircle bg-primary justify-content-center">
+                <i class="fe fe-users fe-32 align-self-center text-white"></i>
+              </div>
+              <p>Users</p>
+            </div>
+            <div class="col-6 text-center">
+              <div class="squircle bg-primary justify-content-center">
+                <i class="fe fe-settings fe-32 align-self-center text-white"></i>
+              </div>
+              <p>Settings</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main> <!-- main -->
+
+{% endblock %}
+
+{% block javascript %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+
+<script>
+  $(document).ready(function() {
+    $.validator.addMethod("uniqueSelect", function(value, element) {
+      var fieldName = $(element).data('name');
+      var selectedValues = $('select[data-name="' + fieldName + '"]').map(function() {
+        return $(this).val();
+      }).get();
+
+      var duplicateValues = selectedValues.filter(function(val, index, self) {
+        return self.indexOf(val) !== index;
+      });
+
+      return duplicateValues.length === 0; // If there are no duplicate values, it's unique
+    }, "This field has already been selected by another dropdown.");
+
+  
+    $("#mappingform").validate({
+      rules: {
+        {% for field in field_map %}
+          "{{ field }}": {
+            required: true,
+            uniqueSelect: true
+          },
+        {% endfor %}
+      },
+      messages: {
+        {% for field in field_map %}
+          "{{ field }}": {
+            required: "Please select a field.",
+            uniqueSelect: "This field has already been selected by another dropdown."
+          },
+        {% endfor %}
+      },
+      errorPlacement: function(error, element) {
+        error.insertAfter(element);
+      },
+      submitHandler: function(form) {
+        form.submit();
+      }
+    });
+    $('select[data-name]').each(function() {
+      $(this).on('change', function() {
+        $(this).valid();
+      });
+    });
+
+    $('#skipp').click(function() {
+      window.location.href = '{% url "lead_dashboard" %}'; 
+    });
+  });
+  </script>
+  
+  
+{% endblock %}
