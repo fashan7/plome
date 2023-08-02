@@ -14,6 +14,10 @@ import os
 import importlib.util
 from .models import Lead, Notification
 import json
+import pandas as pd
+from dateutil.parser import parse as dateutil_parse
+import math
+import numpy as np
 
 
 
@@ -307,13 +311,8 @@ def deactivated_leads(request):
 
 
 
-        
 
-
-import pandas as pd
-
-
-def parse_date(date_string):
+def parse_date_with_format(date_string):
     try:
         # Try parsing with format '%m/%d/%Y %H:%M'
         date_obj = datetime.strptime(date_string, '%m/%d/%Y %H:%M')
@@ -332,75 +331,134 @@ def parse_date(date_string):
                 # If none of the formats match, return None
                 return None
         return None
+    
+
+def parse_date(date_string):
+    try:
+        # Try using dateutil.parser.parse to automatically parse the date
+        if isinstance(date_string, float):
+            return datetime.now()
+        
+        if date_string:
+            date_obj = dateutil_parse(date_string)
+            return date_obj
+        else:
+            return datetime.now()
+    except ValueError:
+        return None
+
+
+
+
+def date_handler(obj):
+    if hasattr(obj, 'isoformat'):
+        return obj.isoformat()
+    elif isinstance(obj, np.int64):
+        return int(obj)
+    else:
+        raise TypeError("Unserializable object {} of type {}".format(obj, type(obj)))
+
 
 def import_leads(request):
-    if request.method == 'POST' and request.FILES.get('file'):
-        file = request.FILES['file']
-        try:
-            if file.name.endswith('.csv'):
-                imported_leads = []
-                csv_reader = csv.reader(file.read().decode('utf-8').splitlines())
-                header = next(csv_reader)  # Get the header row
-                for row in csv_reader:
-                    date_de_soumission = parse_date(row[0].strip('“”'))
-                    
-                    if not date_de_soumission:
-                        continue  # Skip this row if date is not valid
-                        
-                    telephone = int(float(row[4])) if row[4].strip() else None
-                    lead = Lead(
-                        date_de_soumission=date_de_soumission,
-                        nom_de_la_campagne=row[1] or '',
-                        avez_vous_travaille=row[2] or '',
-                        nom_prenom=row[3] or '',
-                        telephone=telephone,
-                        email=row[5] or '',
-                        qualification=row[6] or '',
-                        comments=row[7] or ''
-                    )
-                    imported_leads.append(lead)
-                Lead.objects.bulk_create(imported_leads)
-            elif file.name.endswith('.xlsx'):
+    field_map = {
+        'date_de_soumission': 'date de soumission',
+        'nom_de_la_campagne': 'nom de la campagne',
+        'avez_vous_travaille': 'avez vous travaillé ?',
+        'nom_prenom': 'nom et prénom',
+        'telephone': 'téléphone',
+        'email': 'e-mail',
+        'qualification': 'qualification',
+        'comments': 'commentaires',
+    }
+    if request.method == 'POST':
+        if 'file' in request.FILES:
+            file = request.FILES['file']
+            try:
+                if file.name.endswith('.csv'):
+                    df = pd.read_csv(file)
+                elif file.name.endswith('.xls') or file.name.endswith('.xlsx'):
+                    df = pd.read_excel(file)
+                else:
+                    raise ValueError("Unsupported file format. Only CSV, XLS, and XLSX files are allowed.")
+
+                headers = [header.strip() for header in df.columns]
+                print(headers)
                 
-                # Convert XLSX to CSV
-                df = pd.read_excel(file)
-                csv_tempfile = 'tempfile.csv'
-                df.to_csv(csv_tempfile, index=False, encoding='utf-8', na_rep='')  # Set na_rep to an empty string
 
-                # Read the CSV and process it
-                with open(csv_tempfile, 'r', encoding='utf-8') as csv_file:
-                    imported_leads = []
-                    csv_reader = csv.reader(csv_file)
-                    header = next(csv_reader)  # Get the header row
-                    for row in csv_reader:
-                        date_de_soumission = parse_date(row[0].strip('“”'))
-                        if not date_de_soumission:
-                            continue  # Skip this row if date is not valid
-                        lead = Lead(
-                            date_de_soumission=date_de_soumission,
-                            nom_de_la_campagne=row[1] or '',
-                            avez_vous_travaille=row[2] or '',
-                            nom_prenom=row[3] or '',
-                            telephone=row[4] or '',
-                            email=row[5] or '',
-                            qualification=row[6] or '',
-                            comments=row[7] or ''
-                        )
-                        imported_leads.append(lead)
-                    Lead.objects.bulk_create(imported_leads)
+                additional_headers = [header for header in headers if header not in field_map]
+                df_dict = df.to_dict(orient='records')
+                json_data = json.dumps(df_dict, default=date_handler)
+                request.session['df'] = json_data #df.to_dict(orient='records', date_format='iso', date_unit='s', default_handler=str)
+                request.session['field_map'] = field_map
+               
+                context = {'headers': headers, 'field_map': field_map, 'additional_headers': additional_headers}
+                return render(request, 'lead/mapping_modal.html', context)
+            except Exception as e:
+                messages.error(request, f'Error reading file: {str(e)}')
+                return redirect('lead_dashboard')
 
-            else:
-                raise ValueError('Unsupported file format. Please provide a CSV or XLSX file.')
-# Delete duplicate leads
+        elif 'mapping' in request.POST:
+            mapping_data = {}  
+            custom_fields = {}
+
+
+            for field, field_name in field_map.items():
+                mapping_data[field] = request.POST.get(field, '')
+
+
+
+            for custom_field in request.POST.getlist('custom_fields'):
+                custom_fields[custom_field] = custom_field
+
+            mapping_data.update({'custom_fields':custom_fields})
+
+
+            df_records = request.session.get('df', [])
+            field_map = request.session.get('field_map', {})
+            # print(df_records)
+            # print(field_map)
+            # print(mapping_data)
+            
+            leads = []
+            for record in json.loads(df_records):
+                lead_data = {}
+                for header, field in mapping_data.items():
+                    if header == 'custom_fields':
+                        custom_f = {}
+                        for excess_key, excess_fields in field.items():
+                            excess_value = record.get(excess_key)
+                            excess_value_holder = None
+                            if (isinstance(excess_value, float) and math.isnan(excess_value)) or excess_value == 'NaT':
+                                excess_value_holder = ''
+                            else:
+                                excess_value_holder =  excess_value
+                            custom_f[excess_key] = excess_value_holder
+                        lead_data['custom_fields'] = custom_f
+                    else:
+                        value = record.get(field)
+                        value_holder = None
+                        if header == 'date_de_soumission':
+                            date_de_soumission = parse_date(value)
+                            value_holder = date_de_soumission
+                        elif isinstance(value, float) and math.isnan(value):
+                            value_holder = ' '
+                        elif isinstance(value, float) and not math.isnan(value):
+                            value_holder = int(value) if value.is_integer() else value
+                        else:
+                            value_holder = record[field]
+                        
+                        lead_data[header] = value_holder
+                leads.append(Lead(**lead_data))
+            Lead.objects.bulk_create(leads)
+            request.session.pop('df', None)
+            request.session.pop('field_map', None)
+
             duplicates_deleted = delete_duplicate_leads()
+            messages.success(request, f'{len(leads)} leads imported successfully. {duplicates_deleted} duplicate leads deleted.')
 
-            messages.success(request, f'{len(imported_leads)} leads imported successfully. {duplicates_deleted} duplicate leads deleted.')
-        except Exception as e:
-            messages.error(request, f'Error importing leads: {str(e)}')
-
+            return redirect('lead_dashboard')
+            
     return redirect('lead_dashboard')
-
-
 
 
 def delete_leads(request):

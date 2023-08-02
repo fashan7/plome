@@ -32,7 +32,7 @@ class Lead(models.Model):
 
 
     def __str__(self):
-        return self.nom_de_la_campagne
+        return str(self.nom_de_la_campagne)
     
 
 
