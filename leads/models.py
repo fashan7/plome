@@ -46,10 +46,12 @@ class Lead(models.Model):
     is_complete = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     custom_fields = models.JSONField(null=True, blank=True)
+
     assign_comment = models.JSONField(null=True, blank=True)
     history = models.ForeignKey(LeadHistory, on_delete=models.SET_NULL, null=True, blank=True, related_name='leads')
     _original_state = {}
    
+
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -124,11 +126,12 @@ class Notification(models.Model):
     message = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
-   
-    
+
+
     def __str__(self):
         return self.message
 # models.py
+
 
     custom_fields = models.JSONField(null=True, blank=True)
 # models.py
@@ -149,4 +152,5 @@ class FacebookLead(models.Model):
         return self.user
     
     
+
     

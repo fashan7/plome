@@ -12,7 +12,7 @@ from accounts.models import CustomUserTypes
 from pagesallocation.views import navigation_data
 import os
 import importlib.util
-from .models import Lead
+from .models import Lead, Notification
 import json
 
 
@@ -95,6 +95,7 @@ def lead_dashboard(request):
             lead.assigned_to = assigned_user
             lead.save()
             notification_message = f'You have been assigned a new lead: {lead.nom_de_la_campagne}'
+
             return HttpResponseRedirect(f'/filtered_lead_dashboard/{assigned_user.id}/?notification={notification_message}')
         else:
             return redirect('lead_dashboard')
@@ -103,6 +104,10 @@ def lead_dashboard(request):
         active_leads = Lead.objects.filter(is_active=True).order_by('-date_de_soumission')
         users = CustomUserTypes.objects.all()
         nav_data = navigation_data(request.user.id)
+
+        notification = Notification(user=assigned_user, lead=lead, message=notification_message)
+        notification.save()
+
 
         # Check if the user selected a specific user filter
         selected_user_id = request.GET.get('user_id')
@@ -237,6 +242,9 @@ def lead_edit(request, lead_id):
         lead.last_modified_by = request.user
 
         lead.save()
+
+        
+
         #Saving the notification for assign
         if assigned_user_id:
             notification_message = f'You have been assigned a new lead: {lead.nom_de_la_campagne}'
@@ -269,7 +277,41 @@ def lead_edit(request, lead_id):
 
 
 
+
 #can be used in future 
+
+def assign_leads(request):
+    if request.method == 'POST':
+        selected_leads = request.POST.get('selected_leads')
+        assign_to_user_id = request.POST.get('assign_to_user')
+        if not selected_leads or not assign_to_user_id:
+            return JsonResponse({'success': False, 'message': 'Invalid data.'}, status=400)
+
+        try:
+            assigned_user = CustomUserTypes.objects.get(id=assign_to_user_id)
+        except CustomUserTypes.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Assigned user not found.'}, status=400)
+
+        try:
+            selected_leads = json.loads(selected_leads)
+            for lead_data in selected_leads:
+                lead_id = lead_data.get('id')
+                
+                lead = Lead.objects.get(id=lead_id)
+                lead.assigned_to = assigned_user
+                lead.save()
+
+                notification_message = f'You have been assigned a new lead: {lead.nom_de_la_campagne}'
+                notification = Notification(user=assigned_user, lead=lead, message=notification_message)
+                notification.save()
+
+            return JsonResponse({'success': True, 'message': 'Leads assigned successfully.'}, status=200)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+    return JsonResponse({'success': False, 'message': 'Invalid request.'}, status=400)
+
+
 # def lead_edit(request, lead_id):
 #     lead = get_object_or_404(Lead, id=lead_id)
 
