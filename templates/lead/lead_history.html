@@ -1,0 +1,21 @@
+<h1>Lead History for {{ lead.nom_de_la_campagne }}</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Timestamp</th>
+            <th>User</th>
+            <th>Assigned To</th>
+            <th>Changes</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entry in history_entries %}
+        <tr>
+            <td>{{ entry.timestamp }}</td>
+            <td>{{ entry.user.username }}</td>
+            <td>{{ entry.assigned_to.username }}</td>
+            <td>{{ entry.changes }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

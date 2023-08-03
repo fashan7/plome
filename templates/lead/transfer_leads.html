@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Transferred Leads</title>
+    <!-- Add your CSS stylesheets and other header content here -->
+</head>
+<body>
+    <h1>Transferred Leads</h1>
+    {% if leads %}
+        <ul>
+            {% for lead in leads %}
+                <li>
+                    <strong>Lead ID:</strong> {{ lead.id }}<br>
+                    <strong>Date de soumission:</strong> {{ lead.date_de_soumission }}<br>
+                    <strong>Nom de la campagne:</strong> {{ lead.nom_de_la_campagne }}<br>
+                    <strong>Avez-vous travaillé:</strong> {{ lead.avez_vous_travaille }}<br>
+                    <strong>Nom Prénom:</strong> {{ lead.nom_prenom }}<br>
+                    <strong>Téléphone:</strong> {{ lead.telephone }}<br>
+                    <strong>Email:</strong> {{ lead.email }}<br>
+                    <strong>Qualification:</strong> {{ lead.get_qualification_display }}<br>
+                    <strong>Comments:</strong> {{ lead.comments }}<br>
+                    <!-- Add other fields here based on your Lead model -->
+                    <!-- You can access the user mentions from assign_comment field as JSON data -->
+                    <strong>Assigned To:</strong> 
+                    {% if lead.assign_comment %}
+                        {% for mention in lead.assign_comment %}
+                            @{{ mention.username }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        Unassigned
+                    {% endif %}
+                    <br>
+                    <!-- Add a button to view lead details -->
+                    <button class="view_lead_button" data-lead-id="{{ lead.id }}">View Details</button>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No transferred leads found.</p>
+    {% endif %}
+
+    <!-- Add your scripts and other footer content here -->
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Handle clicking on the "View Details" button
+        $(document).on("click", ".view_lead_button", function () {
+            const leadId = $(this).attr('data-lead-id');
+            // Redirect to the lead details page for the selected lead
+            window.location.href = `/lead/${leadId}/`; // Replace this URL with your lead details page URL
+        });
+    </script>
+</body>
+</html>
