@@ -1,6 +1,14 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
+<style>
+  .mention-textarea {
+    font-family: 'Arial';
+    color: rgb(20, 95, 245);
+    font-weight: bold;
+  }
+</style>
+
 <main role="main" class="main-content">
   <div class="container-fluid">
     <div class="container-fluid">
@@ -70,61 +78,51 @@
         form.addEventListener('submit', handleFormSubmit);
       </script>
       <script>
-      var customFieldCounter = 0; 
+        var customFieldCounter = 0;
 
-      function addCustomField() {
-        var container = document.getElementById('custom-fields-container');
+        function addCustomField() {
+          var container = document.getElementById('custom-fields-container');
+          var customFieldDiv = document.createElement('div');
+          customFieldDiv.className = 'form-row';
+          var fieldNameDiv = document.createElement('div');
+          fieldNameDiv.className = 'col-md-5 mb-3';
+          var fieldNameInput = document.createElement('input');
+          fieldNameInput.type = 'text';
+          fieldNameInput.name = 'custom_field_name[]';
+          fieldNameInput.className = 'form-control';
+          fieldNameInput.placeholder = 'Custom Field Name';
+          var fieldValueDiv = document.createElement('div');
+          fieldValueDiv.className = 'col-md-5 mb-3';
+          var fieldValueInput = document.createElement('input');
+          fieldValueInput.type = 'text';
+          fieldValueInput.name = 'custom_field_value[]';
+          fieldValueInput.className = 'form-control';
+          fieldValueInput.placeholder = 'Custom Field Value';
+          var deleteButtonDiv = document.createElement('div');
+          deleteButtonDiv.className = 'col-md-2 text-right  mb-3';
+          var deleteButton = document.createElement('button');
+          deleteButton.type = 'button';
+          deleteButton.className = 'btn btn-danger';
+          deleteButton.textContent = 'Delete';
+          deleteButton.onclick = function() {
+            container.removeChild(customFieldDiv);
+          };
+          fieldNameDiv.appendChild(fieldNameInput);
+          fieldValueDiv.appendChild(fieldValueInput);
+          deleteButtonDiv.appendChild(deleteButton);
+          customFieldDiv.appendChild(fieldNameDiv);
+          customFieldDiv.appendChild(fieldValueDiv);
+          customFieldDiv.appendChild(deleteButtonDiv);
+          container.appendChild(customFieldDiv);
+          // Increment the counter for the next custom fild
+          customFieldCounter++;
+        }
+      </script>
 
-        var customFieldDiv = document.createElement('div');
-        customFieldDiv.className = 'form-row'; 
-
-        var fieldNameDiv = document.createElement('div');
-        fieldNameDiv.className = 'col-md-5 mb-3'; 
-
-        var fieldNameInput = document.createElement('input');
-        fieldNameInput.type = 'text';
-        fieldNameInput.name = 'custom_field_name[]'; 
-        fieldNameInput.className = 'form-control'; 
-        fieldNameInput.placeholder = 'Custom Field Name';
-
-        var fieldValueDiv = document.createElement('div');
-        fieldValueDiv.className = 'col-md-5 mb-3'; 
-
-        var fieldValueInput = document.createElement('input');
-        fieldValueInput.type = 'text';
-        fieldValueInput.name = 'custom_field_value[]'; 
-        fieldValueInput.className = 'form-control'; 
-        fieldValueInput.placeholder = 'Custom Field Value';
-
-        var deleteButtonDiv = document.createElement('div');
-        deleteButtonDiv.className = 'col-md-2 text-right  mb-3'; 
-
-        var deleteButton = document.createElement('button');
-        deleteButton.type = 'button';
-        deleteButton.className = 'btn btn-danger';
-        deleteButton.textContent = 'Delete';
-        deleteButton.onclick = function () {
-          container.removeChild(customFieldDiv); 
-        };
-
-        fieldNameDiv.appendChild(fieldNameInput);
-        fieldValueDiv.appendChild(fieldValueInput);
-        deleteButtonDiv.appendChild(deleteButton);
-
-        customFieldDiv.appendChild(fieldNameDiv);
-        customFieldDiv.appendChild(fieldValueDiv);
-        customFieldDiv.appendChild(deleteButtonDiv);
-
-        container.appendChild(customFieldDiv);
-
-        // Increment the counter for the next custom fild
-        customFieldCounter++;
-      }
-    </script>
-          
       <div class="row justify-content-center">
         <div class="col-12">
           <h2 class="mb-2 page-title">Leads table</h2>
+
           <button type="button" class="btn mb-2 btn-outline-primary" data-toggle="modal" data-target="#defaultModal">
             Add
             lead </button>
@@ -133,13 +131,54 @@
           <!-- Add these buttons to your template -->
           <a href="{% url 'export_leads' 'csv' %}" class="btn mb-2 btn-outline-primary">Export Leads as CSV</a>
           <a href="{% url 'export_leads' 'xlsx' %}" class="btn mb-2 btn-outline-primary">Export Leads as XLSX</a>
+
+          <form method="GET" action="{% url 'lead_dashboard' %}">
+            <!-- filter for users  -->
+            <label for="user_filter">Filter by User:</label>
+            <select name="user_id" id="user_filter">
+              <option value="">All Users</option>
+              {% for user in users %}
+              <option value="{{ user.id }}" {% if request.GET.user_id == user.id|stringformat:"s" %}selected{% endif %}>
+                {{ user.username }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit">Apply Filter</button>
+
+            <!-- filter for qualificaiton -->
+            <label for="qualification_filter">Filter by Qualification:</label>
+            <select name="qualification" id="qualification_filter">
+              <option value="">--Select Qualification-- </option>
+              <option value="nrp1">NRP1</option>
+              <option value="nrp2">NRP2</option>
+              <option value="nrp3">NRP3</option>
+              <option value="en_cours">En cours</option>
+              <option value="rappel">Rappel</option>
+              <option value="faux_numero">Faux numéro</option>
+              <option value="pas_de_budget">Pas de budget</option> 
+              <option value="pas_interesse">Pas intéressé</option>
+              <option value="ne_pas_rappele">Ne pas rappeler</option>
+              <option value="signe_pole_emploi">Signé Pôle Emploi</option>
+              <option value="signe_cpf">Signé CPF</option>
+            </select>
+
+            <button type="submit">Apply Filters</button>
+          </form>
+          </form>
+
+
           <div>
             <label for="assignToUser">Assign to:</label>
             <select id="assignToUser">
               <option value="">-- Select User --</option>
+
+              {% for user in users %}
+              <option value="{{ user.id }}">{{ user.username }}</option>
+              {% endfor %}
+
                 {% for user in users %}
                 <option value="{{ user.id }}">{{ user.username }}</option>
                 {% endfor %}
+
             </select>
             <button id="assignButton">Assign</button>
           </div>
@@ -206,6 +245,7 @@
                               {% endcomment %}
                               <select name="qualification" class="form-control" id="qualification" name="qualification"
                                 required>
+                                <option value="">--Select Qualification-- </option>
                                 <option value="nrp1">NRP1</option>
                                 <option value="nrp2">NRP2</option>
                                 <option value="nrp3">NRP3</option>
@@ -238,18 +278,19 @@
                               {% endfor %}
                             </select>
                           </div>
-                          
+
                           <div class="col-md-12 mb-3">
-                            <button type="button" class="btn btn-secondary" onclick="addCustomField()">Add Custom Field</button>
+                            <button type="button" class="btn btn-secondary" onclick="addCustomField()">Add Custom
+                              Field</button>
                           </div>
-                          
-                          <div  class="col-md-12 mb-3" id="custom-fields-container">
+
+                          <div class="col-md-12 mb-3" id="custom-fields-container">
                             <!-- Custom Fields will be dynamically added here -->
                           </div>
                           <div class="col-md-6 mb-3">
                             <button class="btn btn-primary" type="submit">Submit</button>
                           </div>
-                          
+
                       </form>
                     </div> <!-- /.card-body -->
                   </div>
@@ -301,12 +342,24 @@
                         <th data-toggle="select">Avez-vous travaillé</th>
                         <th data-toggle="select">Nom & Prenom</th>
 
+                        
+                        <th data-toggle="select">Téléphone</th>
+                        <th data-toggle="select">Email</th>
+                        <th data-toggle="select">Qualification</th>
+                        <th data-toggle="select">Comments</th>
+                        <th data-toggle="select">Assign to</th>
+                        <th data-toggle="select">Transfer</th>
+                        <th data-toggle="select">Action</th>
+
+
+
                         <th data-toggle="select">Téléphone</th>
                         <th data-toggle="select">Email</th>
                         <th data-toggle="select">Qualification</th>
                         <th data-toggle="select">Comments</th>
                         <th data-toggle="select">Assign to</th>
                         <th data-toggle="select">Action</th>
+
                       </tr>
                     </thead>
                     <tbody>
@@ -324,6 +377,14 @@
                         <td>{{ lead.qualification }}</td>
                         <td>{{ lead.comments }}</td>
                         <td>{{ lead.assigned_to }}</td>
+                        
+                       <td>
+                        <div id="user_mentions_list_{{ lead.id }}" class="user-mentions-list"></div>
+                          <textarea id="assign_comment_field_{{ lead.id }}" name="assign_comment" class="mention-textarea">{{ lead.assign_comment }}</textarea>
+                          <button class="transfer_button" data-lead-id="{{ lead.id }}" data-user-mentions="{{ lead.get_user_mentions_json }}">Transfer</button>
+                          
+                      </td>
+                      
                         <td>
                           {% comment %} <button class="btn btn-sm dropdown-toggle more-horizontal" type="button"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -409,7 +470,10 @@
                                       </div>
                                       <div class="form-group col-md-6">
                                         <label for="qualification">Qualification</label>
+
                                         <select name="qualification" id="qualification" class="form-control" required>
+                                          <option value="" {% if not lead.select_qualification %}selected{% endif %}>
+                                            --Select Qualification--</option>
                                           <option value="nrp1" {% if lead.qualification == 'nrp1' %} selected
                                             {% endif %}>
                                             NRP1
@@ -511,7 +575,9 @@
     </div> <!-- .row -->
   </div>
   </div> <!-- .container-fluid -->
+
   
+
   <div class="modal fade modal-shortcut modal-slide" tabindex="-1" role="dialog" aria-labelledby="defaultModalLabel"
     aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -572,12 +638,124 @@
 
 </main> <!-- main -->
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+
+$(document).ready(function () {
+
+  /*test */
+  $(document).ready(function () {
+    // Function to get all users from the server
+    function getAllUsers() {
+        $.ajax({
+            url:  '{% url "get_all_users" %}',
+            method: 'GET',
+            success: function (users) {
+                // Store the users in a global variable
+                window.allUsers = users;
+            },
+            error: function (error) {
+                console.error("Error fetching users:", error);
+            }
+        });
+    }
+
+    // Get the list of all users on page load
+    getAllUsers();
+
+    // Handle "@" typing and show the user mentions list
+    $(document).on("input", ".mention-textarea", function () {
+        const leadId = $(this).attr('id').split('_').pop();
+        const value = $(this).val();
+        const userMentionsList = $(`#user_mentions_list_${leadId}`);
+        if (value.endsWith('@') && window.allUsers) {
+            userMentionsList.empty();
+            for (const user of window.allUsers) {
+                const mentionItem = $("<div>").text(`@${user.username}`).attr('data-user-id', user.id);
+                userMentionsList.append(mentionItem);
+            }
+            userMentionsList.show();
+        } else {
+            userMentionsList.hide();
+        }
+    });
+
+    // Handle click on a mention item and insert the selected username in the textarea
+    
+    $(document).on("click", ".user-mentions-list div", function () {
+        const username = $(this).text().slice(1); // Exclure le préfixe "@" en enlevant le premier caractère
+        const leadId = $(this).closest("td").find(".mention-textarea").attr('id').split('_').pop();
+        const textarea = $(`#assign_comment_field_${leadId}`);
+        const currentValue = textarea.val();
+        const mentionStartIndex = currentValue.lastIndexOf('@');
+        const updatedValue = currentValue.substring(0, mentionStartIndex + 1) + username + ' '; // Ajouter un espace après le nom d'utilisateur
+        textarea.val(updatedValue);
+        $(`#user_mentions_list_${leadId}`).hide();
+
+        // Move the cursor position after the inserted text and the added space
+        const cursorPos = mentionStartIndex + username.length + 2; // +2: length of "@" and the added space
+        textarea[0].setSelectionRange(cursorPos, cursorPos);
+        textarea[0].focus(); // Optional: Move the cursor to the end of the inserted text
+    });
+    
+    
+
+    // Handle keyboard navigation and selection
+    $(document).on("keydown", ".mention-textarea", function (event) {
+        const userMentionsList = $(this).closest("td").find(".user-mentions-list");
+        if (userMentionsList.is(":visible")) {
+            const mentionItems = userMentionsList.find("div");
+            const currentSelected = userMentionsList.find(".selected");
+            if (event.key === "ArrowUp" && currentSelected.prev().length) {
+                currentSelected.removeClass("selected");
+                currentSelected.prev().addClass("selected");
+            } else if (event.key === "ArrowDown" && currentSelected.next().length) {
+                currentSelected.removeClass("selected");
+                currentSelected.next().addClass("selected");
+            } else if (event.key === "Enter" && currentSelected.length) {
+                const username = currentSelected.text();
+                const leadId = $(this).attr('id').split('_').pop();
+                const textarea = $(`#assign_comment_field_${leadId}`);
+                const currentValue = textarea.val();
+                const mentionStartIndex = currentValue.lastIndexOf('@');
+                const updatedValue = currentValue.substring(0, mentionStartIndex) + username + " " + currentValue.substring(mentionStartIndex);
+                textarea.val(updatedValue);
+                userMentionsList.hide();
+            }
+        }
+    });
+});
+
+  /*test */
+
+    // Handle clicking outside the user mentions list to close it
+    $(document).on('click', function (event) {
+        const target = $(event.target);
+        if (!target.hasClass('mention-textarea') && !target.hasClass('mention-item')) {
+            $('.user-mentions-list').hide();
+        }
+    });
+
+    // Handle clicking on the "Transfer" button
+    $(document).on("click", ".transfer_button", function () {
+        const leadId = $(this).attr('data-lead-id');
+        const user_mentions = JSON.parse($(`#assign_comment_field_${leadId}`).val());
+        // ... (your AJAX request to transfer the lead, similar to the previous implementation)
+    });
+
+});
+</script>
+
 {% endblock %}
 {% block javascript %}
 <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
 <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/select/1.3.1/css/select.bootstrap.css" />
 <script src="https://cdn.datatables.net/select/1.3.1/js/dataTables.select.min.js"></script>
+
+
+
+
 <script>
   $(document).ready(function() {
     var table = $('#exampleDT').DataTable({
@@ -591,6 +769,26 @@
         style: 'multi',
         selector: 'td:first-child'
       },
+
+      order: [
+        [1, 'asc']
+      ]
+    });
+    // Handle "Select All" checkbox click
+    $('#selectAllCheckbox').on('click', function() {
+      var isChecked = this.checked;
+      table.rows({
+        page: 'current'
+      }).every(function() {
+        this.select(isChecked);
+      });
+    });
+    $('#assignButton').on('click', function() {
+      var selectedLeads = [];
+      var assignToUser = $('#assignToUser').val();
+      table.rows({
+        selected: true
+
       order: [[1, 'asc']]
     });
 
@@ -607,6 +805,7 @@
       var assignToUser = $('#assignToUser').val();
 
       table.rows({ selected: true }).every(function() {
+
         var rowData = this.data();
         var rowNode = this.node();
         var leadId = rowNode.querySelector('td:first-child').getAttribute('data-lead-id');
@@ -619,6 +818,16 @@
           telephone: rowData[5],
           email: rowData[6],
           qualification: rowData[8] || null,
+
+          comments: rowData[9] || null,
+        };
+        selectedLeads.push(lead);
+      });
+      if (selectedLeads.length > 0 && assignToUser) {
+        $.ajax({
+          type: 'POST',
+          url: '{% url "assign_leads" %}',
+
           comments: rowData[9]  || null, 
         };
         selectedLeads.push(lead);
@@ -628,13 +837,18 @@
         $.ajax({
           type: 'POST',
           url: '{% url "assign_leads" %}', 
+
           data: {
             csrfmiddlewaretoken: '{{ csrf_token }}',
             selected_leads: JSON.stringify(selectedLeads),
             assign_to_user: assignToUser
           },
           success: function(response) {
+
+            location.reload();
+
             location.reload(); 
+
           },
           error: function(error) {
             alert('When assigning User, something got wrong')
@@ -651,5 +865,8 @@
 
 
 
+
+
   
+
 {% endblock %}
