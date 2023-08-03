@@ -52,12 +52,15 @@ class Lead(models.Model):
     _original_state = {}
    
 
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Store the original state of the instance
         self._original_state = self.__dict__.copy()
         
+=======
+    def __str__(self):
+        return str(self.nom_de_la_campagne)
+
     
         
     def add_user_mention(self, user_id, username):
