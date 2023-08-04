@@ -142,6 +142,13 @@ def lead_dashboard(request):
 
 
 from .models import *
+
+def lead_history_view(request, lead_id):
+    lead = get_object_or_404(Lead, id=lead_id)
+    lead_history = LeadHistory.objects.filter(lead=lead).order_by('-timestamp')
+    return render(request, 'lead/leads_dashboard.html', {'lead': lead, 'lead_history': lead_history})
+
+
 def lead_list(request):
     leads = Lead.objects.all()
     return render(request, 'lead/lead_list.html', {'leads': leads})
@@ -998,6 +1005,7 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 
 def transfer_leads(request):
+    lead = get_object_or_404(Lead, id=lead_id)
     if request.method == 'POST':
         data = json.loads(request.body)
         lead_id = data.get('lead_id')
