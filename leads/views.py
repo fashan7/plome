@@ -109,8 +109,13 @@ def lead_dashboard(request):
         users = CustomUserTypes.objects.all()
         nav_data = navigation_data(request.user.id)
 
-        notification = Notification(user=assigned_user, lead=lead, message=notification_message)
-        notification.save()
+
+        assigned_to_id = request.POST.get('assigned_to')
+        if assigned_to_id:
+            assigned_user = CustomUserTypes.objects.get(id=assigned_to_id)
+
+            notification = Notification(user=assigned_user, lead=lead, message=notification_message)
+            notification.save()
 
 
         # Check if the user selected a specific user filter
@@ -500,7 +505,7 @@ def import_leads(request):
                     raise ValueError("Unsupported file format. Only CSV, XLS, and XLSX files are allowed.")
 
                 headers = [header.strip() for header in df.columns]
-                print(headers)
+                # print(headers)
                 
 
                 additional_headers = [header for header in headers if header not in field_map]
@@ -514,24 +519,7 @@ def import_leads(request):
             except Exception as e:
                 messages.error(request, f'Error reading file: {str(e)}')
                 return redirect('lead_dashboard')
-
-        elif 'mapping' in request.POST:
-            mapping_data = {}  
-            custom_fields = {}
-
-
-                additional_headers = [header for header in headers if header not in field_map]
-                df_dict = df.to_dict(orient='records')
-                json_data = json.dumps(df_dict, default=date_handler)
-                request.session['df'] = json_data #df.to_dict(orient='records', date_format='iso', date_unit='s', default_handler=str)
-                request.session['field_map'] = field_map
-               
-                context = {'headers': headers, 'field_map': field_map, 'additional_headers': additional_headers}
-                return render(request, 'lead/mapping_modal.html', context)
-            except Exception as e:
-                messages.error(request, f'Error reading file: {str(e)}')
-                return redirect('lead_dashboard')
-
+            
         elif 'mapping' in request.POST:
             mapping_data = {}  
             custom_fields = {}
@@ -541,63 +529,8 @@ def import_leads(request):
                 mapping_data[field] = request.POST.get(field, '')
 
 
-
             for field, field_name in field_map.items():
                 mapping_data[field] = request.POST.get(field, '')
-
-            for custom_field in request.POST.getlist('custom_fields'):
-                custom_fields[custom_field] = custom_field
-
-            mapping_data.update({'custom_fields':custom_fields})
-
-
-            df_records = request.session.get('df', [])
-            field_map = request.session.get('field_map', {})
-            # print(df_records)
-            # print(field_map)
-            # print(mapping_data)
-            
-            leads = []
-            for record in json.loads(df_records):
-                lead_data = {}
-                for header, field in mapping_data.items():
-                    if header == 'custom_fields':
-                        custom_f = {}
-                        for excess_key, excess_fields in field.items():
-                            excess_value = record.get(excess_key)
-                            excess_value_holder = None
-                            if (isinstance(excess_value, float) and math.isnan(excess_value)) or excess_value == 'NaT':
-                                excess_value_holder = ''
-                            else:
-                                excess_value_holder =  excess_value
-                            custom_f[excess_key] = excess_value_holder
-                        lead_data['custom_fields'] = custom_f
-                    else:
-                        value = record.get(field)
-                        value_holder = None
-                        if header == 'date_de_soumission':
-                            date_de_soumission = parse_date(value)
-                            value_holder = date_de_soumission
-                        elif isinstance(value, float) and math.isnan(value):
-                            value_holder = ' '
-                        elif isinstance(value, float) and not math.isnan(value):
-                            value_holder = int(value) if value.is_integer() else value
-                        else:
-                            value_holder = record[field]
-                        
-                        lead_data[header] = value_holder
-                leads.append(Lead(**lead_data))
-            Lead.objects.bulk_create(leads)
-            request.session.pop('df', None)
-            request.session.pop('field_map', None)
-
-            duplicates_deleted = delete_duplicate_leads()
-            messages.success(request, f'{len(leads)} leads imported successfully. {duplicates_deleted} duplicate leads deleted.')
-
-            return redirect('lead_dashboard')
-            
-    return redirect('lead_dashboard')
-
 
             for custom_field in request.POST.getlist('custom_fields'):
                 custom_fields[custom_field] = custom_field
@@ -1010,7 +943,7 @@ import pandas as pd
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from django.shortcuts import render
-from .forms import GoogleSheetForm
+# from .forms import GoogleSheetForm
 from .models import FacebookLead
 
 def gsheet(request):

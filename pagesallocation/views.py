@@ -61,10 +61,11 @@ def get_sub_sections(user_id, section_id):
 def navigation_data(user_id):
     response_section = group_sections(user_id)
     nav_bar = dict()
-    for data in response_section:
-        temp = list(data.values())
-        response_sub_section = get_sub_sections(user_id, temp[0])
-        nav_bar.update({temp[0]: response_sub_section})
+    if response_section:
+        for data in response_section:
+            temp = list(data.values())
+            response_sub_section = get_sub_sections(user_id, temp[0])
+            nav_bar.update({temp[0]: response_sub_section})
     return nav_bar
 
 def get_primary_section():

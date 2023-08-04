@@ -10,6 +10,3 @@ admin.site.register(LogEntry)
 admin.site.register(FacebookLead)
 admin.site.register(LeadHistory)
 
-admin.site.register(LogEntry)
-admin.site.register(Notification)
-
