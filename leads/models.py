@@ -12,7 +12,8 @@ class LeadHistory(models.Model):
     lead = models.ForeignKey('Lead', on_delete=models.CASCADE, related_name='lead_history')
     timestamp = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='assigned_leads')
+    previous_assigned_to = models.ForeignKey(CustomUserTypes, on_delete=models.SET_NULL, null=True, blank=True, related_name='previous_assigned_leads')
+    current_assigned_to = models.ForeignKey(CustomUserTypes, on_delete=models.SET_NULL, null=True, blank=True, related_name='current_assigned_leads')
     changes = models.TextField()
 
     class Meta:
@@ -46,6 +47,9 @@ class Lead(models.Model):
     is_complete = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     custom_fields = models.JSONField(null=True, blank=True)
+
+    transfer_to = models.ForeignKey(CustomUserTypes, on_delete=models.SET_NULL, null=True, blank=True, related_name='transferred_leads')
+    is_transferred = models.BooleanField(default=False)
 
     assign_comment = models.JSONField(null=True, blank=True)
     history = models.ForeignKey(LeadHistory, on_delete=models.SET_NULL, null=True, blank=True, related_name='leads')
@@ -99,7 +103,7 @@ from django.dispatch import receiver
 @receiver(post_save, sender=Lead)
 def create_lead_history(sender, instance, created, **kwargs):
     if created:
-        LeadHistory.objects.create(lead=instance, user=instance.last_modified_by, assigned_to=instance.assigned_to, changes="Lead created.")
+        LeadHistory.objects.create(lead=instance, user=instance.last_modified_by, previous_assigned_to=None, current_assigned_to=instance.assigned_to, changes="Lead created.")
     else:
         changes = []
         for field, value in instance._original_state.items():
@@ -114,6 +118,7 @@ def create_lead_history(sender, instance, created, **kwargs):
                     old_assigned_to_name = User.objects.get(id=value).get_username() if value else "Unassigned"
                     new_assigned_to_name = User.objects.get(id=new_value).get_username() if new_value else "Unassigned"
                     changes.append(f"- {instance.last_modified_by.username} changed assigned user from '{old_assigned_to_name}' to '{new_assigned_to_name}'.")
+                    LeadHistory.objects.create(lead=instance, user=instance.last_modified_by, previous_assigned_to=value, current_assigned_to=new_value, changes="Lead transferred.")
                 else:
                     changes.append(f"- {field}: {value} -> {new_value}")
         # Check if any changes were made
@@ -132,10 +137,7 @@ class Notification(models.Model):
 
     def __str__(self):
         return self.message
-# models.py
-
-
-    custom_fields = models.JSONField(null=True, blank=True)
+    
 # models.py
 
 class FacebookLead(models.Model):
