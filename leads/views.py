@@ -109,6 +109,11 @@ def lead_dashboard(request):
         users = CustomUserTypes.objects.all()
         nav_data = navigation_data(request.user.id)
 
+        
+        assigned_to_id = request.POST.get('assigned_to')
+        assigned_user = CustomUserTypes.objects.get(id=assigned_to_id)
+            
+
         notification = Notification(user=assigned_user, lead=lead, message=notification_message)
         notification.save()
 
@@ -938,7 +943,7 @@ import pandas as pd
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from django.shortcuts import render
-from .forms import GoogleSheetForm
+# from .forms import GoogleSheetForm
 from .models import FacebookLead
 
 def gsheet(request):
