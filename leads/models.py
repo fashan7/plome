@@ -2,9 +2,7 @@ from django.db import models
 from django.forms import JSONField
 from accounts.models import User
 from accounts.models import CustomUserTypes
-from django.contrib.auth import get_user_model
 from django.dispatch import receiver
-import json
 from django.db.models.signals import post_save
 
 
