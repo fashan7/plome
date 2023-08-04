@@ -56,8 +56,7 @@ class Lead(models.Model):
         super().__init__(*args, **kwargs)
         # Store the original state of the instance
         self._original_state = self.__dict__.copy()
-        
-=======
+     
     def __str__(self):
         return str(self.nom_de_la_campagne)
 
