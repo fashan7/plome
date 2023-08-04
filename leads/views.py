@@ -109,13 +109,13 @@ def lead_dashboard(request):
         users = CustomUserTypes.objects.all()
         nav_data = navigation_data(request.user.id)
 
-        
-        assigned_to_id = request.POST.get('assigned_to')
-        assigned_user = CustomUserTypes.objects.get(id=assigned_to_id)
-            
 
-        notification = Notification(user=assigned_user, lead=lead, message=notification_message)
-        notification.save()
+        assigned_to_id = request.POST.get('assigned_to')
+        if assigned_to_id:
+            assigned_user = CustomUserTypes.objects.get(id=assigned_to_id)
+
+            notification = Notification(user=assigned_user, lead=lead, message=notification_message)
+            notification.save()
 
 
         # Check if the user selected a specific user filter
