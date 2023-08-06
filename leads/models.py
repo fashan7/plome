@@ -2,9 +2,7 @@ from django.db import models
 from django.forms import JSONField
 from accounts.models import User
 from accounts.models import CustomUserTypes
-from django.contrib.auth import get_user_model
 from django.dispatch import receiver
-import json
 from django.db.models.signals import post_save
 
 
@@ -47,7 +45,7 @@ class Lead(models.Model):
     is_complete = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     custom_fields = models.JSONField(null=True, blank=True)
-
+    current_transfer = models.ForeignKey(CustomUserTypes, on_delete=models.SET_NULL, null=True, blank=True, related_name='current_transferred_leads')
     transfer_to = models.ForeignKey(CustomUserTypes, on_delete=models.SET_NULL, null=True, blank=True, related_name='transferred_leads')
     is_transferred = models.BooleanField(default=False)
 
@@ -103,7 +101,7 @@ from django.dispatch import receiver
 @receiver(post_save, sender=Lead)
 def create_lead_history(sender, instance, created, **kwargs):
     if created:
-        LeadHistory.objects.create(lead=instance, user=instance.last_modified_by, previous_assigned_to=None, current_assigned_to=instance.assigned_to, changes="Lead created.")
+        LeadHistory.objects.create(lead=instance, user=instance.last_modified_by, previous_assigned_to=instance.current_transfer, current_assigned_to=instance.transfer_to, changes="Lead created.")
     else:
         changes = []
         for field, value in instance._original_state.items():
@@ -115,8 +113,8 @@ def create_lead_history(sender, instance, created, **kwargs):
                     new_qualification = dict(instance.QUALIFICATION_CHOICES).get(new_value, new_value)
                     changes.append(f"- {instance.last_modified_by.username} ---- changed qualification from ---- '{old_qualification}' --to '{new_qualification}'.")
                 elif field == 'assigned_to':
-                    old_assigned_to_name = User.objects.get(id=value).get_username() if value else "Unassigned"
-                    new_assigned_to_name = User.objects.get(id=new_value).get_username() if new_value else "Unassigned"
+                    old_assigned_to_name = CustomUserTypes.objects.get(id=value).get_username() if value else "Unassigned"
+                    new_assigned_to_name = CustomUserTypes.objects.get(id=new_value).get_username() if new_value else "Unassigned"
                     changes.append(f"- {instance.last_modified_by.username} changed assigned user from '{old_assigned_to_name}' to '{new_assigned_to_name}'.")
                     LeadHistory.objects.create(lead=instance, user=instance.last_modified_by, previous_assigned_to=value, current_assigned_to=new_value, changes="Lead transferred.")
                 else:
@@ -125,7 +123,7 @@ def create_lead_history(sender, instance, created, **kwargs):
         if changes:
             # Join all the messages into a single string
             changes_str = "\n".join(changes)
-            LeadHistory.objects.create(lead=instance, user=instance.last_modified_by, assigned_to=instance.assigned_to, changes=changes_str)
+            LeadHistory.objects.create(lead=instance, user=instance.last_modified_by, previous_assigned_to=instance.current_transfer, current_assigned_to=instance.transfer_to, changes=changes_str)
       
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
