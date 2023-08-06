@@ -389,6 +389,7 @@
                         <td>{{ lead.assigned_to }}</td>
                         
                        <td>
+                        Mentioned to {{ lead.transfer_to }}
                         <div id="user_mentions_list_{{ lead.id }}" class="user-mentions-list"></div>
                           <textarea id="assign_comment_field_{{ lead.id }}" name="assign_comment" class="mention-textarea">{{ lead.assign_comment }}</textarea>
                           <button class="transfer_button" data-lead-id="{{ lead.id }}" data-user-mentions="{{ lead.get_user_mentions_json }}">Mention</button>
