@@ -146,7 +146,7 @@ from .models import *
 def lead_history_view(request, lead_id):
     lead = get_object_or_404(Lead, id=lead_id)
     lead_history = LeadHistory.objects.filter(lead=lead).order_by('-timestamp')
-    return render(request, 'lead/leads_dashboard.html', {'lead': lead, 'lead_history': lead_history})
+    return render(request, 'lead/lead_history.html', {'lead': lead, 'history_entries': lead_history})
 
 
 def lead_list(request):
@@ -1005,20 +1005,39 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 
 def transfer_leads(request):
-    lead = get_object_or_404(Lead, id=lead_id)
+    
     if request.method == 'POST':
-        data = json.loads(request.body)
-        lead_id = data.get('lead_id')
-        user_mentions = data.get('user_mentions', [])
+        lead_id = request.POST['leadid']
+        username = json.loads(request.POST['username'])  #transfer to
+        fulltext = request.POST['fulltext']
 
-        # Perform the lead transfer logic here
-        # You can access the lead and mentioned users using their IDs
-        # Example:
-        # lead = Lead.objects.get(pk=lead_id)
-        # users = User.objects.filter(id__in=[mention.get('user_id') for mention in user_mentions])
+        current_user = request.user
+      
+        username = username.get('username')
+        if username:
+            new_assigned_transfer = get_object_or_404(CustomUserTypes, username=username)
+            if new_assigned_transfer:
+                lead = get_object_or_404(Lead, id=lead_id)
+                if not lead.current_transfer and lead.transfer_to:
+                    lead.current_transfer = lead.transfer_to 
+                    
 
-        # After transferring the lead, redirect to the transfer_leads page
-        return redirect('transfer_leads')
+                lead.transfer_to = new_assigned_transfer
+                lead.is_transferred = True
+                lead.save()
+
+                changes = f"{fulltext}"
+
+                LeadHistory.objects.create(lead=lead, user=current_user,  previous_assigned_to=lead.current_transfer, current_assigned_to=lead.transfer_to, changes=changes)
+
+                notification_message = f'You have new mention lead'
+
+                notification = Notification(user=new_assigned_transfer, lead=lead, message=notification_message)
+                notification.save()
+                return JsonResponse({'success': 'success'}, status=200)
+            
+        return JsonResponse({'error': 'Username not found'}, status=503)
+        
     else:
         return JsonResponse({'error': 'Invalid request method.'}, status=400)
 

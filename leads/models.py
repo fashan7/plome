@@ -45,7 +45,7 @@ class Lead(models.Model):
     is_complete = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     custom_fields = models.JSONField(null=True, blank=True)
-
+    current_transfer = models.ForeignKey(CustomUserTypes, on_delete=models.SET_NULL, null=True, blank=True, related_name='current_transferred_leads')
     transfer_to = models.ForeignKey(CustomUserTypes, on_delete=models.SET_NULL, null=True, blank=True, related_name='transferred_leads')
     is_transferred = models.BooleanField(default=False)
 
@@ -101,7 +101,7 @@ from django.dispatch import receiver
 @receiver(post_save, sender=Lead)
 def create_lead_history(sender, instance, created, **kwargs):
     if created:
-        LeadHistory.objects.create(lead=instance, user=instance.last_modified_by, previous_assigned_to=None, current_assigned_to=instance.assigned_to, changes="Lead created.")
+        LeadHistory.objects.create(lead=instance, user=instance.last_modified_by, previous_assigned_to=instance.current_transfer, current_assigned_to=instance.transfer_to, changes="Lead created.")
     else:
         changes = []
         for field, value in instance._original_state.items():
@@ -123,7 +123,7 @@ def create_lead_history(sender, instance, created, **kwargs):
         if changes:
             # Join all the messages into a single string
             changes_str = "\n".join(changes)
-            LeadHistory.objects.create(lead=instance, user=instance.last_modified_by, assigned_to=instance.assigned_to, changes=changes_str)
+            LeadHistory.objects.create(lead=instance, user=instance.last_modified_by, previous_assigned_to=instance.current_transfer, current_assigned_to=instance.transfer_to, changes=changes_str)
       
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
