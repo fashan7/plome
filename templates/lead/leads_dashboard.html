@@ -118,6 +118,7 @@
           customFieldCounter++;
         }
       </script>
+     
 
       <div class="row justify-content-center">
         <div class="col-12">
@@ -530,6 +531,15 @@
                                           {% endfor %}
                                         </select>
                                       </div>
+                                      {% if lead.custom_fields %}
+                                        <h3>Custom Fields</h3>
+                                        {% for key, value in lead.custom_fields.items %}
+                                          <div class="form-group col-md-6">
+                                            <label for="{{ key }}">{{ key }}</label>
+                                            <input type="text" name="custom_fields.{{ key }}" id="{{ key }}" class="form-control" value="{{ value }}" >
+                                          </div>
+                                        {% endfor %}
+                                      {% endif %}
 
                                     </div>
                                   </form>

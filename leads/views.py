@@ -252,6 +252,14 @@ def lead_edit(request, lead_id):
         lead.email = form_data['email']
         lead.qualification = form_data['qualification']
         lead.comments = form_data['comments']
+
+        custom_fields_data = {}
+        for key, value in form_data.items():
+            if key.startswith('custom_fields.'):
+                custom_field_key = key.split('.', 1)[1]
+                custom_fields_data[custom_field_key] = value
+        lead.custom_fields = custom_fields_data
+
     
 
         # Set the last_modified_by field to the current user
