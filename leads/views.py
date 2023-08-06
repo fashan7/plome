@@ -1020,6 +1020,9 @@ def transfer_leads(request):
                 lead = get_object_or_404(Lead, id=lead_id)
                 if not lead.current_transfer and lead.transfer_to:
                     lead.current_transfer = lead.transfer_to 
+
+                if lead.current_transfer and lead.transfer_to:
+                    lead.current_transfer = lead.transfer_to
                     
 
                 lead.transfer_to = new_assigned_transfer
@@ -1027,7 +1030,6 @@ def transfer_leads(request):
                 lead.save()
 
                 changes = f"{fulltext}"
-
                 LeadHistory.objects.create(lead=lead, user=current_user,  previous_assigned_to=lead.current_transfer, current_assigned_to=lead.transfer_to, changes=changes)
 
                 notification_message = f'You have new mention lead'
