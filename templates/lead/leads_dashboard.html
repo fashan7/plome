@@ -118,6 +118,7 @@
           customFieldCounter++;
         }
       </script>
+     
 
       <div class="row justify-content-center">
         <div class="col-12">
@@ -323,6 +324,7 @@
 
         <div class="modal fade" id='showhsitory'>
           <div class="modal-dialog modal-xl">
+
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title">History Entries</h5>
@@ -341,6 +343,24 @@
           </div>
         </div>
 
+              <div class="modal-content">
+                  <div class="modal-header">
+                      <h5 class="modal-title">History Entries</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                      </button>
+                  </div>
+                  <div class="modal-body">
+                      <div id="loadhistory"></div>
+                  </div>
+                  <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" id="closeHistoryModel" data-dismiss="modal">Close</button>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+
         <!-- Small table -->
         <div class="row my-2">
           <div class="col-md-12">
@@ -356,6 +376,7 @@
                         <th data-toggle="select">Nom de la Campagne </th>
                         <th data-toggle="select">Avez-vous travaillé</th>
                         <th data-toggle="select">Nom & Prenom</th>
+
 
                         <th data-toggle="select">Téléphone</th>
                         <th data-toggle="select">Email</th>
@@ -382,6 +403,7 @@
                         <td>{{ lead.comments }}</td>
                         <td>{{ lead.assigned_to }}</td>
 
+
                         <td>
                           Mentioned to {{ lead.transfer_to }}
                           {% comment %} <div id="user_mentions_list_{{ lead.id }}" class="user-mentions-list"></div>
@@ -391,6 +413,16 @@
                             data-user-mentions="{{ lead.get_user_mentions_json }}">Mention</button> {% endcomment %}
 
                         </td>
+
+                
+                       <td>
+                        Mentioned to {{ lead.transfer_to }}
+                        <div id="user_mentions_list_{{ lead.id }}" class="user-mentions-list"></div>
+                          <textarea id="assign_comment_field_{{ lead.id }}" name="assign_comment" class="mention-textarea">{{ lead.assign_comment }}</textarea>
+                          <button class="transfer_button" data-lead-id="{{ lead.id }}" data-user-mentions="{{ lead.get_user_mentions_json }}">Mention</button>
+                          
+                      </td>
+                      
 
                         <td>
                           {% comment %} <button class="btn btn-sm dropdown-toggle more-horizontal" type="button"
@@ -410,10 +442,15 @@
                                 Activate
                                 {% endif %}
                               </a>
+
                               <a class="dropdown-item show-history-btn" data-lead-id="{{ lead.id }}"
                                 data-url="{% url 'lead_history' lead.id %}" href="javascript:void(0)">Show History</a>
                               <a class="dropdown-item" href="javascript:void(0)" data-toggle="modal"
                                 data-target="#editModal-{{ lead.id }}">View</a>
+
+                              <a class="dropdown-item show-history-btn" data-lead-id="{{ lead.id }}" data-url="{% url 'lead_history' lead.id %}" href="javascript:void(0)">Show History</a>
+                              <a class="dropdown-item" href="javascript:void(0)" data-toggle="modal" data-target="#editModal-{{ lead.id }}">View</a>
+
                             </div>
                           </div>
 
@@ -531,6 +568,7 @@
                                         </select>
                                       </div>
                                       {% if lead.custom_fields %}
+
                                       <h3>Custom Fields</h3>
                                       {% for key, value in lead.custom_fields.items %}
                                       <div class="form-group col-md-6">
@@ -539,10 +577,39 @@
                                           class="form-control" value="{{ value }}">
                                       </div>
                                       {% endfor %}
+
+                                        <h3>Custom Fields</h3>
+                                        {% for key, value in lead.custom_fields.items %}
+                                          <div class="form-group col-md-6">
+                                            <label for="{{ key }}">{{ key }}</label>
+                                            <input type="text" name="custom_fields.{{ key }}" id="{{ key }}" class="form-control" value="{{ value }}" >
+                                          </div>
+                                        {% endfor %}
+
                                       {% endif %}
 
                                     </div>
                                   </form>
+
+
+                                  <ul class="nav nav-tabs mb-4" id="myTab" role="tablist" style="border-bottom:none">
+                                    <li class="nav-item">
+                                      <a class="nav-link" id="home-tab" data-toggle="tab" href="javascript:void(0)" role="tab" aria-controls="acomment" aria-selected="false">Mention</a>
+                                    </li>
+                                    <li class="nav-item">
+                                      <a class="nav-link" id="profile-tab" data-toggle="tab" href="javascript:void(0)" role="tab" aria-controls="history" aria-selected="false">History</a>
+                                    </li>
+                                    <li class="nav-item">
+                                      <a class="nav-link" id="contact-tab" data-toggle="tab" href="javascript:void(0)" role="tab" aria-controls="documents" aria-selected="false">Documents</a>
+                                    </li>
+                                  </ul>
+                                </div>
+                                <!-- Your form fields -->
+                                <div class="modal-footer">
+                                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                  <button type="button" class="btn btn-primary"
+                                    onclick="updateLead('{{ lead.id }}')">Save</button>
+
 
                                   <!-- and tabs -->
                                   <!--  New changes  -->
@@ -866,6 +933,7 @@
         } else {
           userMentionsList.hide();
         }
+
       });
       // Handle click on a mention item and insert the selected username in the textarea
       $(document).on("click", ".user-mentions-list div", function() {
@@ -905,6 +973,55 @@
       });
       // Handle keyboard navigation and selection
       $(document).on("keydown", ".mention-textarea", function(event) {
+
+    });
+
+    // Handle click on a mention item and insert the selected username in the textarea
+    
+    $(document).on("click", ".user-mentions-list div", function () {
+      const username = $(this).text().slice(1); // Exclude the "@" prefix by removing the first character
+      const leadId = $(this).closest("td").find(".mention-textarea").attr('id').split('_').pop();
+      const textarea = $(`#assign_comment_field_${leadId}`);
+      const currentValue = textarea.val();
+      const mentionStartIndex = currentValue.lastIndexOf('@');
+    
+      // Find the start and end indices of the last selected user mention, if any
+      let existingMentionStartIndex = -1;
+      let existingMentionEndIndex = -1;
+      if (mentionStartIndex >= 0) {
+        existingMentionStartIndex = mentionStartIndex;
+        existingMentionEndIndex = currentValue.indexOf('@', mentionStartIndex + 1);
+        if (existingMentionEndIndex === -1) {
+          existingMentionEndIndex = currentValue.length;
+        }
+      }
+    
+      // Remove the last selected user mention, if any
+      let updatedValue = currentValue;
+      if (existingMentionStartIndex >= 0 && existingMentionEndIndex >= 0) {
+        updatedValue = currentValue.substring(0, existingMentionStartIndex) + currentValue.substring(existingMentionEndIndex);
+      }
+    
+      // Append the selected username if it's not already present
+      const mentionAlreadyExists = updatedValue.includes(`@${username}`);
+      if (!mentionAlreadyExists) {
+        updatedValue = updatedValue.trim();
+        updatedValue = updatedValue ? `${updatedValue} @${username} ` : `@${username} `;
+      }
+    
+      textarea.val(updatedValue);
+      $(`#user_mentions_list_${leadId}`).hide();
+    
+      // Move the cursor position after the inserted text and the added space
+      const cursorPos = updatedValue.length;
+      textarea[0].setSelectionRange(cursorPos, cursorPos);
+      textarea[0].focus(); // Optional: Move the cursor to the end of the inserted text
+    });
+    
+
+    // Handle keyboard navigation and selection
+    $(document).on("keydown", ".mention-textarea", function (event) {
+
         const userMentionsList = $(this).closest("td").find(".user-mentions-list");
         if (userMentionsList.is(":visible")) {
           const mentionItems = userMentionsList.find("div");
@@ -938,6 +1055,7 @@
       }
     });
     // Handle clicking on the "Transfer" button
+
     $(document).on("click", ".transfer_button", function() {
       const leadId = $(this).attr('data-lead-id');
       const textarea = $(`#assign_comment_field_${leadId}`);
@@ -964,6 +1082,35 @@
           'fulltext': user_mentions_text
         },
         success: function(jsonData) {
+
+    $(document).on("click", ".transfer_button", function () {
+      const leadId = $(this).attr('data-lead-id');
+      const textarea = $(`#assign_comment_field_${leadId}`);
+      const user_mentions_text = textarea.val().trim();
+      
+      // Use regular expression to extract all mentions
+      const mentions = user_mentions_text.match(/@\w+/g);
+      const mentionsArray = [];
+      
+      // Construct the array of mention objects
+      for (const mention of mentions) {
+          const username = mention.substring(1); // Remove "@" from the mention
+          mentionsArray.push({ "username": username, "full_text": mention });
+          break
+      }
+
+      $.ajax({
+        url:  '{% url "transfer_leads" %}',
+        method: 'POST',
+        data: {
+          csrfmiddlewaretoken: '{{ csrf_token }}',
+          'leadid':leadId,
+          'username':JSON.stringify(mentionsArray[0]),
+          'fulltext':user_mentions_text
+        },
+        success: function (jsonData) {
+          
+
           Swal.fire(
             'Success!',
             'successfully transfered',
@@ -972,16 +1119,29 @@
             location.reload();
           });
         },
+
         error: function(error) {
+
+        error: function (error) {
+
           Swal.fire({
             icon: 'error',
             title: 'Oops...',
             text: error.error
           });
         }
+
       });
     });
   });
+
+    });
+  });
+  
+  
+
+});
+
 </script>
 
 {% endblock %}
@@ -991,16 +1151,30 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/select/1.3.1/css/select.bootstrap.css" />
 <script src="https://cdn.datatables.net/select/1.3.1/js/dataTables.select.min.js"></script>
 
+
 <!-- Include Bootstrap JavaScript -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.min.js"></script>
 <!-- Include Bootstrap CSS -->
 
+
+<!-- Include Bootstrap JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+<!-- Include Bootstrap CSS -->
+
+
 <script>
   $(document).ready(function() {
     $('.show-history-btn').click(function(event) {
+
       event.preventDefault();
       var leadId = $(this).data('lead-id');
       var url = $(this).data('url');
+
+     
+      event.preventDefault();
+      var leadId = $(this).data('lead-id');
+      var url = $(this).data('url'); 
+
       $.get(url, function(data) {
         // Append the lead history modal to the body
         $('#loadhistory').html(data);
@@ -1009,6 +1183,7 @@
       });
     });
   });
+
   $('#closeHistoryModel').click(function(event) {
     $('#showhsitory').modal('hide');
   });
@@ -1042,10 +1217,16 @@
       var assignToUser = $('#assignToUser').val();
       table.rows({
         selected: true,
+
         order: [
           [1, 'asc']
         ]
       });
+
+        order: [[1, 'asc']]
+      });
+      
+
     });
     // Handle "Select All" checkbox click
     $('#selectAllCheckbox').on('click', function() {
@@ -1082,10 +1263,19 @@
         $.ajax({
           type: 'POST',
           url: '{% url "assign_leads" %}',
+
           comments: rowData[9] || null,
         });
         selectedLeads.push(lead)
       }
+
+
+          comments: rowData[9]  || null, 
+        });
+        selectedLeads.push(lead)
+      }
+
+
       if (selectedLeads.length > 0 && assignToUser) {
         $.ajax({
           type: 'POST',

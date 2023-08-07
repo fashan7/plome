@@ -14,6 +14,10 @@ import os
 import importlib.util
 from .models import Lead, Notification
 import json
+
+
+import pandas as pd
+
 from dateutil.parser import parse as dateutil_parse
 import math
 import numpy as np
@@ -1062,7 +1066,10 @@ def transfer_leads(request):
                 lead.save()
 
                 changes = f"{fulltext}"
+
                 # LeadHistory.objects.create(lead=lead, user=current_user, previous_assigned_to=lead.current_assigned_to, current_assigned_to=lead.transfer_to, changes=changes)
+
+
                 LeadHistory.objects.create(lead=lead, user=current_user,  previous_assigned_to=lead.current_transfer, current_assigned_to=lead.transfer_to, changes=changes)
 
                 notification_message = f'You have new mention lead'
