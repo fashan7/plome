@@ -14,6 +14,9 @@ import os
 import importlib.util
 from .models import Lead, Notification
 import json
+from dateutil.parser import parse as dateutil_parse
+import math
+import numpy as np
 
 
 
@@ -86,7 +89,7 @@ def lead_dashboard(request):
         custom_field_values = request.POST.getlist('custom_field_value[]')
         custom_fields = dict(zip(custom_field_names, custom_field_values))
         lead.custom_fields = json.dumps(custom_fields)
-
+        
         lead.save()
 
         assigned_to_id = request.POST.get('assigned_to')
@@ -94,8 +97,9 @@ def lead_dashboard(request):
             assigned_user = CustomUserTypes.objects.get(id=assigned_to_id)
             lead.assigned_to = assigned_user
             lead.save()
+           
             notification_message = f'You have been assigned a new lead: {lead.nom_de_la_campagne}'
-
+            
             return HttpResponseRedirect(f'/filtered_lead_dashboard/{assigned_user.id}/?notification={notification_message}')
         else:
             return redirect('lead_dashboard')
@@ -105,8 +109,13 @@ def lead_dashboard(request):
         users = CustomUserTypes.objects.all()
         nav_data = navigation_data(request.user.id)
 
-        notification = Notification(user=assigned_user, lead=lead, message=notification_message)
-        notification.save()
+
+        assigned_to_id = request.POST.get('assigned_to')
+        if assigned_to_id:
+            assigned_user = CustomUserTypes.objects.get(id=assigned_to_id)
+
+            notification = Notification(user=assigned_user, lead=lead, message=notification_message)
+            notification.save()
 
 
         # Check if the user selected a specific user filter
@@ -128,11 +137,21 @@ def lead_dashboard(request):
         # Apply the qualification filter
         if selected_qualification:
             filtered_leads = filtered_leads.filter(qualification=selected_qualification)
+        
+        duplicates_deleted = delete_duplicate_leads()
+        messages.success(request, f'{duplicates_deleted} duplicate leads deleted.')
 
         return render(request, 'lead/leads_dashboard.html', {'leads': filtered_leads, 'users': users, 'sections': nav_data})
 
 
 from .models import *
+
+def lead_history_view(request, lead_id):
+    lead = get_object_or_404(Lead, id=lead_id)
+    lead_history = LeadHistory.objects.filter(lead=lead).order_by('-timestamp')
+    return render(request, 'lead/lead_history.html', {'lead': lead, 'history_entries': lead_history})
+
+
 def lead_list(request):
     leads = Lead.objects.all()
     return render(request, 'lead/lead_list.html', {'leads': leads})
@@ -178,6 +197,29 @@ def lead_history(request, lead_id):
 
 #     return render(request, 'lead/leads_dashboard.html', {'leads': active_leads, 'users': users,'sections': nav_data})
 
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Lead, Attachment
+
+def attach_file_to_lead(request, lead_id):
+    lead = get_object_or_404(Lead, id=lead_id)
+
+    if request.method == 'POST':
+        attached_file = request.FILES.get('attachment')
+        title = request.POST.get('title')  # Retrieve the title from the form data
+
+        if attached_file:
+            # Create an Attachment instance and link it to the lead
+            attachment = Attachment.objects.create(
+                lead=lead,
+                file=attached_file,  # Save the file directly, Django handles file storage
+                title=title
+                # Add other fields for attachment metadata as needed
+            )
+
+            return redirect('lead_dashboard', lead_id=lead_id)  # Redirect to the lead detail page or another appropriate view
+
+    return render(request, 'lead_dashboard.html', {'lead': lead})
+
 
 from django.contrib.admin.models import LogEntry, CHANGE
 from django.contrib.contenttypes.models import ContentType
@@ -188,6 +230,7 @@ def lead_edit(request, lead_id):
     if request.method == 'POST':
         form_data = request.POST.copy()  # Make a copy of the POST data to modify it
         assigned_user_id = form_data.get('assigned_to')  # Get the assigned user ID from the form data
+        
 
         if assigned_user_id:
             try:
@@ -236,6 +279,14 @@ def lead_edit(request, lead_id):
         lead.email = form_data['email']
         lead.qualification = form_data['qualification']
         lead.comments = form_data['comments']
+
+        custom_fields_data = {}
+        for key, value in form_data.items():
+            if key.startswith('custom_fields.'):
+                custom_field_key = key.split('.', 1)[1]
+                custom_fields_data[custom_field_key] = value
+        lead.custom_fields = custom_fields_data
+
     
 
         # Set the last_modified_by field to the current user
@@ -243,7 +294,6 @@ def lead_edit(request, lead_id):
 
         lead.save()
 
-        
 
         #Saving the notification for assign
         if assigned_user_id:
@@ -274,8 +324,6 @@ def lead_edit(request, lead_id):
         return JsonResponse({'success': True})
 
     return render(request, 'lead/lead_edit.html', {'lead': lead})
-
-
 
 
 #can be used in future 
@@ -379,6 +427,7 @@ def complete_leads(request):
 
 
 
+
 # def parse_date(date_str):
 #     try:
 #         # Try parsing with format '%Y-%m-%d %H:%M:%S'
@@ -422,6 +471,7 @@ from dateutil.parser import parse as dateutil_parse
 import math
 import numpy as np
 
+
 def parse_date_with_format(date_string):
     try:
         # Try parsing with format '%m/%d/%Y %H:%M'
@@ -460,6 +510,17 @@ def parse_date(date_string):
 
 
 
+
+
+def date_handler(obj):
+    if hasattr(obj, 'isoformat'):
+        return obj.isoformat()
+    elif isinstance(obj, np.int64):
+        return int(obj)
+    else:
+        raise TypeError("Unserializable object {} of type {}".format(obj, type(obj)))
+
+
 def import_leads(request):
     field_map = {
         'date_de_soumission': 'date de soumission',
@@ -483,7 +544,7 @@ def import_leads(request):
                     raise ValueError("Unsupported file format. Only CSV, XLS, and XLSX files are allowed.")
 
                 headers = [header.strip() for header in df.columns]
-                print(headers)
+                # print(headers)
                 
 
                 additional_headers = [header for header in headers if header not in field_map]
@@ -497,7 +558,7 @@ def import_leads(request):
             except Exception as e:
                 messages.error(request, f'Error reading file: {str(e)}')
                 return redirect('lead_dashboard')
-
+            
         elif 'mapping' in request.POST:
             mapping_data = {}  
             custom_fields = {}
@@ -507,6 +568,8 @@ def import_leads(request):
                 mapping_data[field] = request.POST.get(field, '')
 
 
+            for field, field_name in field_map.items():
+                mapping_data[field] = request.POST.get(field, '')
 
             for custom_field in request.POST.getlist('custom_fields'):
                 custom_fields[custom_field] = custom_field
@@ -919,7 +982,7 @@ import pandas as pd
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from django.shortcuts import render
-from .forms import GoogleSheetForm
+# from .forms import GoogleSheetForm
 from .models import FacebookLead
 
 def gsheet(request):
@@ -974,19 +1037,42 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 
 def transfer_leads(request):
+    
     if request.method == 'POST':
-        data = json.loads(request.body)
-        lead_id = data.get('lead_id')
-        user_mentions = data.get('user_mentions', [])
+        lead_id = request.POST['leadid']
+        username = json.loads(request.POST['username'])  #transfer to
+        fulltext = request.POST['fulltext']
 
-        # Perform the lead transfer logic here
-        # You can access the lead and mentioned users using their IDs
-        # Example:
-        # lead = Lead.objects.get(pk=lead_id)
-        # users = User.objects.filter(id__in=[mention.get('user_id') for mention in user_mentions])
+        current_user = request.user
+      
+        username = username.get('username')
+        if username:
+            new_assigned_transfer = get_object_or_404(CustomUserTypes, username=username)
+            if new_assigned_transfer:
+                lead = get_object_or_404(Lead, id=lead_id)
+                if not lead.current_transfer and lead.transfer_to:
+                    lead.current_transfer = lead.transfer_to 
 
-        # After transferring the lead, redirect to the transfer_leads page
-        return redirect('transfer_leads')
+                if lead.current_transfer and lead.transfer_to:
+                    lead.current_transfer = lead.transfer_to
+                    
+
+                lead.transfer_to = new_assigned_transfer
+                lead.is_transferred = True
+                lead.save()
+
+                changes = f"{fulltext}"
+                # LeadHistory.objects.create(lead=lead, user=current_user, previous_assigned_to=lead.current_assigned_to, current_assigned_to=lead.transfer_to, changes=changes)
+                LeadHistory.objects.create(lead=lead, user=current_user,  previous_assigned_to=lead.current_transfer, current_assigned_to=lead.transfer_to, changes=changes)
+
+                notification_message = f'You have new mention lead'
+
+                notification = Notification(user=new_assigned_transfer, lead=lead, message=notification_message)
+                notification.save()
+                return JsonResponse({'success': 'success'}, status=200)
+            
+        return JsonResponse({'error': 'Username not found'}, status=503)
+        
     else:
         return JsonResponse({'error': 'Invalid request method.'}, status=400)
 
