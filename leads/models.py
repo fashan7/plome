@@ -2,9 +2,7 @@ from django.db import models
 from django.forms import JSONField
 from accounts.models import User
 from accounts.models import CustomUserTypes
-from django.contrib.auth import get_user_model
 from django.dispatch import receiver
-import json
 from django.db.models.signals import post_save
 
 
@@ -12,7 +10,8 @@ class LeadHistory(models.Model):
     lead = models.ForeignKey('Lead', on_delete=models.CASCADE, related_name='lead_history')
     timestamp = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='assigned_leads')
+    previous_assigned_to = models.ForeignKey(CustomUserTypes, on_delete=models.SET_NULL, null=True, blank=True, related_name='previous_assigned_leads')
+    current_assigned_to = models.ForeignKey(CustomUserTypes, on_delete=models.SET_NULL, null=True, blank=True, related_name='current_assigned_leads')
     changes = models.TextField()
 
     class Meta:
@@ -46,18 +45,23 @@ class Lead(models.Model):
     is_complete = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     custom_fields = models.JSONField(null=True, blank=True)
-
+    current_transfer = models.ForeignKey(CustomUserTypes, on_delete=models.SET_NULL, null=True, blank=True, related_name='current_transferred_leads')
+    transfer_to = models.ForeignKey(CustomUserTypes, on_delete=models.SET_NULL, null=True, blank=True, related_name='transferred_leads')
+    is_transferred = models.BooleanField(default=False)
+    
     assign_comment = models.JSONField(null=True, blank=True)
     history = models.ForeignKey(LeadHistory, on_delete=models.SET_NULL, null=True, blank=True, related_name='leads')
     _original_state = {}
    
 
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Store the original state of the instance
         self._original_state = self.__dict__.copy()
-        
+     
+    def __str__(self):
+        return str(self.nom_de_la_campagne)
+
     
         
     def add_user_mention(self, user_id, username):
@@ -97,28 +101,31 @@ from django.dispatch import receiver
 @receiver(post_save, sender=Lead)
 def create_lead_history(sender, instance, created, **kwargs):
     if created:
-        LeadHistory.objects.create(lead=instance, user=instance.last_modified_by, assigned_to=instance.assigned_to, changes="Lead created.")
+        LeadHistory.objects.create(lead=instance, user=instance.last_modified_by, previous_assigned_to=instance.current_transfer, current_assigned_to=instance.transfer_to, changes="Lead created.")
     else:
         changes = []
         for field, value in instance._original_state.items():
             new_value = getattr(instance, field)
-            if new_value != value:
-                # Customize the message for specific fields
-                if field == 'qualification':
-                    old_qualification = dict(instance.QUALIFICATION_CHOICES).get(value, value)
-                    new_qualification = dict(instance.QUALIFICATION_CHOICES).get(new_value, new_value)
-                    changes.append(f"- {instance.last_modified_by.username} ---- changed qualification from ---- '{old_qualification}' --to '{new_qualification}'.")
-                elif field == 'assigned_to':
-                    old_assigned_to_name = User.objects.get(id=value).get_username() if value else "Unassigned"
-                    new_assigned_to_name = User.objects.get(id=new_value).get_username() if new_value else "Unassigned"
-                    changes.append(f"- {instance.last_modified_by.username} changed assigned user from '{old_assigned_to_name}' to '{new_assigned_to_name}'.")
-                else:
-                    changes.append(f"- {field}: {value} -> {new_value}")
+            # if new_value != value:
+            #     # Customize the message for specific fields
+            #     if field == 'qualification':
+            #         pass
+            #         # old_qualification = dict(instance.QUALIFICATION_CHOICES).get(value, value)
+            #         # new_qualification = dict(instance.QUALIFICATION_CHOICES).get(new_value, new_value)
+            #         # changes.append(f"- {instance.last_modified_by.username} ---- changed qualification from ---- '{old_qualification}' --to '{new_qualification}'.")
+            #     elif field == 'assigned_to':
+            #         pass
+            #         # old_assigned_to_name = CustomUserTypes.objects.get(id=value).get_username() if value else "Unassigned"
+            #         # new_assigned_to_name = CustomUserTypes.objects.get(id=new_value).get_username() if new_value else "Unassigned"
+            #         # changes.append(f"- {instance.last_modified_by.username} changed assigned user from '{old_assigned_to_name}' to '{new_assigned_to_name}'.")
+            #         # LeadHistory.objects.create(lead=instance, user=instance.last_modified_by, previous_assigned_to=value, current_assigned_to=new_value, changes="Lead transferred.")
+            #     else:
+            #         changes.append(f"- {field}: {value} -> {new_value}")
         # Check if any changes were made
         if changes:
             # Join all the messages into a single string
             changes_str = "\n".join(changes)
-            LeadHistory.objects.create(lead=instance, user=instance.last_modified_by, assigned_to=instance.assigned_to, changes=changes_str)
+            LeadHistory.objects.create(lead=instance, user=instance.last_modified_by, previous_assigned_to=instance.current_transfer, current_assigned_to=instance.transfer_to, changes=changes_str)
       
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -130,10 +137,7 @@ class Notification(models.Model):
 
     def __str__(self):
         return self.message
-# models.py
-
-
-    custom_fields = models.JSONField(null=True, blank=True)
+    
 # models.py
 
 class FacebookLead(models.Model):
@@ -154,3 +158,12 @@ class FacebookLead(models.Model):
     
 
     
+class Attachment(models.Model):
+    lead = models.ForeignKey(Lead, on_delete=models.CASCADE, related_name='attachments')
+    file = models.FileField(upload_to='lead_attachments/')
+    title = models.CharField(max_length=100)  # Additional field for attachment title
+
+    # Additional fields for attachment metadata (e.g., description, etc.)
+
+    def __str__(self):
+        return f"Attachment for Lead: {self.lead.nom_de_la_campagne}"
