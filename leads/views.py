@@ -14,7 +14,10 @@ import os
 import importlib.util
 from .models import Lead, Notification
 import json
+
+
 import pandas as pd
+
 from dateutil.parser import parse as dateutil_parse
 import math
 import numpy as np
@@ -90,7 +93,7 @@ def lead_dashboard(request):
         custom_field_values = request.POST.getlist('custom_field_value[]')
         custom_fields = dict(zip(custom_field_names, custom_field_values))
         lead.custom_fields = json.dumps(custom_fields)
-
+        
         lead.save()
 
         assigned_to_id = request.POST.get('assigned_to')
@@ -98,8 +101,9 @@ def lead_dashboard(request):
             assigned_user = CustomUserTypes.objects.get(id=assigned_to_id)
             lead.assigned_to = assigned_user
             lead.save()
+           
             notification_message = f'You have been assigned a new lead: {lead.nom_de_la_campagne}'
-
+            
             return HttpResponseRedirect(f'/filtered_lead_dashboard/{assigned_user.id}/?notification={notification_message}')
         else:
             return redirect('lead_dashboard')
@@ -137,6 +141,9 @@ def lead_dashboard(request):
         # Apply the qualification filter
         if selected_qualification:
             filtered_leads = filtered_leads.filter(qualification=selected_qualification)
+        
+        duplicates_deleted = delete_duplicate_leads()
+        messages.success(request, f'{duplicates_deleted} duplicate leads deleted.')
 
         return render(request, 'lead/leads_dashboard.html', {'leads': filtered_leads, 'users': users, 'sections': nav_data})
 
@@ -194,6 +201,29 @@ def lead_history(request, lead_id):
 
 #     return render(request, 'lead/leads_dashboard.html', {'leads': active_leads, 'users': users,'sections': nav_data})
 
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Lead, Attachment
+
+def attach_file_to_lead(request, lead_id):
+    lead = get_object_or_404(Lead, id=lead_id)
+
+    if request.method == 'POST':
+        attached_file = request.FILES.get('attachment')
+        title = request.POST.get('title')  # Retrieve the title from the form data
+
+        if attached_file:
+            # Create an Attachment instance and link it to the lead
+            attachment = Attachment.objects.create(
+                lead=lead,
+                file=attached_file,  # Save the file directly, Django handles file storage
+                title=title
+                # Add other fields for attachment metadata as needed
+            )
+
+            return redirect('lead_dashboard', lead_id=lead_id)  # Redirect to the lead detail page or another appropriate view
+
+    return render(request, 'lead_dashboard.html', {'lead': lead})
+
 
 from django.contrib.admin.models import LogEntry, CHANGE
 from django.contrib.contenttypes.models import ContentType
@@ -204,6 +234,7 @@ def lead_edit(request, lead_id):
     if request.method == 'POST':
         form_data = request.POST.copy()  # Make a copy of the POST data to modify it
         assigned_user_id = form_data.get('assigned_to')  # Get the assigned user ID from the form data
+        
 
         if assigned_user_id:
             try:
@@ -267,7 +298,6 @@ def lead_edit(request, lead_id):
 
         lead.save()
 
-        
 
         #Saving the notification for assign
         if assigned_user_id:
@@ -298,8 +328,6 @@ def lead_edit(request, lead_id):
         return JsonResponse({'success': True})
 
     return render(request, 'lead/lead_edit.html', {'lead': lead})
-
-
 
 
 #can be used in future 
@@ -1038,6 +1066,10 @@ def transfer_leads(request):
                 lead.save()
 
                 changes = f"{fulltext}"
+
+                # LeadHistory.objects.create(lead=lead, user=current_user, previous_assigned_to=lead.current_assigned_to, current_assigned_to=lead.transfer_to, changes=changes)
+
+
                 LeadHistory.objects.create(lead=lead, user=current_user,  previous_assigned_to=lead.current_transfer, current_assigned_to=lead.transfer_to, changes=changes)
 
                 notification_message = f'You have new mention lead'

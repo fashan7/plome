@@ -49,6 +49,10 @@ class Lead(models.Model):
     transfer_to = models.ForeignKey(CustomUserTypes, on_delete=models.SET_NULL, null=True, blank=True, related_name='transferred_leads')
     is_transferred = models.BooleanField(default=False)
 
+    
+
+
+
     assign_comment = models.JSONField(null=True, blank=True)
     history = models.ForeignKey(LeadHistory, on_delete=models.SET_NULL, null=True, blank=True, related_name='leads')
     _original_state = {}
@@ -106,6 +110,23 @@ def create_lead_history(sender, instance, created, **kwargs):
         changes = []
         for field, value in instance._original_state.items():
             new_value = getattr(instance, field)
+
+            # if new_value != value:
+            #     # Customize the message for specific fields
+            #     if field == 'qualification':
+            #         pass
+            #         # old_qualification = dict(instance.QUALIFICATION_CHOICES).get(value, value)
+            #         # new_qualification = dict(instance.QUALIFICATION_CHOICES).get(new_value, new_value)
+            #         # changes.append(f"- {instance.last_modified_by.username} ---- changed qualification from ---- '{old_qualification}' --to '{new_qualification}'.")
+            #     elif field == 'assigned_to':
+            #         pass
+            #         # old_assigned_to_name = CustomUserTypes.objects.get(id=value).get_username() if value else "Unassigned"
+            #         # new_assigned_to_name = CustomUserTypes.objects.get(id=new_value).get_username() if new_value else "Unassigned"
+            #         # changes.append(f"- {instance.last_modified_by.username} changed assigned user from '{old_assigned_to_name}' to '{new_assigned_to_name}'.")
+            #         # LeadHistory.objects.create(lead=instance, user=instance.last_modified_by, previous_assigned_to=value, current_assigned_to=new_value, changes="Lead transferred.")
+            #     else:
+            #         changes.append(f"- {field}: {value} -> {new_value}")
+
             if new_value != value:
                 # Customize the message for specific fields
                 if field == 'qualification':
@@ -119,6 +140,7 @@ def create_lead_history(sender, instance, created, **kwargs):
                     LeadHistory.objects.create(lead=instance, user=instance.last_modified_by, previous_assigned_to=value, current_assigned_to=new_value, changes="Lead transferred.")
                 else:
                     changes.append(f"- {field}: {value} -> {new_value}")
+
         # Check if any changes were made
         if changes:
             # Join all the messages into a single string
@@ -156,3 +178,12 @@ class FacebookLead(models.Model):
     
 
     
+class Attachment(models.Model):
+    lead = models.ForeignKey(Lead, on_delete=models.CASCADE, related_name='attachments')
+    file = models.FileField(upload_to='lead_attachments/')
+    title = models.CharField(max_length=100)  # Additional field for attachment title
+
+    # Additional fields for attachment metadata (e.g., description, etc.)
+
+    def __str__(self):
+        return f"Attachment for Lead: {self.lead.nom_de_la_campagne}"
