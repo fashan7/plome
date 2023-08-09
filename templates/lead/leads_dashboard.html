@@ -737,34 +737,34 @@
                                             </div>
                                           </div>
 
-                                          <script>
-                                            function confirmDelete(attachmentId) {
-                                              if (confirm('Are you sure you want to delete this attachment?')) {
-                                                deleteAttachment(attachmentId);
-                                              }
-                                            }
+                                         <script>
+  function confirmDelete(attachmentId) {
+    if (confirm('Are you sure you want to delete this attachment?')) {
+      deleteAttachment(attachmentId);
+    }
+  }
 
-                                            function deleteAttachment(attachmentId) {
-                                              $.ajax({
-                                                type: 'POST',
-                                                url: '{% url '
-                                                delete_attachment ' attachment_id=0 %}'.replace('0', attachmentId),
-                                                data: {
-                                                  csrfmiddlewaretoken: '{{ csrf_token }}',
-                                                },
-                                                success: function() {
-                                                  // Remove the deleted attachment from the UI
-                                                  $('#attachment-list li').filter(function() {
-                                                    return $(this).find('button').attr('onclick').includes(
-                                                      attachmentId.toString());
-                                                  }).remove();
-                                                },
-                                                error: function() {
-                                                  alert('An error occurred while deleting the attachment.');
-                                                }
-                                              });
-                                            }
-                                          </script>
+  function deleteAttachment(attachmentId) {
+    $.ajax({
+      type: 'POST',
+      url: '{% url 'delete_attachment' attachment_id=0 %}'.replace('0', attachmentId),
+      data: {
+        csrfmiddlewaretoken: '{{ csrf_token }}',
+      },
+      success: function() {
+        // Remove the deleted attachment from the UI
+        $('#attachment-list li').filter(function() {
+          return $(this).find('button').attr('onclick').includes(
+            attachmentId.toString());
+        }).remove();
+      },
+      error: function() {
+        alert('An error occurred while deleting the attachment.');
+      }
+    });
+  }
+</script>
+
 
                                         </div>
                                       </div>
