@@ -36,9 +36,14 @@ urlpatterns = [
 
     path('sales_lead/',views.sales_lead,name="sales_lead"),
     path('assign_leads/', views.assign_leads, name='assign_leads'),
-
-
+    path('lead_dashboard/<int:lead_id>/', views.lead_dashboard, name='lead_dashboard'),
+    path('attach_file/<int:lead_id>/', views.attach_file_to_lead, name='attach_file_to_lead'),
+    path('download_attachment/<int:attachment_id>/<path:attachment_name>/', views.download_attachment, name='download_attachment'),
+    path('delete_attachment/<int:attachment_id>/', views.delete_attachment, name='delete_attachment'),
 ]
+
+
+
 
 
 

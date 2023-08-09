@@ -76,7 +76,7 @@ from django.shortcuts import render, redirect
 from .models import Lead, CustomUserTypes
 from django.contrib.auth import get_user_model
 
-def lead_dashboard(request):
+def lead_dashboard(request, lead_id):
     if request.method == 'POST':
         # Retrieve form data and create a new lead instance
         lead = Lead(
@@ -144,6 +144,8 @@ def lead_dashboard(request):
         
         duplicates_deleted = delete_duplicate_leads()
         messages.success(request, f'{duplicates_deleted} duplicate leads deleted.')
+        
+        lead = get_object_or_404(Lead, id=lead_id)
 
         return render(request, 'lead/leads_dashboard.html', {'leads': filtered_leads, 'users': users, 'sections': nav_data})
 
@@ -223,6 +225,33 @@ def attach_file_to_lead(request, lead_id):
             return redirect('lead_dashboard', lead_id=lead_id)  # Redirect to the lead detail page or another appropriate view
 
     return render(request, 'lead_dashboard.html', {'lead': lead})
+
+
+from django.http import FileResponse
+from django.shortcuts import get_object_or_404
+from .models import Attachment
+from urllib.parse import unquote 
+
+def download_attachment(request, attachment_id, attachment_name):
+    attachment = get_object_or_404(Attachment, id=attachment_id)
+    
+    response = FileResponse(attachment.file, as_attachment=True)
+    response['Content-Disposition'] = f'attachment; filename="{unquote(attachment_name)}"'
+    
+    return response
+
+from django.http import JsonResponse
+
+
+
+
+def delete_attachment(request, attachment_id):
+    attachment = get_object_or_404(Attachment, id=attachment_id)
+    attachment.file.delete()  # Delete the attached file from storage
+    attachment.delete()  # Delete the Attachment instance
+    return JsonResponse({'message': 'Attachment deleted successfully'})
+
+
 
 
 from django.contrib.admin.models import LogEntry, CHANGE
