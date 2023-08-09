@@ -573,11 +573,11 @@
                                             <a class="nav-link active" data-toggle="tab" href="#doccument">Documents</a>
                                           </li>
                                           <li class="nav-item">
-                                            <a class="nav-link show-history-btn" data-toggle="tab" href="#history" data-lead-id="{{ lead.id }}"
-                                            data-url="{% url 'lead_history' lead.id %}" >History</a>
+                                            <a class="nav-link" data-toggle="tab" href="#history"  >History</a>
                                           </li>
                                           <li class="nav-item">
-                                            <a class="nav-link " data-toggle="tab" href="#historymention">Mention</a>
+                                            <a class="nav-link  show-history-btn" data-toggle="tab" href="#historymention" data-lead-id="{{ lead.id }}"
+                                            data-url="{% url 'lead_history' lead.id %}">Mention</a>
                                           </li>
                                           <li class="nav-item ml-auto">
                                             <div data-toggle="collapse" data-target="#accordionContent">
@@ -591,38 +591,40 @@
                                     </div>
 
                                     <div class="tab-content" id="accordionContent" class="collapse">
-                                      <div class="tab-pane fade"   id="historymention">
+                                      <div class="tab-pane fade" id="historymention">
                                         <div class="row">
                                           <div class="col-md-8">
-                                            <div class="card">
-                                              <div class="card-body mx-1" style="max-height: 300px; overflow-y: auto;">
-                                                <blockquote>
-                                                  <!-- added the mention for mention history -->
-                                                  <table class="table table-hover">
-                                                    <thead class="thead-dark">
-                                                      <tr>
-                                                        <th>Timestamp</th>
-                                                        <th>User</th>
-                                                        <th>Previous To</th>
-                                                        <th>Assigned To</th>
-                                                        <th>Changes</th>
-                                                      </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                      {% for entry in history_entries %}
-                                                      <tr>
-                                                        <td>{{ entry.timestamp }}</td>
-                                                        <td>{{ entry.user.username }}</td>
-                                                        <td>{{ entry.previous_assigned_to.username }}</td>
-                                                        <td>{{ entry.current_assigned_to.username }}</td>
-                                                        <td>{{ entry.changes }}</td>
-                                                      </tr>
-                                                      {% endfor %}
-                                                    </tbody>
-                                                  </table>
-                                                </blockquote>
+                                            <div  id="historymentionData">
+                                              <div class="card" >
+                                                <div class="card-body mx-1" style="max-height: 300px; overflow-y: auto;">
+                                                  <blockquote>
+                                                    <!-- added the mention for mention history -->
+                                                    <table class="table table-hover">
+                                                      <thead class="thead-dark">
+                                                        <tr>
+                                                          <th>Timestamp</th>
+                                                          <th>User</th>
+                                                          <th>Previous To</th>
+                                                          <th>Assigned To</th>
+                                                          <th>Changes</th>
+                                                        </tr>
+                                                      </thead>
+                                                      <tbody>
+                                                        {% for entry in history_entries %}
+                                                        <tr>
+                                                          <td>{{ entry.timestamp }}</td>
+                                                          <td>{{ entry.user.username }}</td>
+                                                          <td>{{ entry.previous_assigned_to.username }}</td>
+                                                          <td>{{ entry.current_assigned_to.username }}</td>
+                                                          <td>{{ entry.changes }}</td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                      </tbody>
+                                                    </table>
+                                                  </blockquote>
+                                                </div>
+                                                <!-- /.card-body -->
                                               </div>
-                                              <!-- /.card-body -->
                                             </div>
                                           </div>
                                           <div class="col-md-4">
@@ -1095,7 +1097,7 @@
 
       $.get(url, function(data) {
         // Append the lead history modal to the body
-        $('#historymention').html(data);
+        $('#historymentionData').html(data);
         // Show the modal
         //$('#showhsitory').modal('show');
       });
