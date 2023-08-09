@@ -282,11 +282,11 @@
 
                               <a class="dropdown-item" href="javascript:void(0)" data-toggle="modal"
                                 data-target="#editModal-{{ lead.id }}">Edit</a>
-                              <a class="dropdown-item" href="{% url 'toggle_lead_status' lead.id %}">
-                                {% if lead.is_active %}
-                                Deactivate
+                              <a class="dropdown-item" href="{% url 'toggle_saleslead_status' lead.id %}">
+                                {% if lead.is_complete %}
+                                Not Complete
                                 {% else %}
-                                Activate
+                                Complete
                                 {% endif %}
                               </a>
                               {% comment %} <a class="dropdown-item" href="#">Assign</a> {% endcomment %}
@@ -296,7 +296,7 @@
                           <!-- edit modal -->
                           <div class="modal fade" id="editModal-{{ lead.id }}" tabindex="-1" role="dialog"
                             aria-labelledby="editModalLabel" aria-hidden="true">
-                            <div class="modal-dialog" role="document">
+                            <div class="modal-dialog modal-xl" role="document">
                               <div class="modal-content">
                                 <div class="modal-header">
                                   <h5 class="modal-title" id="editModalLabel">Edit Lead
@@ -406,14 +406,121 @@
 
                                     </div>
                                   </form>
-                                </div>
-                                <!-- Your form fields -->
-                                <div class="modal-footer">
-                                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                  <button type="button" class="btn btn-primary"
-                                    onclick="updateLead('{{ lead.id }}')">Save</button>
 
+                                <!-- and tabs -->
+                              <!--  New changes  -->
+
+                            <div class="container mt-1">
+                              <div class="card card-primary card-outline card-tabs">
+                                <div class="card-header card-header-regular p-0 pt-1">
+                                  <ul class="nav nav-tabs mx-3" id="myTabs">
+                                    <li class="nav-item">
+                                      <a class="nav-link active" data-toggle="tab" href="#mention">Mention</a>
+                                    </li>
+                                    <li class="nav-item">
+                                      <a class="nav-link" data-toggle="tab" href="#history">History</a>
+                                    </li>
+                                    <li class="nav-item">
+                                      <a class="nav-link" data-toggle="tab" href="#doccument">Doccuments</a>
+                                    </li>
+                                    <li class="nav-item ml-auto">
+                                      <div data-toggle="collapse" data-target="#accordionContent">
+                                        <div class="nav-link mb-0 mx-2">
+                                          <i class="fe fe-maximize-2"></i>
+                                        </div>
+                                      </div>
+                                    </li>
+                                  </ul>
                                 </div>
+                              </div>
+                              
+                              <div class="tab-content" id="accordionContent" class="collapse">
+                                <div class="tab-pane fade show active" id="mention">
+                                  <div class="row">
+                                    <div class="col-md-8">
+                                      <div class="card">
+                                        <div class="card-body mx-1" style="max-height: 300px; overflow-y: auto;">
+                                          <blockquote>
+                                             Mentioned to {{ lead.transfer_to }}
+                                          </blockquote>
+                                        </div>
+                                        <!-- /.card-body -->
+                                      </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                      <div class="card">
+                                        <div class="card-body mx-1" style="max-height: 300px; overflow-y: auto;">
+                                          <blockquote>
+                                            <div id="user_mentions_list_{{ lead.id }}" class="user-mentions-list"></div>
+                                            <textarea id="assign_comment_field_{{ lead.id }}" name="assign_comment" class="mention-textarea">{{ lead.assign_comment }}</textarea>
+                                            <button class="transfer_button" data-lead-id="{{ lead.id }}" data-user-mentions="{{ lead.get_user_mentions_json }}">Mention</button>
+                                          </blockquote>
+                                        </div>
+                                        <!-- /.card-body -->
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div class="tab-pane fade" id="history">
+                                  <div class="row">
+                                    <div class="col-6">
+                                      <div class="card">
+                                        <div class="card-body mx-1" style="max-height: 300px; overflow-y: auto;">
+                                          <blockquote>
+                                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</p>
+                                          </blockquote>
+                                        </div>
+                                        <!-- /.card-body -->
+                                      </div>
+                                    </div>
+                                    <div class="col-6">
+                                      <div class="card">
+                                        <div class="card-body mx-1" style="max-height: 300px; overflow-y: auto;">
+                                          <blockquote>
+                                            <p>Contenu de la colonne 2 de l'onglet À propos laye
+                                            </p>
+                                          </blockquote>
+                                        </div>
+                                        <!-- /.card-body -->
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                <div class="tab-pane fade" id="doccument">
+                                  <div class="row">
+                                    <div class="col-6">
+                                      <div class="card">
+                                        <div class="card-body mx-1" style="max-height: 300px; overflow-y: auto;">
+                                          <blockquote>
+                                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</p>
+                                          </blockquote>
+                                        </div>
+                                        <!-- /.card-body -->
+                                      </div>
+                                    </div>
+                                    <div class="col-6">
+                                      <div class="card">
+                                        <div class="card-body mx-1" style="max-height: 300px; overflow-y: auto;">
+                                          <blockquote>
+                                            <p>Contenu de la colonne 2 de l'onglet À propos laye
+                                            </p>
+                                          </blockquote>
+                                        </div>
+                                        <!-- /.card-body -->
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          
+                              <!-- and tabs -->
+
+                              <!--  tabs accordeon -->
+                              <!-- and tabs -->
+                              <!-- end of new changes -->
 
                                 <!-- Your JavaScript code -->
 
@@ -583,6 +690,8 @@
 
 </main> <!-- main -->
 
+
+
 {% endblock %}
 {% block javascript %}
  
@@ -593,4 +702,178 @@
             responsive: true
         });
     </script>
+
+    
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+
+$(document).ready(function () {
+
+  /*test */
+  $(document).ready(function () {
+    // Function to get all users from the server
+    function getAllUsers() {
+        $.ajax({
+            url:  '{% url "get_all_users" %}',
+            method: 'GET',
+            success: function (users) {
+                // Store the users in a global variable
+                window.allUsers = users;
+            },
+            error: function (error) {
+                console.error("Error fetching users:", error);
+            }
+        });
+    }
+
+    // Get the list of all users on page load
+    getAllUsers();
+
+    // Handle "@" typing and show the user mentions list
+    $(document).on("input", ".mention-textarea", function () {
+        const leadId = $(this).attr('id').split('_').pop();
+        const value = $(this).val();
+        const userMentionsList = $(`#user_mentions_list_${leadId}`);
+        if (value.endsWith('@') && window.allUsers) {
+            userMentionsList.empty();
+            for (const user of window.allUsers) {
+                const mentionItem = $("<div>").text(`@${user.username}`).attr('data-user-id', user.id);
+                userMentionsList.append(mentionItem);
+            }
+            userMentionsList.show();
+        } else {
+            userMentionsList.hide();
+        }
+    });
+
+    // Handle click on a mention item and insert the selected username in the textarea
+    
+    $(document).on("click", ".user-mentions-list div", function () {
+      const username = $(this).text().slice(1); // Exclude the "@" prefix by removing the first character
+      const leadId = $(this).closest("td").find(".mention-textarea").attr('id').split('_').pop();
+      const textarea = $(`#assign_comment_field_${leadId}`);
+      const currentValue = textarea.val();
+      const mentionStartIndex = currentValue.lastIndexOf('@');
+    
+      // Find the start and end indices of the last selected user mention, if any
+      let existingMentionStartIndex = -1;
+      let existingMentionEndIndex = -1;
+      if (mentionStartIndex >= 0) {
+        existingMentionStartIndex = mentionStartIndex;
+        existingMentionEndIndex = currentValue.indexOf('@', mentionStartIndex + 1);
+        if (existingMentionEndIndex === -1) {
+          existingMentionEndIndex = currentValue.length;
+        }
+      }
+    
+      // Remove the last selected user mention, if any
+      let updatedValue = currentValue;
+      if (existingMentionStartIndex >= 0 && existingMentionEndIndex >= 0) {
+        updatedValue = currentValue.substring(0, existingMentionStartIndex) + currentValue.substring(existingMentionEndIndex);
+      }
+    
+      // Append the selected username if it's not already present
+      const mentionAlreadyExists = updatedValue.includes(`@${username}`);
+      if (!mentionAlreadyExists) {
+        updatedValue = updatedValue.trim();
+        updatedValue = updatedValue ? `${updatedValue} @${username} ` : `@${username} `;
+      }
+    
+      textarea.val(updatedValue);
+      $(`#user_mentions_list_${leadId}`).hide();
+    
+      // Move the cursor position after the inserted text and the added space
+      const cursorPos = updatedValue.length;
+      textarea[0].setSelectionRange(cursorPos, cursorPos);
+      textarea[0].focus(); // Optional: Move the cursor to the end of the inserted text
+    });
+    
+
+    // Handle keyboard navigation and selection
+    $(document).on("keydown", ".mention-textarea", function (event) {
+        const userMentionsList = $(this).closest("td").find(".user-mentions-list");
+        if (userMentionsList.is(":visible")) {
+            const mentionItems = userMentionsList.find("div");
+            const currentSelected = userMentionsList.find(".selected");
+            if (event.key === "ArrowUp" && currentSelected.prev().length) {
+                currentSelected.removeClass("selected");
+                currentSelected.prev().addClass("selected");
+            } else if (event.key === "ArrowDown" && currentSelected.next().length) {
+                currentSelected.removeClass("selected");
+                currentSelected.next().addClass("selected");
+            } else if (event.key === "Enter" && currentSelected.length) {
+                const username = currentSelected.text();
+                const leadId = $(this).attr('id').split('_').pop();
+                const textarea = $(`#assign_comment_field_${leadId}`);
+                const currentValue = textarea.val();
+                const mentionStartIndex = currentValue.lastIndexOf('@');
+                const updatedValue = currentValue.substring(0, mentionStartIndex) + username + " " + currentValue.substring(mentionStartIndex);
+                textarea.val(updatedValue);
+                userMentionsList.hide();
+            }
+        }
+    });
+});
+
+  /*test */
+
+    // Handle clicking outside the user mentions list to close it
+    $(document).on('click', function (event) {
+        const target = $(event.target);
+        if (!target.hasClass('mention-textarea') && !target.hasClass('mention-item')) {
+            $('.user-mentions-list').hide();
+        }
+    });
+
+    // Handle clicking on the "Transfer" button
+    $(document).on("click", ".transfer_button", function () {
+      const leadId = $(this).attr('data-lead-id');
+      const textarea = $(`#assign_comment_field_${leadId}`);
+      const user_mentions_text = textarea.val().trim();
+      
+      // Use regular expression to extract all mentions
+      const mentions = user_mentions_text.match(/@\w+/g);
+      const mentionsArray = [];
+      
+      // Construct the array of mention objects
+      for (const mention of mentions) {
+          const username = mention.substring(1); // Remove "@" from the mention
+          mentionsArray.push({ "username": username, "full_text": mention });
+          break
+      }
+
+      $.ajax({
+        url:  '{% url "transfer_leads" %}',
+        method: 'POST',
+        data: {
+          csrfmiddlewaretoken: '{{ csrf_token }}',
+          'leadid':leadId,
+          'username':JSON.stringify(mentionsArray[0]),
+          'fulltext':user_mentions_text
+        },
+        success: function (jsonData) {
+          
+          Swal.fire(
+            'Success!',
+            'successfully transfered',
+            'success'
+          ).then(function() {
+            location.reload();
+          });
+        },
+        error: function (error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: error.error
+          });
+        }
+    });
+  });
+  
+  
+
+});
+</script>
 {% endblock %}

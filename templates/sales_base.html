@@ -4,15 +4,12 @@
 
 <head>
 
-  <title>Dashboard</title>
-
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+  <title>Sales CRM</title>
 
   <link rel="stylesheet" href="{%static 'css/feather.css' %}">
   <!-- Date Range Picker CSS -->
   <link rel="stylesheet" href="{%static 'css/daterangepicker.css' %}">
   <!-- App CSS -->
-
 
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -22,26 +19,24 @@
   <title>base</title>
 
   <!-- Simple bar CSS -->
-  <link rel="stylesheet" href="{%static 'css/simplebar.css '%}">
+  <link rel="stylesheet" href="{%static 'css/simplebar.css'%}">
   <!-- Fonts CSS -->
   <link
     href="https://fonts.googleapis.com/css2?family=Overpass:ital,wght@0,100;0,200;0,300;0,400;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,600;1,700;1,800;1,900&display=swap"
     rel="stylesheet">
   <!-- Icons CSS -->
 
-
   <!-- App CSS -->
   <link rel="stylesheet" href="{%static 'css/app-light.css'%}" id="lightTheme">
   <link rel="stylesheet" href="{%static 'css/app-dark.css'%}" id="darkTheme" disabled>
 
-<!-- data table new -->
+  <!-- data table new -->
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css">
-  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">  
-<!--and data table new -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
+  <!--and data table new -->
 </head>
 
 <body class="vertical  light  ">
-  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
   <div class="wrapper">
     <nav class="topnav navbar navbar-light">
       <button type="button" class="navbar-toggler text-muted mt-2 p-0 mr-3 collapseSidebar">
@@ -63,7 +58,8 @@
           </a>
         </li>
         <li class="nav-item nav-notif">
-          <a class="nav-link text-muted my-2" href="./#" data-toggle="modal" data-target=".modal-notif">
+          <a class="nav-link text-muted my-2" href="./#" data-toggle="modal" onclick="fetchNotifications()"
+            data-target="#notificationModal">
             <span class="fe fe-bell fe-16"></span>
             <span class="dot dot-md bg-success"></span>
           </a>
@@ -77,9 +73,9 @@
           </a>
           <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
             <a class="dropdown-item" href="{% url 'profile' %}">Profile</a>
-            <a class="dropdown-item" href="#">Dashboard</a>
-            <a class="dropdown-item" href="#">Settings</a>
-            <a class="dropdown-item" href="#">Logout</a>
+            <a class="dropdown-item" href="{% url 'admin_dashboard' %}">Dashboard</a>
+            <a class="dropdown-item" href="{% url 'profile_settings' %}">Settings</a>
+            <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
           </div>
         </li>
       </ul>
@@ -104,12 +100,19 @@
         </div>
         <ul class="navbar-nav flex-fill w-100 mb-2">
           <li class="nav-item dropdown">
-            <a href="#dashboard" data-toggle="collapse" aria-expanded="false" class="nav-link">
+            <a href="#dashboard" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
               <i class="fe fe-home fe-16"></i>
               <span class="ml-3 item-text">Dashboard</span><span class="sr-only">(current)</span>
             </a>
+            <ul class="collapse list-unstyled pl-4 w-100" id="dashboard">
+              <li class="nav-item">
+                <a class="nav-link pl-3" href="{% url 'sales_dashboard' %}"><span class="ml-1">Home</span></a>
+              </li>
+              <!-- Add more dropdown items here if needed -->
+            </ul>
           </li>
         </ul>
+
         <p class="text-muted nav-heading mt-4 mb-1">
           <span>Components</span>
         </p>
@@ -118,8 +121,8 @@
             <a href="#user" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
               <i class="fe fe-user fe-16"></i>
               <span class="ml-3 item-text">Users</span>
-            </a> {% endcomment %}
-            {% comment %} <ul class="collapse list-unstyled pl-4 w-100" id="user">
+            </a>
+            <ul class="collapse list-unstyled pl-4 w-100" id="user">
               <a class="nav-link pl-3" href="{% url 'add_new_user' %}"><span class="ml-1">Add new users</span></a>
               <a class="nav-link pl-3" href="#"><span class="ml-1">Deactivate users</span></a>
 
@@ -133,18 +136,19 @@
             </a>
             <ul class="collapse list-unstyled pl-4 w-100" id="forms">
               <li class="nav-item">
-                <a class="nav-link pl-3" href="{% url 'lead_dashboard' %}"><span class="ml-1 item-text">Add
+                <a class="nav-link pl-3" href="{% url 'sales_lead' %}"><span class="ml-1 item-text">Sales
                     leads</span></a>
               </li>
+              {% comment %} sales_facebook {% endcomment %}
               <li class="nav-item">
                 <a class="nav-link pl-3" href="{% url 'facebook_leads' %}"><span class="ml-1 item-text">Facebook
                     leads</span></a>
               </li>
+              {% comment %} complete leads {% endcomment %}
               <li class="nav-item">
-                <a class="nav-link pl-3" href="{% url 'deactivated_leads' %}"><span class="ml-1 item-text">Deactivate
+                <a class="nav-link pl-3" href="{% url 'complete_leads' %}"><span class="ml-1 item-text">Complete
                     Leads</span></a>
               </li>
-
 
             </ul>
           </li>
@@ -155,16 +159,16 @@
             </a>
             <ul class="collapse list-unstyled pl-4 w-100" id="profile">
               <li class="nav-item">
-                <a class="nav-link pl-3" href="#"><span class="ml-1">Overview</span></a>
+                <a class="nav-link pl-3" href="{% url 'profile' %}"><span class="ml-1">Overview</span></a>
               </li>
               <li class="nav-item">
-                <a class="nav-link pl-3" href="#"><span class="ml-1">Settings</span></a>
+                <a class="nav-link pl-3" href="{% url 'profile_settings' %}"><span class="ml-1">Settings</span></a>
               </li>
 
             </ul>
           </li>
 
-          <li class="nav-item dropdown">
+          {% comment %} <li class="nav-item dropdown">
             <a href="#tables" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
               <i class="fe fe-grid fe-16"></i>
               <span class="ml-3 item-text">Tables</span>
@@ -181,7 +185,8 @@
                 <a class="nav-link pl-3" href="./table_datatables.html"><span class="ml-1 item-text">Data
                     Tables</span></a>
               </li>
-            </ul>
+            </ul> {% endcomment %}
+            {% comment %}
           </li>
           <li class="nav-item dropdown">
             <a href="#charts" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
@@ -204,7 +209,7 @@
               </li>
             </ul>
           </li>
-        </ul>
+        </ul> {% endcomment %}
         <p class="text-muted nav-heading mt-4 mb-1">
           <span>Apps</span>
         </p>
@@ -250,7 +255,7 @@
             </ul>
           </li>
         </ul>
-        <p class="text-muted nav-heading mt-4 mb-1">
+        {% comment %} <p class="text-muted nav-heading mt-4 mb-1">
           <span>Extra</span>
         </p>
         <ul class="navbar-nav flex-fill w-100 mb-2">
@@ -264,8 +269,8 @@
                 <a class="nav-link pl-3" href="./page-orders.html">
                   <span class="ml-1 item-text">Orders</span>
                 </a>
-              </li>
-              <li class="nav-item">
+              </li> {% endcomment %}
+              {% comment %} <li class="nav-item">
                 <a class="nav-link pl-3" href="./page-timeline.html">
                   <span class="ml-1 item-text">Timeline</span>
                 </a>
@@ -279,8 +284,8 @@
                 <a class="nav-link pl-3" href="./page-404.html">
                   <span class="ml-1 item-text">Page 404</span>
                 </a>
-              </li>
-              <li class="nav-item">
+              </li> {% endcomment %}
+              {% comment %} <li class="nav-item">
                 <a class="nav-link pl-3" href="./page-500.html">
                   <span class="ml-1 item-text">Page 500</span>
                 </a>
@@ -291,8 +296,8 @@
                 </a>
               </li>
             </ul>
-          </li>
-          <li class="nav-item dropdown">
+          </li> {% endcomment %}
+          {% comment %} <li class="nav-item dropdown">
             <a href="#auth" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
               <i class="fe fe-shield fe-16"></i>
               <span class="ml-3 item-text">Authentication</span>
@@ -304,8 +309,8 @@
               <a class="nav-link pl-3" href="./auth-resetpw.html"><span class="ml-1">Reset Password</span></a>
               <a class="nav-link pl-3" href="./auth-confirm.html"><span class="ml-1">Confirm Password</span></a>
             </ul>
-          </li>
-          <li class="nav-item dropdown">
+          </li> {% endcomment %}
+          {% comment %} <li class="nav-item dropdown">
             <a href="#layouts" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
               <i class="fe fe-layout fe-16"></i>
               <span class="ml-3 item-text">Layout</span>
@@ -323,8 +328,8 @@
               </li>
             </ul>
           </li>
-        </ul>
-        <p class="text-muted nav-heading mt-4 mb-1">
+        </ul> {% endcomment %}
+        {% comment %} <p class="text-muted nav-heading mt-4 mb-1">
           <span>Documentation</span>
         </p>
         <ul class="navbar-nav flex-fill w-100 mb-2">
@@ -340,7 +345,7 @@
             target="_blank" class="btn mb-2 btn-primary btn-lg btn-block">
             <i class="fe fe-shopping-cart fe-12 mx-2"></i><span class="small">Buy now</span>
           </a>
-        </div>
+        </div> {% endcomment %}
       </nav>
     </aside>
     {% block content %}
@@ -359,19 +364,6 @@
   <script src="{%static 'js/tinycolor-min.js'%}"></script>
   <script src="{%static 'js/config.js'%}"></script>
   <script src="{%static 'js/apps.js'%}"></script>
-  <!-- Global site tag (gtag.js) - Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-56159088-1"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-
-    function gtag() {
-      dataLayer.push(arguments);
-    }
-    gtag('js', new Date());
-    gtag('config', 'UA-56159088-1');
-  </script>
-
-  
 
   <!-- datatable script -->
   {% block javascript %}
@@ -379,5 +371,180 @@
   {% endblock %}
   <!-- and datatable script -->
 </body>
+
+<!-- Add this in your base.html template -->
+<div class="modal fade modal-notif modal-slide" id="notificationModal" tabindex="-1" role="dialog"
+  aria-labelledby="defaultModalLabel" aria-hidden="true">
+  <!-- Your modal content here, but replace the notifications list with the following -->
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content" style="height: 100%; background:white">
+      <div class="modal-header">
+        <h5 class="modal-title" id="defaultModalLabel">Notifications</h5>&nbsp;&nbsp;
+        <span class="badge badge-pill badge-info" id="unreadNotificationCount">0</span>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" style="overflow-y: auto;">
+        <div class="list-group list-group-flush my-n3" id="notificationList">
+          <!-- Dynamic notifications will be added here -->
+          <div class="list-group-item">Loading notifications...</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-block" onclick="clearAllNotifications()"
+          data-dismiss="modal">Clear All</button>
+      </div>
+    </div>
+  </div>
+  <!-- Rest of your modal content -->
+</div>
+
+<!-- Add the following script at the end of your base.html template -->
+<script>
+  function fetchNotifications() {
+    $.ajax({
+      url: '{% url "get_notifications" %}',
+      dataType: 'json',
+      success: function(data) {
+        var unreadNotificationCount = $('#unreadNotificationCount'); // Reference to the badge
+        var notificationList = $('#notificationList');
+        notificationList.empty(); // Clear existing notifications
+        unreadNotificationCount.text(0);
+        if (data.length === 0) {
+          notificationList.append('<div class="list-group-item">No new notifications</div>');
+        } else {
+          var totalCount = 0;
+          var customNotification = '';
+          var groupCount = 0;
+          var currentHour = null;
+          data.forEach(function(notification) {
+            console.log(data)
+            // Calculate time ago
+            var notificationTime = new Date(notification.timestamp);
+            var currentTime = new Date();
+            var timeDiff = Math.floor((currentTime - notificationTime) / 1000); // Time difference in seconds
+            var formattedTimestamp = notificationTime.toLocaleString();
+            // Function to format time ago
+            function formatTimeAgo(timeDiff) {
+              if (timeDiff < 60) {
+                return timeDiff + 's ago';
+              } else if (timeDiff < 3600) {
+                return Math.floor(timeDiff / 60) + 'm ago';
+              } else if (timeDiff < 86400) {
+                return Math.floor(timeDiff / 3600) + 'h ago';
+              } else {
+                return Math.floor(timeDiff / 86400) + 'd ago';
+              }
+            }
+            var notificationHour = notificationTime.getHours();
+            if (currentHour === null || notificationHour === currentHour) {
+              groupCount += 1;
+            } else {
+              if (groupCount > 0) {
+                viewAllLink =
+                  '<a href="{% url "all_notifications" %}" class="view-all-link">View all notifications</a>';
+                // Display the custom notification for the previous hour group
+                customNotification = '<div class="list-group-item bg-transparent">' +
+                  '<div class="row align-items-center">' +
+                  '<div class="col">' +
+                  '<small><strong>' + groupCount +
+                  ' notifications received in the last hour</strong></small><br/>' +
+                  viewAllLink +
+                  '</div>' +
+                  '</div>' +
+                  '</div>';
+                notificationList.append(customNotification);
+                groupCount = 1;
+              }
+            }
+            var itemHtml =
+              '<div class="list-group-item bg-transparent">' +
+              '<div class="row align-items-center">' +
+              '<div class="col-auto">' +
+              '<span class="fe fe-bell fe-24"></span>' +
+              '</div>' +
+              '<div class="col">' +
+              '<small><strong>' + notification.message + '</strong></small>' +
+              '<div class="my-0 text-muted small">' + formattedTimestamp + '</div>' +
+              '<div class="my-0 text-muted small">' + formatTimeAgo(timeDiff) + '</div>' +
+              '</div>' +
+              '<div class="col-auto">' +
+              '<span class="fe fe-x-circle fe-16 text-primary cursor-pointer" onclick="markNotificationRead(' +
+              notification.id + ')"></span>' +
+              '</div>' +
+              '</div>' +
+              '</div>';
+            notificationList.append(itemHtml);
+            totalCount += 1;
+            currentHour = notificationHour;
+          });
+          if (groupCount > 0) {
+            viewAllLink =
+              '<a href="{% url "all_notifications" %}" class="view-all-link">View all notifications</a>';
+            // Display the custom notification for the last hour group
+            customNotification = '<div class="list-group-item bg-transparent">' +
+              '<div class="row align-items-center">' +
+              '<div class="col">' +
+              '<small><strong>' + groupCount + ' notifications received in the last hour</strong></small><br>' +
+              viewAllLink +
+              '</div>' +
+              '</div>' +
+              '</div>';
+            notificationList.append(customNotification);
+          }
+          unreadNotificationCount.text(totalCount);
+        }
+      },
+      error: function() {
+        console.error('Failed to fetch notifications.');
+      }
+    });
+  }
+
+  function markNotificationRead(notificationId) {
+    $.ajax({
+      url: '{% url "mark_notification_read" %}',
+      type: 'POST',
+      data: {
+        notification_id: notificationId,
+        csrfmiddlewaretoken: '{{ csrf_token }}'
+      },
+      dataType: 'json',
+      success: function(response) {
+        if (response.success) {
+          $('.close').click();
+        }
+      },
+      error: function() {
+        console.error('Failed to mark notification as read.');
+      }
+    });
+  }
+
+  function clearAllNotifications() {
+    // Make an AJAX call to mark all notifications as read
+    $.ajax({
+      url: '{% url "clear_all_notifications" %}',
+      type: 'POST',
+      data: {
+        csrfmiddlewaretoken: '{{ csrf_token }}'
+      },
+      dataType: 'json',
+      success: function(response) {
+        if (response.success) {
+          // Notifications cleared successfully
+          // Now close the notification slide
+          $('#notificationModal').modal('hide');
+          // Optionally, you can reload the page to refresh the notifications
+          // location.reload();
+        }
+      },
+      error: function() {
+        console.error('Failed to clear all notifications.');
+      }
+    });
+  }
+</script>
 
 </html>

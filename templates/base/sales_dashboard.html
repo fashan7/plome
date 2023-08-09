@@ -1,56 +1,22 @@
 {% extends 'sales_base.html' %}
 {% load static %}
-
 {% block content %}
 <main role="main" class="main-content">
     <div class="container-fluid">
         <div class="row justify-content-center">
             <div class="col-12">
-                <h1 class="page-title">Hello Sales, {{ request.user }}</h1>
+                {% for fu in filtered_user %}
+                <h1 class="page-title">Hello Sales, {{fu}}</h1>
+                {% endfor %}
             </div>
-            <!-- .col-12 -->
+            <!--	.col-12	-->
         </div>
-        <!-- .row -->
+        <!--	.row	-->
     </div>
-    <!-- .container-fluid -->
+    <!--	.container-fluid	--> 
 
-    {% if user_leads %}
-    <div class="row justify-content-center">
-        <div class="col-12">
-            <h2>User Leads:</h2>
-            <ul>
-                {% for lead in user_leads %}
-                <li>{{ lead.nom_de_la_campagne }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-    {% endif %}
-
-    {% if user_notifications %}
-    <div class="row justify-content-center">
-        <div class="col-12">
-            <h2>User Notifications:</h2>
-            <ul>
-                {% for notification in user_notifications %}
-                <li>{{ notification.message }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-    {% endif %}
-
-    {% if messages %}
-    {% for message in messages %}
-    <div class="alert alert-info alert-dismissible fade show" role="alert">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    {% endfor %}
-    {% endif %}
-
-    {% if user_notifications %}
-    <div class="modal fade modal-notif modal-slide" tabindex="-1" role="dialog" aria-labelledby="defaultModalLabel" aria-hidden="true">
+    <div class="modal fade modal-notif modal-slide" tabindex="-1" role="dialog" aria-labelledby="defaultModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -63,20 +29,66 @@
                 </div>
                 <div class="modal-body">
                     <div class="list-group list-group-flush my-n3">
-                        {% for notification in user_notifications %}
                         <div class="list-group-item bg-transparent">
                             <div class="row align-items-center">
                                 <div class="col-auto">
-                                    <span class="fe fe-bell fe-24"></span>
+                                    <span class="fe fe-box fe-24"></span>
                                 </div>
                                 <div class="col">
-                                    <small><strong>{{ notification.message }}</strong></small>
-                                    <small class="badge badge-pill badge-light text-muted">{{ notification.created_at }}</small>
+                                    <small><strong>Package has uploaded successfull</strong></small>
+                                    <div class="my-0 text-muted small">
+                                        Package is zipped and uploaded
+                                    </div>
+                                    <small class="badge badge-pill badge-light text-muted">1m ago</small>
                                 </div>
                             </div>
                         </div>
-                        {% endfor %}
+                        <div class="list-group-item bg-transparent">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <span class="fe fe-download fe-24"></span>
+                                </div>
+                                <div class="col">
+                                    <small><strong>Widgets are updated successfull</strong></small>
+                                    <div class="my-0 text-muted small">
+                                        Just create new layout Index, form, table
+                                    </div>
+                                    <small class="badge badge-pill badge-light text-muted">2m ago</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="list-group-item bg-transparent">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <span class="fe fe-inbox fe-24"></span>
+                                </div>
+                                <div class="col">
+                                    <small><strong>Notifications have been sent</strong></small>
+                                    <div class="my-0 text-muted small">
+                                        Fusce dapibus, tellus ac cursus commodo
+                                    </div>
+                                    <small class="badge badge-pill badge-light text-muted">30m ago</small>
+                                </div>
+                            </div>
+                            <!--	/	.row	-->
+                        </div>
+                        <div class="list-group-item bg-transparent">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <span class="fe fe-link fe-24"></span>
+                                </div>
+                                <div class="col">
+                                    <small><strong>Link was attached to menu</strong></small>
+                                    <div class="my-0 text-muted small">
+                                        New layout has been attached to the menu
+                                    </div>
+                                    <small class="badge badge-pill badge-light text-muted">1h ago</small>
+                                </div>
+                            </div>
+                        </div>
+                        <!--	/	.row	-->
                     </div>
+                    <!--	/	.list-group	-->
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">
@@ -86,8 +98,6 @@
             </div>
         </div>
     </div>
-    {% endif %}
-
     <div class="modal fade modal-shortcut modal-slide" tabindex="-1" role="dialog" aria-labelledby="defaultModalLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -146,15 +156,10 @@
         </div>
     </div>
 </main>
-<!-- main -->
+<!--	main	-->
 </div>
 {% endblock %}
 
-{% block javascript %}
-<script>
-    // Show the notification modal when the page loads
-    $(document).ready(function () {
-        $('.modal-notif').modal('show');
-    });
-</script>
-{% endblock %}
+
+
+
