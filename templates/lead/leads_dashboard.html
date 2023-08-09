@@ -343,24 +343,6 @@
           </div>
         </div>
 
-              <div class="modal-content">
-                  <div class="modal-header">
-                      <h5 class="modal-title">History Entries</h5>
-                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                          <span aria-hidden="true">&times;</span>
-                      </button>
-                  </div>
-                  <div class="modal-body">
-                      <div id="loadhistory"></div>
-                  </div>
-                  <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" id="closeHistoryModel" data-dismiss="modal">Close</button>
-                  </div>
-              </div>
-          </div>
-      </div>
-
-
         <!-- Small table -->
         <div class="row my-2">
           <div class="col-md-12">
@@ -376,14 +358,13 @@
                         <th data-toggle="select">Nom de la Campagne </th>
                         <th data-toggle="select">Avez-vous travaillé</th>
                         <th data-toggle="select">Nom & Prenom</th>
-
-
                         <th data-toggle="select">Téléphone</th>
                         <th data-toggle="select">Email</th>
                         <th data-toggle="select">Qualification</th>
                         <th data-toggle="select">Comments</th>
                         <th data-toggle="select">Assign to</th>
-                        <th data-toggle="select">Mention</th>
+                        <th data-toggle="select">Mentioned</th>
+                        <th data-toggle="select">Mention Action</th>
                         <th data-toggle="select">Action</th>
                       </tr>
                     </thead>
@@ -443,13 +424,10 @@
                                 {% endif %}
                               </a>
 
-                              <a class="dropdown-item show-history-btn" data-lead-id="{{ lead.id }}"
+                              <a class="dropdown-item show-history-btn-" data-lead-id="{{ lead.id }}"
                                 data-url="{% url 'lead_history' lead.id %}" href="javascript:void(0)">Show History</a>
                               <a class="dropdown-item" href="javascript:void(0)" data-toggle="modal"
                                 data-target="#editModal-{{ lead.id }}">View</a>
-
-                              <a class="dropdown-item show-history-btn" data-lead-id="{{ lead.id }}" data-url="{% url 'lead_history' lead.id %}" href="javascript:void(0)">Show History</a>
-                              <a class="dropdown-item" href="javascript:void(0)" data-toggle="modal" data-target="#editModal-{{ lead.id }}">View</a>
 
                             </div>
                           </div>
@@ -569,7 +547,6 @@
                                       </div>
                                       {% if lead.custom_fields %}
 
-                                      <h3>Custom Fields</h3>
                                       {% for key, value in lead.custom_fields.items %}
                                       <div class="form-group col-md-6">
                                         <label for="{{ key }}">{{ key }}</label>
@@ -578,54 +555,29 @@
                                       </div>
                                       {% endfor %}
 
-                                        <h3>Custom Fields</h3>
-                                        {% for key, value in lead.custom_fields.items %}
-                                          <div class="form-group col-md-6">
-                                            <label for="{{ key }}">{{ key }}</label>
-                                            <input type="text" name="custom_fields.{{ key }}" id="{{ key }}" class="form-control" value="{{ value }}" >
-                                          </div>
-                                        {% endfor %}
 
                                       {% endif %}
 
                                     </div>
                                   </form>
 
-
-                                  <ul class="nav nav-tabs mb-4" id="myTab" role="tablist" style="border-bottom:none">
-                                    <li class="nav-item">
-                                      <a class="nav-link" id="home-tab" data-toggle="tab" href="javascript:void(0)" role="tab" aria-controls="acomment" aria-selected="false">Mention</a>
-                                    </li>
-                                    <li class="nav-item">
-                                      <a class="nav-link" id="profile-tab" data-toggle="tab" href="javascript:void(0)" role="tab" aria-controls="history" aria-selected="false">History</a>
-                                    </li>
-                                    <li class="nav-item">
-                                      <a class="nav-link" id="contact-tab" data-toggle="tab" href="javascript:void(0)" role="tab" aria-controls="documents" aria-selected="false">Documents</a>
-                                    </li>
-                                  </ul>
                                 </div>
                                 <!-- Your form fields -->
                                 <div class="modal-footer">
-                                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                  <button type="button" class="btn btn-primary"
-                                    onclick="updateLead('{{ lead.id }}')">Save</button>
-
-
-                                  <!-- and tabs -->
-                                  <!--  New changes  -->
-
                                   <div class="container mt-1">
                                     <div class="card card-primary card-outline card-tabs">
                                       <div class="card-header card-header-regular p-0 pt-1">
                                         <ul class="nav nav-tabs mx-3" id="myTabs">
+                                          
                                           <li class="nav-item">
-                                            <a class="nav-link active" data-toggle="tab" href="#mention">Mention</a>
+                                            <a class="nav-link active" data-toggle="tab" href="#doccument">Documents</a>
                                           </li>
                                           <li class="nav-item">
-                                            <a class="nav-link" data-toggle="tab" href="#history">History</a>
+                                            <a class="nav-link show-history-btn" data-toggle="tab" href="#history" data-lead-id="{{ lead.id }}"
+                                            data-url="{% url 'lead_history' lead.id %}" >History</a>
                                           </li>
                                           <li class="nav-item">
-                                            <a class="nav-link" data-toggle="tab" href="#doccument">Doccuments</a>
+                                            <a class="nav-link " data-toggle="tab" href="#historymention">Mention</a>
                                           </li>
                                           <li class="nav-item ml-auto">
                                             <div data-toggle="collapse" data-target="#accordionContent">
@@ -639,7 +591,7 @@
                                     </div>
 
                                     <div class="tab-content" id="accordionContent" class="collapse">
-                                      <div class="tab-pane fade show active" id="mention">
+                                      <div class="tab-pane fade"   id="historymention">
                                         <div class="row">
                                           <div class="col-md-8">
                                             <div class="card">
@@ -741,7 +693,7 @@
                                         </div>
                                       </div>
 
-                                      <div class="tab-pane fade" id="doccument">
+                                      <div class="tab-pane fade  show active" id="doccument">
                                         <div class="row">
                                           <div class="col-6">
                                             <div class="card">
@@ -974,7 +926,7 @@
       // Handle keyboard navigation and selection
       $(document).on("keydown", ".mention-textarea", function(event) {
 
-    });
+      });
 
     // Handle click on a mention item and insert the selected username in the textarea
     
@@ -1056,33 +1008,6 @@
     });
     // Handle clicking on the "Transfer" button
 
-    $(document).on("click", ".transfer_button", function() {
-      const leadId = $(this).attr('data-lead-id');
-      const textarea = $(`#assign_comment_field_${leadId}`);
-      const user_mentions_text = textarea.val().trim();
-      // Use regular expression to extract all mentions
-      const mentions = user_mentions_text.match(/@\w+/g);
-      const mentionsArray = [];
-      // Construct the array of mention objects
-      for (const mention of mentions) {
-        const username = mention.substring(1); // Remove "@" from the mention
-        mentionsArray.push({
-          "username": username,
-          "full_text": mention
-        });
-        break
-      }
-      $.ajax({
-        url: '{% url "transfer_leads" %}',
-        method: 'POST',
-        data: {
-          csrfmiddlewaretoken: '{{ csrf_token }}',
-          'leadid': leadId,
-          'username': JSON.stringify(mentionsArray[0]),
-          'fulltext': user_mentions_text
-        },
-        success: function(jsonData) {
-
     $(document).on("click", ".transfer_button", function () {
       const leadId = $(this).attr('data-lead-id');
       const textarea = $(`#assign_comment_field_${leadId}`);
@@ -1120,7 +1045,6 @@
           });
         },
 
-        error: function(error) {
 
         error: function (error) {
 
@@ -1134,14 +1058,6 @@
       });
     });
   });
-
-    });
-  });
-  
-  
-
-});
-
 </script>
 
 {% endblock %}
@@ -1163,7 +1079,9 @@
 
 
 <script>
+  
   $(document).ready(function() {
+    
     $('.show-history-btn').click(function(event) {
 
       event.preventDefault();
@@ -1177,9 +1095,9 @@
 
       $.get(url, function(data) {
         // Append the lead history modal to the body
-        $('#loadhistory').html(data);
+        $('#historymention').html(data);
         // Show the modal
-        $('#showhsitory').modal('show');
+        //$('#showhsitory').modal('show');
       });
     });
   });
@@ -1270,11 +1188,6 @@
       }
 
 
-          comments: rowData[9]  || null, 
-        });
-        selectedLeads.push(lead)
-      }
-
 
       if (selectedLeads.length > 0 && assignToUser) {
         $.ajax({
@@ -1297,6 +1210,5 @@
         alert('Please select leads and choose a user to assign.');
       }
     });
-  });
 </script>
 {% endblock %}
