@@ -387,19 +387,19 @@
 
                         <td>
                           Mentioned to {{ lead.transfer_to }}
-                          {% comment %} <div id="user_mentions_list_{{ lead.id }}" class="user-mentions-list"></div>
+                          <!-- <div id="user_mentions_list_{{ lead.id }}" class="user-mentions-list"></div>
                           <textarea id="assign_comment_field_{{ lead.id }}" name="assign_comment"
                             class="mention-textarea">{{ lead.assign_comment }}</textarea>
                           <button class="transfer_button" data-lead-id="{{ lead.id }}"
-                            data-user-mentions="{{ lead.get_user_mentions_json }}">Mention</button> {% endcomment %}
+                            data-user-mentions="{{ lead.get_user_mentions_json }}">Mention</button> -->
 
                         </td>
 
                 
                        <td>
                         Mentioned to {{ lead.transfer_to }}
-                        <div id="user_mentions_list_{{ lead.id }}" class="user-mentions-list"></div>
-                          <textarea id="assign_comment_field_{{ lead.id }}" name="assign_comment" class="mention-textarea">{{ lead.assign_comment }}</textarea>
+                      <!--<div id="user_mentions_list_{{ lead.id }}" class="user-mentions-list"></div> 
+                          <textarea id="assign_comment_field_{{ lead.id }}" name="assign_comment" class="mention-textarea">{{ lead.assign_comment }}</textarea>-->
                           <button class="transfer_button" data-lead-id="{{ lead.id }}" data-user-mentions="{{ lead.get_user_mentions_json }}">Mention</button>
                           
                       </td>
@@ -630,7 +630,6 @@
                                           <div class="col-md-4">
                                             <div class="card">
                                               <div class="card-body mx-1" style="max-height: 300px; overflow-y: auto;">
-                                                <blockquote>
                                                   <div id="user_mentions_list_{{ lead.id }}" class="user-mentions-list">
                                                   </div>
                                                   <textarea id="assign_comment_field_{{ lead.id }}"
@@ -638,7 +637,6 @@
                                                     class="mention-textarea">{{ lead.assign_comment }}</textarea>
                                                   <button class="transfer_button" data-lead-id="{{ lead.id }}"
                                                     data-user-mentions="{{ lead.get_user_mentions_json }}">Mention</button>
-                                                </blockquote>
                                               </div>
                                               <!-- /.card-body -->
                                             </div>
