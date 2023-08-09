@@ -44,7 +44,7 @@ def user_dashboard(request):
     context = {
         'assigned_leads_count': assigned_leads_count
     }
-    return render(request, 'lead/dashboard-sales.html', context)
+    return render(request, 'lead/admin_dashboard.html', context)
 
 #deleting the duplicates only if there numbers are same
 def delete_duplicate_leads():
