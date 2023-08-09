@@ -111,35 +111,7 @@ def create_lead_history(sender, instance, created, **kwargs):
         for field, value in instance._original_state.items():
             new_value = getattr(instance, field)
 
-            # if new_value != value:
-            #     # Customize the message for specific fields
-            #     if field == 'qualification':
-            #         pass
-            #         # old_qualification = dict(instance.QUALIFICATION_CHOICES).get(value, value)
-            #         # new_qualification = dict(instance.QUALIFICATION_CHOICES).get(new_value, new_value)
-            #         # changes.append(f"- {instance.last_modified_by.username} ---- changed qualification from ---- '{old_qualification}' --to '{new_qualification}'.")
-            #     elif field == 'assigned_to':
-            #         pass
-            #         # old_assigned_to_name = CustomUserTypes.objects.get(id=value).get_username() if value else "Unassigned"
-            #         # new_assigned_to_name = CustomUserTypes.objects.get(id=new_value).get_username() if new_value else "Unassigned"
-            #         # changes.append(f"- {instance.last_modified_by.username} changed assigned user from '{old_assigned_to_name}' to '{new_assigned_to_name}'.")
-            #         # LeadHistory.objects.create(lead=instance, user=instance.last_modified_by, previous_assigned_to=value, current_assigned_to=new_value, changes="Lead transferred.")
-            #     else:
-            #         changes.append(f"- {field}: {value} -> {new_value}")
-
-            if new_value != value:
-                # Customize the message for specific fields
-                if field == 'qualification':
-                    old_qualification = dict(instance.QUALIFICATION_CHOICES).get(value, value)
-                    new_qualification = dict(instance.QUALIFICATION_CHOICES).get(new_value, new_value)
-                    changes.append(f"- {instance.last_modified_by.username} ---- changed qualification from ---- '{old_qualification}' --to '{new_qualification}'.")
-                elif field == 'assigned_to':
-                    old_assigned_to_name = CustomUserTypes.objects.get(id=value).get_username() if value else "Unassigned"
-                    new_assigned_to_name = CustomUserTypes.objects.get(id=new_value).get_username() if new_value else "Unassigned"
-                    changes.append(f"- {instance.last_modified_by.username} changed assigned user from '{old_assigned_to_name}' to '{new_assigned_to_name}'.")
-                    LeadHistory.objects.create(lead=instance, user=instance.last_modified_by, previous_assigned_to=value, current_assigned_to=new_value, changes="Lead transferred.")
-                else:
-                    changes.append(f"- {field}: {value} -> {new_value}")
+            
 
         # Check if any changes were made
         if changes:
