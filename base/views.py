@@ -337,7 +337,7 @@ def profile_settings(request):
             user.set_password(new_password)
 
         user.save()
-        return redirect('profile')
+        return redirect('profile_settings')
 
 
     return render(request, 'base/profile_setting.html', {'user': user})
