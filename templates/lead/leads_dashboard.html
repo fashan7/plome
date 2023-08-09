@@ -570,13 +570,13 @@
                                         <ul class="nav nav-tabs mx-3" id="myTabs">
                                           
                                           <li class="nav-item">
-                                            <a class="nav-link active" data-toggle="tab" href="#doccument">Documents</a>
+                                            <a class="nav-link active" data-toggle="tab" href="#doccument{{ lead.id }}">Documents</a>
                                           </li>
                                           <li class="nav-item">
-                                            <a class="nav-link" data-toggle="tab" href="#history"  >History</a>
+                                            <a class="nav-link" data-toggle="tab" href="#history{{ lead.id }}"  >History</a>
                                           </li>
                                           <li class="nav-item">
-                                            <a class="nav-link  show-history-btn" data-toggle="tab" href="#historymention" data-lead-id="{{ lead.id }}"
+                                            <a class="nav-link  show-history-btn" data-toggle="tab" href="#historymention{{ lead.id }}" data-lead-id="{{ lead.id }}"
                                             data-url="{% url 'lead_history' lead.id %}">Mention</a>
                                           </li>
                                           <li class="nav-item ml-auto">
@@ -591,10 +591,10 @@
                                     </div>
 
                                     <div class="tab-content" id="accordionContent" class="collapse">
-                                      <div class="tab-pane fade" id="historymention">
+                                      <div class="tab-pane fade" id="historymention{{ lead.id }}">
                                         <div class="row">
                                           <div class="col-md-8">
-                                            <div  id="historymentionData">
+                                            <div  id="historymentionData{{ lead.id }}">
                                               <div class="card" >
                                                 <div class="card-body mx-1" style="max-height: 300px; overflow-y: auto;">
                                                   <blockquote>
@@ -644,7 +644,7 @@
                                         </div>
                                       </div>
 
-                                      <div class="tab-pane fade" id="history">
+                                      <div class="tab-pane fade" id="history{{ lead.id }}">
                                         <div class="row">
                                           <div class="col-6">
                                             <div class="card">
@@ -693,7 +693,7 @@
                                         </div>
                                       </div>
 
-                                      <div class="tab-pane fade  show active" id="doccument">
+                                      <div class="tab-pane fade  show active" id="doccument{{ lead.id }}">
                                         <div class="row">
                                           <div class="col-6">
                                             <div class="card">
@@ -1082,20 +1082,13 @@
   
   $(document).ready(function() {
     
-    $('.show-history-btn').click(function(event) {
-
-      event.preventDefault();
-      var leadId = $(this).data('lead-id');
-      var url = $(this).data('url');
-
-     
+    $(document).on('click', '.show-history-btn', function(event) {
       event.preventDefault();
       var leadId = $(this).data('lead-id');
       var url = $(this).data('url'); 
-
       $.get(url, function(data) {
         // Append the lead history modal to the body
-        $('#historymentionData').html(data);
+        $('#historymentionData'+leadId).html(data);
         // Show the modal
         //$('#showhsitory').modal('show');
       });
