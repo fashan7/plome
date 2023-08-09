@@ -424,7 +424,7 @@
                                 {% endif %}
                               </a>
 
-                              <a class="dropdown-item show-history-btn" data-lead-id="{{ lead.id }}"
+                              <a class="dropdown-item show-history-btn-" data-lead-id="{{ lead.id }}"
                                 data-url="{% url 'lead_history' lead.id %}" href="javascript:void(0)">Show History</a>
                               <a class="dropdown-item" href="javascript:void(0)" data-toggle="modal"
                                 data-target="#editModal-{{ lead.id }}">View</a>
@@ -547,7 +547,6 @@
                                       </div>
                                       {% if lead.custom_fields %}
 
-                                      <h3>Custom Fields</h3>
                                       {% for key, value in lead.custom_fields.items %}
                                       <div class="form-group col-md-6">
                                         <label for="{{ key }}">{{ key }}</label>
@@ -556,42 +555,15 @@
                                       </div>
                                       {% endfor %}
 
-                                        <h3>Custom Fields</h3>
-                                        {% for key, value in lead.custom_fields.items %}
-                                          <div class="form-group col-md-6">
-                                            <label for="{{ key }}">{{ key }}</label>
-                                            <input type="text" name="custom_fields.{{ key }}" id="{{ key }}" class="form-control" value="{{ value }}" >
-                                          </div>
-                                        {% endfor %}
 
                                       {% endif %}
 
                                     </div>
                                   </form>
 
-
-                                  <ul class="nav nav-tabs mb-4" id="myTab" role="tablist" style="border-bottom:none">
-                                    <li class="nav-item">
-                                      <a class="nav-link" id="home-tab" data-toggle="tab" href="javascript:void(0)" role="tab" aria-controls="acomment" aria-selected="false">Mention</a>
-                                    </li>
-                                    <li class="nav-item">
-                                      <a class="nav-link" id="profile-tab" data-toggle="tab" href="javascript:void(0)" role="tab" aria-controls="history" aria-selected="false">History</a>
-                                    </li>
-                                    <li class="nav-item">
-                                      <a class="nav-link" id="contact-tab" data-toggle="tab" href="javascript:void(0)" role="tab" aria-controls="documents" aria-selected="false">Documents</a>
-                                    </li>
-                                  </ul>
                                 </div>
                                 <!-- Your form fields -->
                                 <div class="modal-footer">
-                                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                  <button type="button" class="btn btn-primary"
-                                    onclick="updateLead('{{ lead.id }}')">Save</button>
-
-
-                                  <!-- and tabs -->
-                                  <!--  New changes  -->
-
                                   <div class="container mt-1">
                                     <div class="card card-primary card-outline card-tabs">
                                       <div class="card-header card-header-regular p-0 pt-1">
@@ -600,7 +572,8 @@
                                             <a class="nav-link active" data-toggle="tab" href="#mention">Mention</a>
                                           </li>
                                           <li class="nav-item">
-                                            <a class="nav-link" data-toggle="tab" href="#history">History</a>
+                                            <a class="nav-link show-history-btn" data-toggle="tab" href="#history" data-lead-id="{{ lead.id }}"
+                                            data-url="{% url 'lead_history' lead.id %}" >History</a>
                                           </li>
                                           <li class="nav-item">
                                             <a class="nav-link" data-toggle="tab" href="#doccument">Doccuments</a>
@@ -1119,9 +1092,9 @@
 
       $.get(url, function(data) {
         // Append the lead history modal to the body
-        $('#loadhistory').html(data);
+        $('#history').html(data);
         // Show the modal
-        $('#showhsitory').modal('show');
+        //$('#showhsitory').modal('show');
       });
     });
   });
