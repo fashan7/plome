@@ -343,24 +343,6 @@
           </div>
         </div>
 
-              <div class="modal-content">
-                  <div class="modal-header">
-                      <h5 class="modal-title">History Entries</h5>
-                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                          <span aria-hidden="true">&times;</span>
-                      </button>
-                  </div>
-                  <div class="modal-body">
-                      <div id="loadhistory"></div>
-                  </div>
-                  <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" id="closeHistoryModel" data-dismiss="modal">Close</button>
-                  </div>
-              </div>
-          </div>
-      </div>
-
-
         <!-- Small table -->
         <div class="row my-2">
           <div class="col-md-12">
@@ -376,14 +358,13 @@
                         <th data-toggle="select">Nom de la Campagne </th>
                         <th data-toggle="select">Avez-vous travaillé</th>
                         <th data-toggle="select">Nom & Prenom</th>
-
-
                         <th data-toggle="select">Téléphone</th>
                         <th data-toggle="select">Email</th>
                         <th data-toggle="select">Qualification</th>
                         <th data-toggle="select">Comments</th>
                         <th data-toggle="select">Assign to</th>
-                        <th data-toggle="select">Mention</th>
+                        <th data-toggle="select">Mentioned</th>
+                        <th data-toggle="select">Mention Action</th>
                         <th data-toggle="select">Action</th>
                       </tr>
                     </thead>
@@ -447,9 +428,6 @@
                                 data-url="{% url 'lead_history' lead.id %}" href="javascript:void(0)">Show History</a>
                               <a class="dropdown-item" href="javascript:void(0)" data-toggle="modal"
                                 data-target="#editModal-{{ lead.id }}">View</a>
-
-                              <a class="dropdown-item show-history-btn" data-lead-id="{{ lead.id }}" data-url="{% url 'lead_history' lead.id %}" href="javascript:void(0)">Show History</a>
-                              <a class="dropdown-item" href="javascript:void(0)" data-toggle="modal" data-target="#editModal-{{ lead.id }}">View</a>
 
                             </div>
                           </div>
@@ -974,7 +952,7 @@
       // Handle keyboard navigation and selection
       $(document).on("keydown", ".mention-textarea", function(event) {
 
-    });
+      });
 
     // Handle click on a mention item and insert the selected username in the textarea
     
@@ -1056,33 +1034,6 @@
     });
     // Handle clicking on the "Transfer" button
 
-    $(document).on("click", ".transfer_button", function() {
-      const leadId = $(this).attr('data-lead-id');
-      const textarea = $(`#assign_comment_field_${leadId}`);
-      const user_mentions_text = textarea.val().trim();
-      // Use regular expression to extract all mentions
-      const mentions = user_mentions_text.match(/@\w+/g);
-      const mentionsArray = [];
-      // Construct the array of mention objects
-      for (const mention of mentions) {
-        const username = mention.substring(1); // Remove "@" from the mention
-        mentionsArray.push({
-          "username": username,
-          "full_text": mention
-        });
-        break
-      }
-      $.ajax({
-        url: '{% url "transfer_leads" %}',
-        method: 'POST',
-        data: {
-          csrfmiddlewaretoken: '{{ csrf_token }}',
-          'leadid': leadId,
-          'username': JSON.stringify(mentionsArray[0]),
-          'fulltext': user_mentions_text
-        },
-        success: function(jsonData) {
-
     $(document).on("click", ".transfer_button", function () {
       const leadId = $(this).attr('data-lead-id');
       const textarea = $(`#assign_comment_field_${leadId}`);
@@ -1120,7 +1071,6 @@
           });
         },
 
-        error: function(error) {
 
         error: function (error) {
 
@@ -1134,14 +1084,6 @@
       });
     });
   });
-
-    });
-  });
-  
-  
-
-});
-
 </script>
 
 {% endblock %}
@@ -1270,11 +1212,6 @@
       }
 
 
-          comments: rowData[9]  || null, 
-        });
-        selectedLeads.push(lead)
-      }
-
 
       if (selectedLeads.length > 0 && assignToUser) {
         $.ajax({
@@ -1297,6 +1234,5 @@
         alert('Please select leads and choose a user to assign.');
       }
     });
-  });
 </script>
 {% endblock %}
