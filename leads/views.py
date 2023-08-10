@@ -51,10 +51,12 @@ def admin_dashboard(request):
 
     # Count the leads with the "Signé CPF" qualification
     signe_cpf_leads_count = Lead.objects.filter(qualification='signe_cpf').count()
+    conversion_rate = (signe_cpf_leads_count / all_leads_count) * 100 if all_leads_count != 0 else 0
 
     context = {
         'all_leads_count': all_leads_count,
-        'signe_cpf_leads_count': signe_cpf_leads_count,  # Add the count for "Signé CPF" leads
+        'signe_cpf_leads_count': signe_cpf_leads_count, 
+        'conversion_rate': conversion_rate, # Add the count for "Signé CPF" leads
     }
     return render(request, 'base/admin_dashboard.html', context)
 
@@ -68,10 +70,12 @@ def user_dashboard(request):
 
     # For non-admin users, count leads with the "Signé CPF" qualification assigned to the user
     signe_cpf_leads_count = Lead.objects.filter(qualification='signe_cpf', assigned_to=user).count()
+    conversion_rate = (signe_cpf_leads_count / assigned_leads_count) * 100 if assigned_leads_count != 0 else 0
 
     context = {
         'assigned_leads_count': assigned_leads_count,
-        'signe_cpf_leads_count': signe_cpf_leads_count,  # Add the count for "Signé CPF" leads
+        'signe_cpf_leads_count': signe_cpf_leads_count,
+        'conversion_rate': conversion_rate, # Add the count for "Signé CPF" leads
     }
     return render(request, 'lead/sales_dashboard.html', context)
 
