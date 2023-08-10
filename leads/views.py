@@ -28,7 +28,23 @@ def assign_user_to_lead(lead, user_id):
     assigned_user = CustomUserTypes.objects.get(id=user_id)
     lead.assigned_to = assigned_user
     lead.save()
+      #Increment the lead count for the assigned user
+    assigned_user.lead_count += 1
+    assigned_user.save()
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import Lead
+
+@login_required
+def user_dashboard(request):
+    user = request.user
+    assigned_leads_count = Lead.objects.filter(assigned_to=user).count()
     
+    context = {
+        'assigned_leads_count': assigned_leads_count
+    }
+    return render(request, 'lead/admin_dashboard.html', context)
 
 #deleting the duplicates only if there numbers are same
 def delete_duplicate_leads():
@@ -76,7 +92,7 @@ from django.shortcuts import render, redirect
 from .models import Lead, CustomUserTypes
 from django.contrib.auth import get_user_model
 
-def lead_dashboard(request, lead_id):
+def lead_dashboard(request, lead_id=None):
     if request.method == 'POST':
         # Retrieve form data and create a new lead instance
         lead = Lead(
@@ -144,8 +160,10 @@ def lead_dashboard(request, lead_id):
         
         duplicates_deleted = delete_duplicate_leads()
         messages.success(request, f'{duplicates_deleted} duplicate leads deleted.')
-        
-        lead = get_object_or_404(Lead, id=lead_id)
+        if lead_id is not None:
+            lead = get_object_or_404(Lead, id=lead_id)
+        else:
+            pass
 
         return render(request, 'lead/leads_dashboard.html', {'leads': filtered_leads, 'users': users, 'sections': nav_data})
 
@@ -240,11 +258,8 @@ def download_attachment(request, attachment_id, attachment_name):
     
     return response
 
-from django.http import JsonResponse
-
-
-
-
+from django.http import JsonResponse\
+    
 def delete_attachment(request, attachment_id):
     attachment = get_object_or_404(Attachment, id=attachment_id)
     attachment.file.delete()  # Delete the attached file from storage

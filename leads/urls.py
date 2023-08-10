@@ -23,23 +23,16 @@ urlpatterns = [
     path('get_all_users/', views.get_all_users, name='get_all_users'),
     path('transfer_leads/', views.transfer_leads, name='transfer_leads'),
     path('lead-history/<int:lead_id>/', views.lead_history_view, name='lead_history'),
-    
-
-
-    
-    
-    
-    
-
-
-     path('complete_leads/',views.complete_leads, name='complete_leads'),
+    path('complete_leads/',views.complete_leads, name='complete_leads'),
 
     path('sales_lead/',views.sales_lead,name="sales_lead"),
     path('assign_leads/', views.assign_leads, name='assign_leads'),
     path('lead_dashboard/<int:lead_id>/', views.lead_dashboard, name='lead_dashboard'),
+    
     path('attach_file/<int:lead_id>/', views.attach_file_to_lead, name='attach_file_to_lead'),
     path('download_attachment/<int:attachment_id>/<path:attachment_name>/', views.download_attachment, name='download_attachment'),
     path('delete_attachment/<int:attachment_id>/', views.delete_attachment, name='delete_attachment'),
+    path('user/dashboard/', views.user_dashboard, name='user_dashboard'),
 ]
 
 
