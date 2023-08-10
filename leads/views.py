@@ -14,13 +14,13 @@ import os
 import importlib.util
 from .models import Lead, Notification
 import json
-
-
 import pandas as pd
-
 from dateutil.parser import parse as dateutil_parse
 import math
 import numpy as np
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required, user_passes_test
+from .models import Lead
 
 
 
@@ -32,19 +32,64 @@ def assign_user_to_lead(lead, user_id):
     assigned_user.lead_count += 1
     assigned_user.save()
 
+
+from django.contrib.auth.decorators import user_passes_test
+from django.db.models import Count, Q
 from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
 from .models import Lead
+from . import models
+
+# Custom function to check if the user is a superuser
+def is_superuser(user):
+    return user.is_superuser
+
+# Decorator to restrict access to the view for non-superusers
+@user_passes_test(is_superuser, login_url='dashboard_sales')
+def admin_dashboard(request):
+    # Count all leads
+    all_leads_count = Lead.objects.count()
+
+    # Count the leads with the "Signé CPF" qualification
+    signe_cpf_leads_count = Lead.objects.filter(qualification='signe_cpf').count()
+
+    context = {
+        'all_leads_count': all_leads_count,
+        'signe_cpf_leads_count': signe_cpf_leads_count,  # Add the count for "Signé CPF" leads
+    }
+    return render(request, 'base/admin_dashboard.html', context)
 
 @login_required
 def user_dashboard(request):
     user = request.user
-    assigned_leads_count = Lead.objects.filter(assigned_to=user).count()
-    
+    # Calculate assigned leads count for non-superusers
+    assigned_leads_count = 0
+    if not user.is_superuser:
+        assigned_leads_count = Lead.objects.filter(assigned_to=user).count()
+
+    # For non-admin users, count leads with the "Signé CPF" qualification assigned to the user
+    signe_cpf_leads_count = Lead.objects.filter(qualification='signe_cpf', assigned_to=user).count()
+
     context = {
-        'assigned_leads_count': assigned_leads_count
+        'assigned_leads_count': assigned_leads_count,
+        'signe_cpf_leads_count': signe_cpf_leads_count,  # Add the count for "Signé CPF" leads
     }
-    return render(request, 'lead/admin_dashboard.html', context)
+    return render(request, 'lead/sales_dashboard.html', context)
+
+
+
+
+
+# @login_required
+# def user_dashboard(request):
+#     user = request.user
+#     assigned_leads_count = Lead.objects.filter(assigned_to=user).count()
+    
+#     context = {
+#         'assigned_leads_count': assigned_leads_count
+#     }
+#     return render(request, 'lead/dashboard-sales.html', context)
+
+
 
 #deleting the duplicates only if there numbers are same
 def delete_duplicate_leads():

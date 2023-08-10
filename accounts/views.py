@@ -12,9 +12,9 @@ from django.http import HttpResponse,HttpResponseNotAllowed
 
 def redirect_user_dashboard(user):
     if user.is_superuser:
-        return redirect('base/admin_dashboard')
+        return redirect('lead/admin_dashboard')
     elif user.is_sales:
-        return redirect('base/sales_dashboard')
+        return redirect('lead/sales_dashboard')
     elif user.is_advisor:
         return redirect('base/advisor_dashboard')
     elif user.is_admin:
@@ -23,9 +23,9 @@ def redirect_user_dashboard(user):
 
 def redirect_link_dashboard(user):
     if user.is_superuser:
-        return 'base/admin_dashboard'
+        return 'lead/admin_dashboard'
     elif user.is_sales:
-        return 'base/sales_dashboard'
+        return 'lead/sales_dashboard'
     elif user.is_advisor:
         return 'base/advisor_dashboard'
     elif user.is_admin:
@@ -111,7 +111,9 @@ def signup(request):
     return render(request, 'accounts/auth-register.html')
 
 
-
 def signout(request):
     logout(request)
-    return render(request,'accounts/auth-login.html')
+    return redirect('/')
+# def signout(request):
+#     logout(request)
+#     return render(request,'accounts/auth-login.html')

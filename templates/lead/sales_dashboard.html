@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'sales_base.html' %}
 {% load static %}
 {% block content %}
 <style>
@@ -8,6 +8,7 @@
     font-weight: bold;
   }
 </style>
+
 
 <main role="main" class="main-content">
   <div class="container-fluid">
@@ -23,6 +24,7 @@
                       <i class="fe fe-16 fe-shopping-bag text-white mb-0"></i>
                     </span>
                   </div>
+                  
                   <div class="col pr-0">
                     <p class="small text-muted mb-0">Number of leads assigned</p>
                     <span class="h3 mb-0 text-white">{{ assigned_leads_count }}</span>
@@ -42,11 +44,16 @@
                       <i class="fe fe-16 fe-shopping-cart text-white mb-0"></i>
                     </span>
                   </div>
-                  <div class="col pr-0">
-                    <p class="small text-muted mb-0">Number of Signe CPF</p>
-                    <span class="h3 mb-0">1,869</span>
-                    <span class="small text-success">+16.5%</span>
-                  </div>
+                 <div class="col pr-0">
+    <p class="small text-muted mb-0">Number of Signé CPF</p>
+    {% if not request.user.is_superuser %}
+    <span class="h3 mb-0">{{ signe_cpf_leads_count }}</span>
+   
+    {% else %}
+    <span class="h3 mb-0">-</span>  {# Show a dash for superusers #}
+    {% endif %}
+</div>
+
                 </div>
               </div>
             </div>
