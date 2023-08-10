@@ -888,8 +888,17 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
+<script>  
   $(document).ready(function() {
+    var queryParams = new URLSearchParams(window.location.search);
+    var openModalLeadId = queryParams.get('openModal');
+
+    // If the query parameter exists, show the modal
+    if (openModalLeadId) {
+      setTimeout(function() {
+        $('#editModal-' + openModalLeadId).modal('show');
+      }, 1000); // Adjust the delay as needed
+    }
     /*test */
     $(document).ready(function() {
       // Function to get all users from the server
