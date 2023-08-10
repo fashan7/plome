@@ -40,12 +40,13 @@ from django.utils.timezone import make_aware
 from datetime import timedelta
 from django.utils import timezone
 from leads.views import sales_lead
+from django.db.models import F
 
 
 @require_POST
 def clear_all_notifications(request):
     user = request.user
-    Notification.objects.filter(user=user, is_read=False).update(is_read=True)
+    Notification.objects.filter(user=user, is_hidden=False).update(is_hidden=True)
 
     return JsonResponse({'success': True})
 
@@ -70,11 +71,12 @@ def get_notifications(request):
 
     # Fetch the notifications for the current hour
     unread_notifications = (
-        Notification.objects.filter(user=user, is_read=False) #, timestamp__range=(start_time, end_time)
+        Notification.objects.filter(user=user, is_hidden=False) #, timestamp__range=(start_time, end_time)
         .annotate(hour=Trunc('timestamp', 'hour'))
         .values('hour')
         .annotate(count=Count('id'))
-        .values('hour', 'count', 'message', 'timestamp', 'id')
+        .annotate(lead_id=F('lead__id'))
+        .values('hour', 'count', 'message', 'timestamp', 'id', 'is_read', 'lead_id')
         .order_by('-timestamp')
     )
     return JsonResponse(list(unread_notifications), safe=False)
