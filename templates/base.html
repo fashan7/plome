@@ -392,7 +392,12 @@
   <!-- Rest of your modal content -->
 </div>
 
-  
+  <style>
+    .read {
+      text-decoration: line-through;
+    }
+
+  </style>
   <!-- Add the following script at the end of your base.html template -->
   <script>
     function fetchNotifications() {
@@ -437,7 +442,9 @@
     
               var notificationHour = notificationTime.getHours();
               if (currentHour === null || notificationHour === currentHour) {
-                groupCount += 1;
+                if (notification.is_read) {
+                  groupCount += 1;
+                }
               } else {
                 if (groupCount > 0) {
                   viewAllLink = '<a href="{% url "all_notifications" %}" class="view-all-link">View all notifications</a>';
@@ -457,13 +464,13 @@
               }
     
               var itemHtml =
-                '<div class="list-group-item bg-transparent">' +
+                '<div id="notification-' + notification.id + '" class="list-group-item bg-transparent">' +
                 '<div class="row align-items-center">' +
                 '<div class="col-auto">' +
                 '<span class="fe fe-bell fe-24"></span>' +
                 '</div>' +
                 '<div class="col">' +
-                '<small><strong>' + notification.message + '</strong></small>' +
+                '<small class="' + (notification.is_read ? 'read' : 'unread') + '"><strong>' + notification.message + '</strong></small>' +
                 '<div class="my-0 text-muted small">' + formattedTimestamp + '</div>' +
                 '<div class="my-0 text-muted small">' + formatTimeAgo(timeDiff) + '</div>' +
                 '</div>' +
@@ -474,7 +481,10 @@
                 '</div>';
     
               notificationList.append(itemHtml);
-              totalCount += 1;
+              if (notification.is_read) {
+                totalCount += 1;
+              }
+              
               currentHour = notificationHour;
             });
     
@@ -543,5 +553,6 @@
       });
     }
     </script>
+
 
 </html>
