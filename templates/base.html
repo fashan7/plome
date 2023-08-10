@@ -445,7 +445,9 @@
                 if (notification.is_read) {
                   groupCount += 1;
                 }
-              } else {
+              } 
+              
+              /* else {
                 if (groupCount > 0) {
                   viewAllLink = '<a href="{% url "all_notifications" %}" class="view-all-link">View all notifications</a>';
                   // Display the custom notification for the previous hour group
@@ -461,7 +463,7 @@
     
                   groupCount = 1;
                 }
-              }
+              } */
     
               var itemHtml =
                 '<div id="notification-' + notification.id + '" class="list-group-item bg-transparent">' +
@@ -487,7 +489,7 @@
               
               currentHour = notificationHour;
             });
-    
+            
             if (groupCount > 0) {
               viewAllLink = '<a href="{% url "all_notifications" %}" class="view-all-link">View all notifications</a>';
               // Display the custom notification for the last hour group
