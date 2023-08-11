@@ -140,6 +140,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from .models import Lead, CustomUserTypes
 from django.contrib.auth import get_user_model
+from django.core.mail import send_mail
 
 def lead_dashboard(request, lead_id=None):
     if request.method == 'POST':
@@ -234,7 +235,44 @@ def lead_history(request, lead_id):
     history_entries = LeadHistory.objects.filter(lead=lead)
     return render(request, 'lead/lead_history.html', {'lead': lead, 'history_entries': history_entries})
 
+def save_appointment(request):
+    if request.method == 'POST':
+        lead_id = request.POST.get('lead_id')
+        appointment_date = request.POST.get('appointment_date')
+        appointment_time = request.POST.get('appointment_time')
 
+        lead = Lead.objects.get(pk=lead_id)
+        lead.appointment_date_time = datetime.combine(
+            datetime.strptime(appointment_date, '%Y-%m-%d').date(),
+            datetime.strptime(appointment_time, '%H:%M').time()
+        )
+        lead.save()
+        '''
+        send_mail(
+            'Appointment Scheduled',
+            f'Your appointment is scheduled on {lead.appointment_date_time}.',
+            'sender@example.com',
+            [lead.email],
+            fail_silently=False,
+        )
+        '''
+        return JsonResponse({'success': True})
+        
+    return JsonResponse({'success': False})
+
+def save_signe_cpf(request):
+    if request.method == 'POST':
+        lead_id = request.POST.get('lead_id')
+        price = request.POST.get('price')
+
+        try:
+            lead = Lead.objects.get(id=lead_id)
+            lead.price = price
+            lead.save()
+            return JsonResponse({'success': True})
+        except Lead.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Lead not found'})
+    return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
 # def lead_dashboard(request):
 #     if request.method == 'POST':

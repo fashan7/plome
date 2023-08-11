@@ -236,8 +236,6 @@
                           </div>
                           <div class="form-group col-md-6 mb-3">
                             <label for="qualification">Qualification</label>
-                            {% comment %} <select class="form-control" id="qualification" name="qualification" required>
-                              {% endcomment %}
                               <select name="qualification" class="form-control" id="qualification" name="qualification"
                                 required>
                                 <option value="">--Select Qualification-- </option>
@@ -487,7 +485,7 @@
                                       <div class="form-group col-md-6">
                                         <label for="qualification">Qualification</label>
 
-                                        <select name="qualification" id="qualification" class="form-control" required>
+                                        <select name="qualification" id="qualification" class="form-control qualification-select" data-lead-id="{{ lead.id }}" required>
                                           <option value="" {% if not lead.select_qualification %}selected{% endif %}>
                                             --Select Qualification--</option>
                                           <option value="nrp1" {% if lead.qualification == 'nrp1' %} selected
@@ -883,11 +881,12 @@
       </div>
     </div>
   </div>
-
 </main> <!-- main -->
+
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>  
   $(document).ready(function() {
     var queryParams = new URLSearchParams(window.location.search);
@@ -899,6 +898,8 @@
         $('#editModal-' + openModalLeadId).modal('show');
       }, 1000); // Adjust the delay as needed
     }
+
+    
     /*test */
     $(document).ready(function() {
       // Function to get all users from the server
@@ -1103,9 +1104,133 @@
 <!-- Include Bootstrap JavaScript -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.min.js"></script>
 <!-- Include Bootstrap CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
 
 <script>
   $(document).ready(function() {
+    const rappelFields = $('#rappelFields');
+    const rappelDateInput = $('#rappel_date');
+
+    $(document).on('change', '.qualification-select', function() {
+        var selectedValue = $(this).val();
+        var leadId = $(this).data('lead-id');
+        console.log(leadId)
+
+        if (selectedValue === 'rappel') {
+          $.confirm({
+              title: 'Set Appointment',
+              content: 'Provide the date and time for the appointment:',
+              buttons: {
+                  confirm: function() {
+                      // Get the selected date and time values from the modal
+                      var selectedDate = $('#appointmentDate').val();
+                      var selectedTime = $('#appointmentTime').val();
+                      
+                      $.ajax({
+                        type: 'POST',
+                        url: '{% url "save_appointment" %}',
+                        data: {
+                            'lead_id': leadId,
+                            'appointment_date': selectedDate,
+                            'appointment_time': selectedTime,
+                            csrfmiddlewaretoken: '{{ csrf_token }}'
+                        },
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.success) {
+                              Swal.fire(
+                                'Success!',
+                                'Appointment Intiated',
+                                'success'
+                              ).then(function() {
+                                location.reload();
+                              });
+                            } else {
+                              Swal.fire({
+                                icon: 'error',
+                                title: 'something went wrong!',
+                                text: error.error
+                              });
+                            }
+                        },
+                        error: function() {
+                          Swal.fire({
+                            icon: 'error',
+                            title: 'something went wrong!',
+                            text: error.error
+                          });
+                        }
+                    });
+                  },
+                  cancel: function() {
+                    $('#qualification').val('');
+                  }
+              },
+              // Add form inputs for date and time
+              onContentReady: function() {
+                  var self = this;
+                  self.setContentAppend('<input type="date" class="form-control" id="appointmentDate" required><br>');
+                  self.setContentAppend('<input type="time" class="form-control" id="appointmentTime" required>');
+              }
+          });
+        } 
+        else if (selectedValue === 'signe_cpf') {
+          $.confirm({
+            title: 'Enter Price',
+            content: 'Provide the pricing',
+            buttons: {
+                confirm: function() {
+                    var price = $('#price').val();
+                    $.ajax({
+                      type: 'POST',
+                      url: '{% url "save_signe_cpf" %}',
+                      data: {
+                          'lead_id': leadId,
+                          'price': price,
+                          csrfmiddlewaretoken: '{{ csrf_token }}'
+                      },
+                      dataType: 'json',
+                      success: function(response) {
+                          if (response.success) {
+                            Swal.fire(
+                              'Success!',
+                              'Price Saved',
+                              'success'
+                            ).then(function() {
+                                location.reload();
+                            });
+                          } else {
+                            Swal.fire({
+                              icon: 'error',
+                              title: 'something went wrong!',
+                              text: error.error
+                            });
+                          }
+                      },
+                      error: function() {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Something went wrong!',
+                            text: 'Failed to save price'
+                        }); 
+                      }
+                  });
+                },
+                cancel: function() {
+                    $('#qualification').val(''); // Clear the qualification selection
+                    
+                }
+            },
+            onContentReady: function() {
+              var self = this;
+              self.setContentAppend('<input type="text" class="form-control" id="price" placeholder="Enter price" required>');
+              self.$content.find('#price').removeAttr('readonly');
+          }
+        });
+      }
+    });
+
     $(document).on('click', '.show-history-btn', function(event) {
       event.preventDefault();
       var leadId = $(this).data('lead-id');
