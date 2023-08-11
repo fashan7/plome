@@ -1113,8 +1113,10 @@
     const rappelDateInput = $('#rappel_date');
 
     $(document).on('change', '.qualification-select', function() {
+        
         var selectedValue = $(this).val();
         var leadId = $(this).data('lead-id');
+        $('#editModal-'+leadId).hide();
         console.log(leadId)
 
         if (selectedValue === 'rappel') {
@@ -1224,8 +1226,8 @@
             },
             onContentReady: function() {
               var self = this;
-              self.setContentAppend('<input type="text" class="form-control" id="price" placeholder="Enter price" required>');
-              self.$content.find('#price').removeAttr('readonly');
+              self.setContentAppend('<input type="text" class="form-control" id="price" placeholder="Enter price" focus required>');
+              $('#price').prop('disabled', false);
           }
         });
       }
