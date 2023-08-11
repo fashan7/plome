@@ -214,7 +214,7 @@ def lead_dashboard(request, lead_id=None):
 
 
 
-
+#this function is used for history of mention 
 from .models import *
 
 def lead_history_view(request, lead_id):
@@ -268,6 +268,7 @@ def lead_history(request, lead_id):
 
 #     return render(request, 'lead/leads_dashboard.html', {'leads': active_leads, 'users': users,'sections': nav_data})
 
+#attachement function which has been used
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Lead, Attachment
 

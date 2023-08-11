@@ -50,11 +50,23 @@ def clear_all_notifications(request):
 
     return JsonResponse({'success': True})
 
+from django.shortcuts import redirect
+from django.contrib.auth.decorators import login_required
+
+
+@login_required
 def all_notifications(request):
-    #Reading all notifications when view all 
+    # Read all notifications when view all
     user = request.user
     Notification.objects.filter(user=user, is_read=False).update(is_read=True)
-    return redirect('sales_lead')
+    
+    # Check if the user is an admin (superuser)
+    if user.is_superuser:
+        # Redirect admin to lead_dashboard
+        return redirect('lead_dashboard')
+    else:
+        # Redirect sales user to sales_lead
+        return redirect('sales_lead')
 
 @login_required
 def get_notifications(request):
