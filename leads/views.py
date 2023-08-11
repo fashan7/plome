@@ -34,7 +34,6 @@ def assign_user_to_lead(lead, user_id):
 
 
 from django.contrib.auth.decorators import user_passes_test
-from django.db.models import Count, Q
 from django.shortcuts import render
 from .models import Lead
 from . import models
@@ -61,7 +60,7 @@ def admin_dashboard(request):
     return render(request, 'base/admin_dashboard.html', context)
 
 @login_required
-def user_dashboard(request):
+def sales_dashboard(request):
     user = request.user
     # Calculate assigned leads count for non-superusers
     assigned_leads_count = 0
@@ -77,10 +76,7 @@ def user_dashboard(request):
         'signe_cpf_leads_count': signe_cpf_leads_count,
         'conversion_rate': conversion_rate, # Add the count for "Signé CPF" leads
     }
-    return render(request, 'lead/sales_dashboard.html', context)
-
-
-
+    return render(request, 'base/sales_dashboard.html', context)
 
 
 # @login_required
@@ -218,6 +214,8 @@ def lead_dashboard(request, lead_id=None):
         return render(request, 'lead/leads_dashboard.html', {'leads': filtered_leads, 'users': users, 'sections': nav_data})
 
 
+
+#this function is used for history of mention 
 from .models import *
 
 def lead_history_view(request, lead_id):
@@ -308,6 +306,7 @@ def save_signe_cpf(request):
 
 #     return render(request, 'lead/leads_dashboard.html', {'leads': active_leads, 'users': users,'sections': nav_data})
 
+#attachement function which has been used
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Lead, Attachment
 
