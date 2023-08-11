@@ -50,6 +50,8 @@ class Lead(models.Model):
     is_transferred = models.BooleanField(default=False)
     assign_comment = models.JSONField(null=True, blank=True)
     history = models.ForeignKey(LeadHistory, on_delete=models.SET_NULL, null=True, blank=True, related_name='leads')
+    appointment_date_time = models.DateTimeField(null=True, blank=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     _original_state = {}
    
 

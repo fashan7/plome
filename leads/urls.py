@@ -34,7 +34,11 @@ urlpatterns = [
     path('delete_attachment/<int:attachment_id>/', views.delete_attachment, name='delete_attachment'),
     path('sales_dashboard/', views.sales_dashboard, name='sales_dashboard'),
     path('admin_dashboard/', views.admin_dashboard, name='admin_dashboard'),
-    
+
+
+    path('save_appointment/', views.save_appointment, name='save_appointment'),
+    path('save_signe_cpf/', views.save_signe_cpf, name='save_signe_cpf'),
+
 ]
 
 
