@@ -377,17 +377,19 @@
       openLeadModal(leadId);
     }
 
-    function openLeadModal(leadId) {
-      // Open the lead edit modal
-      var currentUrl = window.location.href;
-      if (currentUrl.includes("sales_lead")) {
-        $('#editModal-' + leadId).modal('show');
-      } else {
-        window.location.href = '/lead/sales_lead/?openModal=' + leadId;
-      }
-    }
-    
-    
+function openLeadModal(leadId) {
+  // Open the lead edit modal
+  var currentUrl = window.location.href;
+  console.log("Current URL:", currentUrl);
+  if (currentUrl.includes("sales_lead")) {
+    console.log("Opening modal on sales_lead");
+    $('#editModal-' + leadId).modal('show');
+  } else {
+    console.log("Redirecting to /lead/sales_lead/");
+    window.location.href = '/lead/sales_lead/?openModal=' + leadId;
+  }
+}
+
     function markNotificationRead(notificationId) {
       $.ajax({
         url: '{% url "mark_notification_read" %}',
