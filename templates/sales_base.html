@@ -380,15 +380,28 @@
 function openLeadModal(leadId) {
   // Open the lead edit modal
   var currentUrl = window.location.href;
-  console.log("Current URL:", currentUrl);
   if (currentUrl.includes("sales_lead")) {
-    console.log("Opening modal on sales_lead");
-    $('#editModal-' + leadId).modal('show');
+    // Check if the leadId is provided
+    if (leadId) {
+      // Trigger the modal to open based on the provided leadId
+      $('#editModal-' + leadId).modal('show');
+    }
   } else {
-    console.log("Redirecting to /lead/sales_lead/");
+    // Redirect to sales_lead and include the openModal parameter
     window.location.href = '/lead/sales_lead/?openModal=' + leadId;
   }
 }
+
+// Check if the openModal parameter exists in the URL
+var urlParams = new URLSearchParams(window.location.search);
+var openModalLeadId = urlParams.get('openModal');
+
+$(document).ready(function () {
+  if (openModalLeadId) {
+    // Use the leadId from the parameter to open the corresponding modal
+    $('#editModal-' + openModalLeadId).modal('show');
+  }
+});
 
     function markNotificationRead(notificationId) {
       $.ajax({
