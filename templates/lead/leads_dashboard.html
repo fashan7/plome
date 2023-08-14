@@ -537,7 +537,7 @@
                                           {% endfor %}
                                         </select>
                                       </div>
-                                      <div class="form-group col-md-6" id="rappelappointment{{ lead.id }}" style="display:none">
+                                      <div class="form-group col-md-6" id="rappelappointment{{ lead.id }}" {% if lead.qualification == 'rappel' %} style="display:block;" {% else %} style="display:none;" {% endif %}>
                                         <label for="appointment">Appointment Date & Time</label>
                                         <div class="input-group mb-3">
                                           <input type="text" class="form-control" name="appointmentStatDateTime" id="appointmentStatDateTime{{ lead.id }}" placeholder="Click Schedule" aria-label="Click Schedule" readonly  value="{{ lead.appointment_date_time }}" aria-describedby="button-addon2">
@@ -546,7 +546,7 @@
                                           </div>
                                         </div>
                                       </div>
-                                      <div class="form-group col-md-6" id="signecpfprice{{ lead.id }}" style="display:none">
+                                      <div class="form-group col-md-6" id="signecpfprice{{ lead.id }}" {% if lead.qualification == 'signe_cpf' %} style="display:block;" {% else %} style="display:none;" {% endif %}>
                                         <label for="price">Price</label>
                                           <input type="text" name="price" id="priceStat{{ lead.id }}" class="form-control"
                                             placeholder="Price" value="{{ lead.price }}" required autocomplete="off">
@@ -904,17 +904,7 @@
 
 <script>  
   $(document).ready(function() {
-    var queryParams = new URLSearchParams(window.location.search);
-    var openModalLeadId = queryParams.get('openModal');
-
-    // If the query parameter exists, show the modal
-    if (openModalLeadId) {
-      setTimeout(function() {
-        $('#editModal-' + openModalLeadId).modal('show');
-      }, 1000); // Adjust the delay as needed
-    }
-
-    
+   
     /*test */
     $(document).ready(function() {
       // Function to get all users from the server
@@ -1121,16 +1111,19 @@
 <!-- Include Bootstrap CSS -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
-<link rel="stylesheet" href="{%static 'css/jquery.timepicker.css'%}">
-<script src="{%static 'js/jquery.timepicker.js'%}"></script>
 <script>
 
   $(document).ready(function() {
-    $('.time-input').timepicker(
-      {
-        'scrollDefault': 'now',
-        'zindex': '9999' /* fix modal open */
-      });
+    var queryParams = new URLSearchParams(window.location.search);
+    var openModalLeadId = queryParams.get('openModal');
+
+    if (openModalLeadId) {
+      setTimeout(function() {
+        $('#editModal-'+openModalLeadId).show();
+      }, 2000); 
+    }
+
+    
     const rappelFields = $('#rappelFields');
     const rappelDateInput = $('#rappel_date');
 
@@ -1179,8 +1172,6 @@
     });
 
     $(document).on('change', '.qualification-select', function() {
-      
-        
         var selectedValue = $(this).val();
         var leadId = $(this).data('lead-id');
         $('#editModal-'+leadId).hide();
@@ -1343,7 +1334,6 @@
     });
     // Handle "Select All" checkbox click
     $('#selectAllCheckbox').on('click', function() {
-      console.log('s')
       var isChecked = this.checked;
       table.rows({
         page: 'current'
