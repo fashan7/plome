@@ -40,7 +40,6 @@ urlpatterns = [
     path('view_notifications/', views.view_notifications, name='view_notifications'),
     path('get_qualification_data/', views.get_qualification_data, name='get_qualification_data'),
     
-]
 
 
 
