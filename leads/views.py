@@ -22,6 +22,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import Lead
 
+from dateutil import parser
 
 
 def assign_user_to_lead(lead, user_id):
@@ -453,10 +454,15 @@ def lead_edit(request, lead_id):
         if lead.comments != form_data['comments']:
             changes['Comments'] = form_data['comments']
 
-        if lead.appointment_date_time != form_data['appointmentStatDateTime']:
+        appointmentDT = form_data.get('appointmentStatDateTime')
+        IsdateChange = False
+        if lead.appointment_date_time != appointmentDT:
+            IsdateChange = True
+            
             changes['Appointment Date Time'] = form_data['appointmentStatDateTime']
 
         if lead.price != form_data['price']:
+            
             changes['Price'] = form_data['price']
 
         # if lead.
@@ -473,9 +479,16 @@ def lead_edit(request, lead_id):
         lead.qualification = form_data['qualification']
         lead.comments = form_data['comments']
 
-        appointmentDT = form_data.get('appointmentStatDateTime')
-        if appointmentDT != 'None':
-            lead.appointment_date_time = appointmentDT
+        
+        if appointmentDT != 'None' and IsdateChange:
+            try:
+                formatted_datetime = parser.parse(appointmentDT)
+            except Exception as e:
+                formatted_datetime = appointmentDT
+            lead.appointment_date_time = formatted_datetime
+        elif appointmentDT == 'None' and IsdateChange:
+            formatted_datetime = parser.parse(appointmentDT)
+            lead.appointment_date_time = formatted_datetime
        
         price = form_data.get('price')
         if price != 'None':
