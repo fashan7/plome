@@ -131,7 +131,7 @@ def filtered_lead_dashboard(request, user_id):
     return render(request, 'lead/leads_dashboard.html', {'leads': active_leads, 'users': users, 'sections': nav_data})
 
 
-
+from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from .models import Lead, CustomUserTypes
@@ -165,6 +165,7 @@ def lead_dashboard(request, lead_id=None):
             lead.save()
            
             notification_message = f'You have been assigned a new lead: {lead.nom_de_la_campagne}'
+            
             
             return HttpResponseRedirect(f'/filtered_lead_dashboard/{assigned_user.id}/?notification={notification_message}')
         else:
@@ -245,15 +246,15 @@ def save_appointment(request):
             datetime.strptime(appointment_time, '%H:%M').time()
         )
         lead.save()
-        '''
+        
         send_mail(
             'Appointment Scheduled',
-            f'Your appointment is scheduled on {lead.appointment_date_time}.',
+            f'Your appointment is scheduled on {lead.appointment_date_time}. ', #need to add the user name 
             'sender@example.com',
             [lead.email],
             fail_silently=False,
         )
-        '''
+        
         return JsonResponse({'success': True})
         
     return JsonResponse({'success': False})
@@ -271,6 +272,45 @@ def save_signe_cpf(request):
         except Lead.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Lead not found'})
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import Notification
+
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import Notification
+
+@login_required
+def view_notifications(request):
+    user = request.user
+    is_sales = user.groups.filter(name='Sales').exists()  # Assuming Sales group exists for sales users
+    is_superuser = user.is_superuser
+
+    # Fetch notifications for the current user
+    notifications = Notification.objects.filter(user=user).order_by('-timestamp')
+
+    # Determine the base template based on user role
+    if is_sales:
+        base_template = 'sales_base.html'
+    elif is_superuser:
+        base_template = 'base.html'
+    else:
+        base_template = 'sales_base.html'
+
+    context = {
+        'notifications': notifications,
+        'base_template': base_template,
+    }
+    return render(request, 'lead/notification.html', context)
+
+
+
+
+
 
 # def lead_dashboard(request):
 #     if request.method == 'POST':
