@@ -38,6 +38,7 @@ urlpatterns = [
 
     path('save_appointment/', views.save_appointment, name='save_appointment'),
     path('save_signe_cpf/', views.save_signe_cpf, name='save_signe_cpf'),
+   path('view_notifications/', views.view_notifications, name='view_notifications'),
 
 ]
 
