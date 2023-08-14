@@ -1343,6 +1343,7 @@
     });
     // Handle "Select All" checkbox click
     $('#selectAllCheckbox').on('click', function() {
+      console.log('s')
       var isChecked = this.checked;
       table.rows({
         page: 'current'
@@ -1350,7 +1351,7 @@
         this.select(isChecked);
       });
     });
-    $('#assignButton').on('click', function() {
+    /*$('#assignButton').on('click', function() {
       var selectedLeads = [];
       var assignToUser = $('#assignToUser').val();
       table.rows({
@@ -1362,17 +1363,10 @@
       order: [
         [1, 'asc']
       ]
-    });
+    });*/
   });
   // Handle "Select All" checkbox click
-  $('#selectAllCheckbox').on('click', function() {
-    var isChecked = this.checked;
-    table.rows({
-      page: 'current'
-    }).every(function() {
-      this.select(isChecked);
-    });
-  });
+  
   $('#assignButton').on('click', function() {
     var selectedLeads = [];
     var assignToUser = $('#assignToUser').val();
