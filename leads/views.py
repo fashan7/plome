@@ -273,6 +273,24 @@ def save_signe_cpf(request):
             return JsonResponse({'success': False, 'error': 'Lead not found'})
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
+def get_qualification_data(request):
+    if request.method == 'POST':
+        lead_id = request.POST.get('lead_id')
+        selectedValue = request.POST.get('selectedValue')
+        try:
+            lead = Lead.objects.get(id=lead_id)
+            result = None
+            if selectedValue == 'rappel':
+                result = lead.appointment_date_time
+            else:
+                result = lead.price
+
+            return JsonResponse({'result': result})
+        except Lead.DoesNotExist:
+            return JsonResponse({'result': False, 'error': 'Lead not found'})
+    return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from .models import Notification
