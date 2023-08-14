@@ -289,6 +289,28 @@ def get_qualification_data(request):
             return JsonResponse({'result': False, 'error': 'Lead not found'})
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
+@login_required
+def view_notifications(request):
+    user = request.user
+    is_sales = user.groups.filter(name='Sales').exists()  # Assuming Sales group exists for sales users
+    is_superuser = user.is_superuser
+
+    # Fetch notifications for the current user
+    notifications = Notification.objects.filter(user=user).order_by('-timestamp')
+
+    # Determine the base template based on user role
+    if is_sales:
+        base_template = 'sales_base.html'
+    elif is_superuser:
+        base_template = 'base.html'
+    else:
+        base_template = 'sales_base.html'
+
+    context = {
+        'notifications': notifications,
+        'base_template': base_template,
+    }
+    return render(request, 'lead/notification.html', context)
 
 # def lead_dashboard(request):
 #     if request.method == 'POST':
