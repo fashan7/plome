@@ -453,6 +453,12 @@ def lead_edit(request, lead_id):
         if lead.comments != form_data['comments']:
             changes['Comments'] = form_data['comments']
 
+        if lead.appointment_date_time != form_data['appointmentStatDateTime']:
+            changes['Appointment Date Time'] = form_data['appointmentStatDateTime']
+
+        if lead.price != form_data['price']:
+            changes['Price'] = form_data['price']
+
         # if lead.
 
         # Repeat the above process for other fields
