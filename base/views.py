@@ -334,8 +334,16 @@ def profile(request):
     return render(request, 'base/profile.html')  # You can pass an empty dictionary if you don't need to display any profile info
 
 
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+
+
+@login_required
 def profile_settings(request):
     user = request.user
+    is_sales = user.groups.filter(name='Sales').exists()  # Assuming Sales group exists for sales users
+    is_super_admin = user.is_superuser
 
     if request.method == 'POST':
         # Update the user fields
@@ -353,8 +361,42 @@ def profile_settings(request):
         user.save()
         return redirect('profile_settings')
 
+    # Determine the base template based on user role
+    if is_sales:
+        base_template = 'sales_base.html'
+    elif is_super_admin:
+        base_template = 'base.html'
+    else:
+        base_template = 'sales_base.html'
 
-    return render(request, 'base/profile_setting.html', {'user': user})
+    context = {
+        'user': user,
+        'base_template': base_template,
+    }
+    return render(request, 'base/profile_setting.html', context)
+
+
+# def profile_settings(request):
+#     user = request.user
+
+#     if request.method == 'POST':
+#         # Update the user fields
+#         user.first_name = request.POST.get('firstname', '')
+#         user.last_name = request.POST.get('lastname', '')
+#         user.email = request.POST.get('inputEmail4', '')
+#         # Update other fields as needed
+
+#         # Check if the password fields are provided and match
+#         new_password = request.POST.get('inputPassword5')
+#         confirm_password = request.POST.get('inputPassword6')
+#         if new_password and new_password == confirm_password:
+#             user.set_password(new_password)
+
+#         user.save()
+#         return redirect('profile_settings')
+
+
+#     return render(request, 'base/profile_setting.html', {'user': user})
 
 # def sendemail(request):
 #     user_id = request.GET.get('user_id')  # Get the user_id from the query parameters

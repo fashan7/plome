@@ -131,7 +131,7 @@ def filtered_lead_dashboard(request, user_id):
     return render(request, 'lead/leads_dashboard.html', {'leads': active_leads, 'users': users, 'sections': nav_data})
 
 
-
+from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from .models import Lead, CustomUserTypes
@@ -165,6 +165,7 @@ def lead_dashboard(request, lead_id=None):
             lead.save()
            
             notification_message = f'You have been assigned a new lead: {lead.nom_de_la_campagne}'
+            
             
             return HttpResponseRedirect(f'/filtered_lead_dashboard/{assigned_user.id}/?notification={notification_message}')
         else:
@@ -245,15 +246,15 @@ def save_appointment(request):
             datetime.strptime(appointment_time, '%H:%M').time()
         )
         lead.save()
-        '''
+        
         send_mail(
             'Appointment Scheduled',
-            f'Your appointment is scheduled on {lead.appointment_date_time}.',
+            f'Your appointment is scheduled on {lead.appointment_date_time}. ', #need to add the user name 
             'sender@example.com',
             [lead.email],
             fail_silently=False,
         )
-        '''
+        
         return JsonResponse({'success': True})
         
     return JsonResponse({'success': False})
@@ -272,22 +273,14 @@ def save_signe_cpf(request):
             return JsonResponse({'success': False, 'error': 'Lead not found'})
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
-def get_qualification_data(request):
-    if request.method == 'POST':
-        lead_id = request.POST.get('lead_id')
-        selectedValue = request.POST.get('selectedValue')
-        try:
-            lead = Lead.objects.get(id=lead_id)
-            result = None
-            if selectedValue == 'rappel':
-                result = lead.appointment_date_time
-            else:
-                result = lead.price
-                
-            return JsonResponse({'result': result})
-        except Lead.DoesNotExist:
-            return JsonResponse({'result': False, 'error': 'Lead not found'})
-    return JsonResponse({'success': False, 'error': 'Invalid request method'})
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import Notification
+
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import Notification
 
 @login_required
 def view_notifications(request):
