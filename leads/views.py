@@ -272,6 +272,24 @@ def save_signe_cpf(request):
             return JsonResponse({'success': False, 'error': 'Lead not found'})
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
+def get_qualification_data(request):
+    if request.method == 'POST':
+        lead_id = request.POST.get('lead_id')
+        selectedValue = request.POST.get('selectedValue')
+        try:
+            lead = Lead.objects.get(id=lead_id)
+            result = None
+            if selectedValue == 'rappel':
+                result = lead.appointment_date_time
+            else:
+                result = lead.price
+                
+            return JsonResponse({'result': result})
+        except Lead.DoesNotExist:
+            return JsonResponse({'result': False, 'error': 'Lead not found'})
+    return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+
 # def lead_dashboard(request):
 #     if request.method == 'POST':
 #         # Retrieve form data and create a new lead instance
@@ -402,6 +420,8 @@ def lead_edit(request, lead_id):
         if lead.comments != form_data['comments']:
             changes['Comments'] = form_data['comments']
 
+        # if lead.
+
         # Repeat the above process for other fields
 
         # Update the lead instance with the form data
@@ -413,6 +433,16 @@ def lead_edit(request, lead_id):
         lead.email = form_data['email']
         lead.qualification = form_data['qualification']
         lead.comments = form_data['comments']
+
+        appointmentDT = form_data.get('appointmentStatDateTime')
+        if appointmentDT != 'None':
+            lead.appointment_date_time = appointmentDT
+       
+        price = form_data.get('price')
+        if price != 'None':
+            lead.price = price
+
+        
 
         custom_fields_data = {}
         for key, value in form_data.items():

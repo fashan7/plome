@@ -32,13 +32,13 @@ urlpatterns = [
     path('attach_file/<int:lead_id>/', views.attach_file_to_lead, name='attach_file_to_lead'),
     path('download_attachment/<int:attachment_id>/<path:attachment_name>/', views.download_attachment, name='download_attachment'),
     path('delete_attachment/<int:attachment_id>/', views.delete_attachment, name='delete_attachment'),
-    path('sales_dashboard/', views.sales_dashboard, name='sales_dashboard'),
+    #path('sales_dashboard/', views.user_dashboard, name='user_dashboard'),
     path('admin_dashboard/', views.admin_dashboard, name='admin_dashboard'),
-
 
     path('save_appointment/', views.save_appointment, name='save_appointment'),
     path('save_signe_cpf/', views.save_signe_cpf, name='save_signe_cpf'),
-
+    path('get_qualification_data/', views.get_qualification_data, name='get_qualification_data'),
+    
 ]
 
 
