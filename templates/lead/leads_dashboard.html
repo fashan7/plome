@@ -537,6 +537,21 @@
                                           {% endfor %}
                                         </select>
                                       </div>
+                                      <div class="form-group col-md-6" id="rappelappointment{{ lead.id }}" style="display:none">
+                                        <label for="appointment">Appointment Date & Time</label>
+                                        <div class="input-group mb-3">
+                                          <input type="text" class="form-control" name="appointmentStatDateTime" id="appointmentStatDateTime{{ lead.id }}" placeholder="Click Schedule" aria-label="Click Schedule" readonly  value="{{ lead.appointment_date_time }}" aria-describedby="button-addon2">
+                                          <div class="input-group-append">
+                                            <button class="btn btn-primary clicktoschedule" data-lead-id="{{ lead.id }}" type="button" id="button-addon2">Schedule New</button>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div class="form-group col-md-6" id="signecpfprice{{ lead.id }}" style="display:none">
+                                        <label for="price">Price</label>
+                                          <input type="text" name="price" id="priceStat{{ lead.id }}" class="form-control"
+                                            placeholder="Price" value="{{ lead.price }}" required autocomplete="off">
+                                      </div>
+                                      <div id="loadBasedQualification{{ lead.id }}"></div>
                                       {% if lead.custom_fields %}
 
                                       {% for key, value in lead.custom_fields.items %}
@@ -1106,20 +1121,73 @@
 <!-- Include Bootstrap CSS -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
-
+<link rel="stylesheet" href="{%static 'css/jquery.timepicker.css'%}">
+<script src="{%static 'js/jquery.timepicker.js'%}"></script>
 <script>
+
   $(document).ready(function() {
+    $('.time-input').timepicker(
+      {
+        'scrollDefault': 'now',
+        'zindex': '9999' /* fix modal open */
+      });
     const rappelFields = $('#rappelFields');
     const rappelDateInput = $('#rappel_date');
 
+    function getAccurateDataofQUalification(selectedV, leadID){
+      $.ajax({
+        type: 'POST',
+        url: '{% url "get_qualification_data" %}',
+        data: {
+            'lead_id': leadID,
+            'selectedValue':selectedV,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        dataType: 'json',
+        success: function(response) {
+          data = response.result
+          if (selectedV === 'rappel') {
+            $('#appointmentStatDateTime'+leadID).val(data);
+          } else {
+            $('#priceStat'+leadID).val(data);
+          }
+        }
+      });
+    }
+    $('.clicktoschedule').click(function() {
+      var leadId = $(this).data('lead-id');
+      $.confirm({
+          title: 'Set Appointment',
+          content: 'Provide the date and time for the appointment:',
+          buttons: {
+              confirm: function() {
+                  var selectedDate = $('#appointmentDate').val();
+                  var selectedTime = $('#appointmentTime').val();
+                  var formattedDateTime = selectedDate + ' ' + selectedTime;
+                  $('#appointmentStatDateTime'+leadId).val(formattedDateTime);
+              },
+              cancel: function() {
+              }
+          },
+          // Add form inputs for date and time
+          onContentReady: function() {
+              var self = this;
+              self.setContentAppend('<input type="date" class="form-control" id="appointmentDate" required><br>');
+              self.setContentAppend('<input type="time" class="form-control" id="appointmentTime" required>');
+          }
+      });
+    });
+
     $(document).on('change', '.qualification-select', function() {
+      
         
         var selectedValue = $(this).val();
         var leadId = $(this).data('lead-id');
         $('#editModal-'+leadId).hide();
-        console.log(leadId)
 
         if (selectedValue === 'rappel') {
+          $("#rappelappointment"+leadId).css("display", "block");
+          $("#signecpfprice"+leadId).css("display", "none");
           $.confirm({
               title: 'Set Appointment',
               content: 'Provide the date and time for the appointment:',
@@ -1146,7 +1214,8 @@
                                 'Appointment Intiated',
                                 'success'
                               ).then(function() {
-                                location.reload();
+                                getAccurateDataofQUalification(selectedValue, leadId);
+                                $('#editModal-'+leadId).show();
                               });
                             } else {
                               Swal.fire({
@@ -1167,6 +1236,7 @@
                   },
                   cancel: function() {
                     $('#qualification').val('');
+                    $('#editModal-'+leadId).show();
                   }
               },
               // Add form inputs for date and time
@@ -1178,6 +1248,8 @@
           });
         } 
         else if (selectedValue === 'signe_cpf') {
+          $("#rappelappointment"+leadId).css("display", "none");
+          $("#signecpfprice"+leadId).css("display", "block");
           $.confirm({
             title: 'Enter Price',
             content: 'Provide the pricing',
@@ -1200,7 +1272,8 @@
                               'Price Saved',
                               'success'
                             ).then(function() {
-                                location.reload();
+                                getAccurateDataofQUalification(selectedValue, leadId);
+                                $('#editModal-'+leadId).show();
                             });
                           } else {
                             Swal.fire({
@@ -1219,9 +1292,9 @@
                       }
                   });
                 },
-                cancel: function() {
-                    $('#qualification').val(''); // Clear the qualification selection
-                    
+                close: function(){
+                  $('#qualification').val('');
+                  $('#editModal-'+leadId).show();
                 }
             },
             onContentReady: function() {
@@ -1230,6 +1303,10 @@
               $('#price').prop('disabled', false);
           }
         });
+      } else {
+        $('#editModal-'+leadId).show();
+        $("#rappelappointment"+leadId).css("display", "none");
+        $("#signecpfprice"+leadId).css("display", "none");
       }
     });
 
@@ -1266,6 +1343,7 @@
     });
     // Handle "Select All" checkbox click
     $('#selectAllCheckbox').on('click', function() {
+      console.log('s')
       var isChecked = this.checked;
       table.rows({
         page: 'current'
@@ -1273,7 +1351,7 @@
         this.select(isChecked);
       });
     });
-    $('#assignButton').on('click', function() {
+    /*$('#assignButton').on('click', function() {
       var selectedLeads = [];
       var assignToUser = $('#assignToUser').val();
       table.rows({
@@ -1285,17 +1363,10 @@
       order: [
         [1, 'asc']
       ]
-    });
+    });*/
   });
   // Handle "Select All" checkbox click
-  $('#selectAllCheckbox').on('click', function() {
-    var isChecked = this.checked;
-    table.rows({
-      page: 'current'
-    }).every(function() {
-      this.select(isChecked);
-    });
-  });
+  
   $('#assignButton').on('click', function() {
     var selectedLeads = [];
     var assignToUser = $('#assignToUser').val();

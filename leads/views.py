@@ -273,8 +273,6 @@ def save_signe_cpf(request):
             return JsonResponse({'success': False, 'error': 'Lead not found'})
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
-
-
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from .models import Notification
@@ -306,11 +304,6 @@ def view_notifications(request):
         'base_template': base_template,
     }
     return render(request, 'lead/notification.html', context)
-
-
-
-
-
 
 # def lead_dashboard(request):
 #     if request.method == 'POST':
@@ -442,6 +435,8 @@ def lead_edit(request, lead_id):
         if lead.comments != form_data['comments']:
             changes['Comments'] = form_data['comments']
 
+        # if lead.
+
         # Repeat the above process for other fields
 
         # Update the lead instance with the form data
@@ -453,6 +448,16 @@ def lead_edit(request, lead_id):
         lead.email = form_data['email']
         lead.qualification = form_data['qualification']
         lead.comments = form_data['comments']
+
+        appointmentDT = form_data.get('appointmentStatDateTime')
+        if appointmentDT != 'None':
+            lead.appointment_date_time = appointmentDT
+       
+        price = form_data.get('price')
+        if price != 'None':
+            lead.price = price
+
+        
 
         custom_fields_data = {}
         for key, value in form_data.items():
