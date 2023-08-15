@@ -13,6 +13,12 @@ class LeadHistory(models.Model):
     previous_assigned_to = models.ForeignKey(CustomUserTypes, on_delete=models.SET_NULL, null=True, blank=True, related_name='previous_assigned_leads')
     current_assigned_to = models.ForeignKey(CustomUserTypes, on_delete=models.SET_NULL, null=True, blank=True, related_name='current_assigned_leads')
     changes = models.TextField()
+    CATEGORY_CHOICES = (
+        ('assign', 'Assign'),
+        ('mention', 'Mention'),
+        ('other', 'Other'),
+    )
+    category = models.CharField(max_length=10, choices=CATEGORY_CHOICES, default='other')
 
     class Meta:
         ordering = ['-timestamp']

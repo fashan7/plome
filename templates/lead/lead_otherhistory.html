@@ -6,26 +6,24 @@
         <table class="table table-hover">
           <thead class="thead-dark">
             <tr>
-              <th>Timestamp</th>
+              <th>ID</th>
               <th>User</th>
-              <th>Previous To</th>
-              <th>Assigned To</th>
-              <th>Changes</th>
+              <th>Action Time</th>
+              <th>Action Made</th>
             </tr>
           </thead>
           <tbody>
               {% for entry in history_entries %}
               <tr>
-                  <td>{{ entry.timestamp }}</td>
+                  <td>{{ entry.id }}</td>
                   <td>{{ entry.user.username }}</td>
-                  <td>{{ entry.previous_assigned_to.username }}</td>
-                  <td>{{ entry.current_assigned_to.username }}</td>
+                  <td>{{ entry.timestamp }}</td>
                   <td>{{ entry.changes }}</td>
               </tr>
               {% endfor %}
           </tbody>
         </table>
-      </div>
+    </div>
     </div>
   </div>
 </div> <!-- Bordered table -->

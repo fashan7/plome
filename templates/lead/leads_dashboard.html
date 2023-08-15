@@ -580,8 +580,8 @@
                                               href="#doccument{{ lead.id }}">Documents</a>
                                           </li>
                                           <li class="nav-item">
-                                            <a class="nav-link" data-toggle="tab"
-                                              href="#history{{ lead.id }}">History</a>
+                                            <a class="nav-link  show-otherhistory-btn" data-lead-id="{{ lead.id }}" data-toggle="tab"
+                                              href="#history{{ lead.id }}" data-url="{% url 'lead_otherhistory' lead.id %}">History</a>
                                           </li>
                                           <li class="nav-item">
                                             <a class="nav-link  show-history-btn" data-toggle="tab"
@@ -655,48 +655,39 @@
 
                                       <div class="tab-pane fade" id="history{{ lead.id }}">
                                         <div class="row">
-                                          <div class="col-6">
-                                            <div class="card">
-                                              <div class="card-body mx-1" style="max-height: 300px; overflow-y: auto;">
-                                                <blockquote>
-                                                  <!-- added the log entry for history-->
-                                                  <div class="table-responsive">
-                                                    <table id="example" class="table table-bordered display nowrap"
-                                                      cellspacing="0" style="width:100%">
-                                                      <thead class="fw-bold">
-                                                        <tr>
-                                                          <th>ID</th>
-                                                          <th>User</th>
-                                                          <th>Action Time</th>
-                                                          <th>Change Message</th>
-                                                        </tr>
-                                                      </thead>
-                                                      <tbody>
-                                                        {% for log_entry in log_entries %}
-                                                        <tr>
-                                                          <td>{{ log_entry.id }}</td>
-                                                          <td>{{ log_entry.user }}</td>
-                                                          <td>{{ log_entry.action_time }}</td>
-                                                          <td>{{ log_entry.change_message }}</td>
-                                                        </tr>
-                                                        {% endfor %}
-                                                      </tbody>
-                                                    </table>
-                                                  </div>
-                                                </blockquote>
+                                          <div class="col-12" >
+                                            <div id="historyotherData{{ lead.id }}">
+                                              <div class="card" >
+                                                <div class="card-body mx-1" style="max-height: 300px; overflow-y: auto;">
+                                                  <blockquote>
+                                                    <!-- added the log entry for history-->
+                                                    <div class="table-responsive">
+                                                      <table id="example" class="table table-bordered display nowrap"
+                                                        cellspacing="0" style="width:100%">
+                                                        <thead class="fw-bold">
+                                                          <tr>
+                                                            <th>ID</th>
+                                                            <th>User</th>
+                                                            <th>Action Time</th>
+                                                            <th>Action Made</th>
+                                                          </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                          {% for entry in history_entries %}
+                                                          <tr>
+                                                            <td>{{ entry.id }}</td>
+                                                            <td>{{ entry.user.username }}</td>
+                                                            <td>{{ entry.timestamp }}</td>
+                                                            <td>{{ entry.changes }}</td>
+                                                          </tr>
+                                                          {% endfor %}
+                                                        </tbody>
+                                                      </table>
+                                                    </div>
+                                                  </blockquote>
+                                                </div>
+                                                <!-- /.card-body -->
                                               </div>
-                                              <!-- /.card-body -->
-                                            </div>
-                                          </div>
-                                          <div class="col-6">
-                                            <div class="card">
-                                              <div class="card-body mx-1" style="max-height: 300px; overflow-y: auto;">
-                                                <blockquote>
-                                                  <p>Contenu de la colonne 2 de l'onglet À propos laye
-                                                  </p>
-                                                </blockquote>
-                                              </div>
-                                              <!-- /.card-body -->
                                             </div>
                                           </div>
                                         </div>
@@ -1308,6 +1299,18 @@
       $.get(url, function(data) {
         // Append the lead history modal to the body
         $('#historymentionData' + leadId).html(data);
+        // Show the modal
+        //$('#showhsitory').modal('show');
+      });
+    });
+
+    $(document).on('click', '.show-otherhistory-btn', function(event) {
+      event.preventDefault();
+      var leadId = $(this).data('lead-id');
+      var url = $(this).data('url');
+      $.get(url, function(data) {
+        // Append the lead history modal to the body
+        $('#historyotherData' + leadId).html(data);
         // Show the modal
         //$('#showhsitory').modal('show');
       });
