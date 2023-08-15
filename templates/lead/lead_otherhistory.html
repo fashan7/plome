@@ -2,26 +2,28 @@
     <div class="card-body">
       <h5 class="card-title">Lead History for {{ lead.nom_de_la_campagne }}</h5>
       </p>
-      <table class="table table-hover">
-        <thead class="thead-dark">
-          <tr>
-            <th>ID</th>
-            <th>User</th>
-            <th>Action Time</th>
-            <th>Action Made</th>
-          </tr>
-        </thead>
-        <tbody>
-            {% for entry in history_entries %}
+      <div class='table-responsive'>
+        <table class="table table-hover">
+          <thead class="thead-dark">
             <tr>
-                <td>{{ entry.id }}</td>
-                <td>{{ entry.user.username }}</td>
-                <td>{{ entry.timestamp }}</td>
-                <td>{{ entry.changes }}</td>
+              <th>ID</th>
+              <th>User</th>
+              <th>Action Time</th>
+              <th>Action Made</th>
             </tr>
-            {% endfor %}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+              {% for entry in history_entries %}
+              <tr>
+                  <td>{{ entry.id }}</td>
+                  <td>{{ entry.user.username }}</td>
+                  <td>{{ entry.timestamp }}</td>
+                  <td>{{ entry.changes }}</td>
+              </tr>
+              {% endfor %}
+          </tbody>
+        </table>
+    </div>
     </div>
   </div>
 </div> <!-- Bordered table -->
