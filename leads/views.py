@@ -461,13 +461,11 @@ def lead_edit(request, lead_id):
 
         appointmentDT = form_data.get('appointmentStatDateTime')
         IsdateChange = False
-        if lead.appointment_date_time != appointmentDT:
+        if lead.appointment_date_time != appointmentDT and lead.appointment_date_time is not None:
             IsdateChange = True
-            
             changes['Appointment Date Time'] = form_data['appointmentStatDateTime']
 
-        if lead.price != form_data['price']:
-            
+        if lead.price != form_data['price'] and lead.price is not None:
             changes['Price'] = form_data['price']
 
         # if lead.
@@ -483,8 +481,6 @@ def lead_edit(request, lead_id):
         lead.email = form_data['email']
         lead.qualification = form_data['qualification']
         lead.comments = form_data['comments']
-
-        
         if appointmentDT != 'None' and IsdateChange:
             try:
                 formatted_datetime = parser.parse(appointmentDT)
