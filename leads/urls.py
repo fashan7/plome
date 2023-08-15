@@ -23,6 +23,8 @@ urlpatterns = [
     path('get_all_users/', views.get_all_users, name='get_all_users'),
     path('transfer_leads/', views.transfer_leads, name='transfer_leads'),
     path('lead-history/<int:lead_id>/', views.lead_history_view, name='lead_history'),
+    path('lead-otherhistory/<int:lead_id>/', views.lead_otherhistory_view, name='lead_otherhistory'),
+    
     path('complete_leads/',views.complete_leads, name='complete_leads'),
 
     path('sales_lead/',views.sales_lead,name="sales_lead"),

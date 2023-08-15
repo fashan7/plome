@@ -222,8 +222,13 @@ from .models import *
 
 def lead_history_view(request, lead_id):
     lead = get_object_or_404(Lead, id=lead_id)
-    lead_history = LeadHistory.objects.filter(lead=lead).order_by('-timestamp')
+    lead_history = LeadHistory.objects.filter(lead=lead, category='mention').order_by('-timestamp')[:10]
     return render(request, 'lead/lead_history.html', {'lead': lead, 'history_entries': lead_history})
+
+def lead_otherhistory_view(request, lead_id):
+    lead = get_object_or_404(Lead, id=lead_id)
+    lead_history = LeadHistory.objects.filter(lead=lead, category='other').order_by('-timestamp')[:10]
+    return render(request, 'lead/lead_otherhistory.html', {'lead': lead, 'history_entries': lead_history})
 
 
 def lead_list(request):
@@ -232,7 +237,7 @@ def lead_list(request):
 
 def lead_history(request, lead_id):
     lead = get_object_or_404(Lead, id=lead_id)
-    history_entries = LeadHistory.objects.filter(lead=lead)
+    history_entries = LeadHistory.objects.filter(lead=lead, category='mention')
     return render(request, 'lead/lead_history.html', {'lead': lead, 'history_entries': history_entries})
 
 def save_appointment(request):
@@ -248,13 +253,13 @@ def save_appointment(request):
         )
         lead.save()
         
-        send_mail(
-            'Appointment Scheduled',
-            f'Your appointment is scheduled on {lead.appointment_date_time}. ', #need to add the user name 
-            'sender@example.com',
-            [lead.email],
-            fail_silently=False,
-        )
+        # send_mail(
+        #     'Appointment Scheduled',
+        #     f'Your appointment is scheduled on {lead.appointment_date_time}. ', #need to add the user name 
+        #     'sender@example.com',
+        #     [lead.email],
+        #     fail_silently=False,
+        # )
         
         return JsonResponse({'success': True})
         
@@ -532,6 +537,13 @@ def lead_edit(request, lead_id):
             change_message=change_message
         )
 
+        LeadHistory.objects.create(
+            user=request.user,
+            lead=lead,
+            changes=change_message,
+            category='other'
+        )
+
         context = {
             'lead': lead,
             'change_message': change_message,
@@ -543,38 +555,6 @@ def lead_edit(request, lead_id):
 
 
 #can be used in future 
-
-def assign_leads(request):
-    if request.method == 'POST':
-        selected_leads = request.POST.get('selected_leads')
-        assign_to_user_id = request.POST.get('assign_to_user')
-        if not selected_leads or not assign_to_user_id:
-            return JsonResponse({'success': False, 'message': 'Invalid data.'}, status=400)
-
-        try:
-            assigned_user = CustomUserTypes.objects.get(id=assign_to_user_id)
-        except CustomUserTypes.DoesNotExist:
-            return JsonResponse({'success': False, 'message': 'Assigned user not found.'}, status=400)
-
-        try:
-            selected_leads = json.loads(selected_leads)
-            for lead_data in selected_leads:
-                lead_id = lead_data.get('id')
-                
-                lead = Lead.objects.get(id=lead_id)
-                lead.assigned_to = assigned_user
-                lead.save()
-
-                notification_message = f'You have been assigned a new lead: {lead.nom_de_la_campagne}'
-                notification = Notification(user=assigned_user, lead=lead, message=notification_message)
-                notification.save()
-
-            return JsonResponse({'success': True, 'message': 'Leads assigned successfully.'}, status=200)
-        except Exception as e:
-            return JsonResponse({'success': False, 'message': str(e)}, status=500)
-
-    return JsonResponse({'success': False, 'message': 'Invalid request.'}, status=400)
-
 
 # def lead_edit(request, lead_id):
 #     lead = get_object_or_404(Lead, id=lead_id)
@@ -1282,7 +1262,7 @@ def transfer_leads(request):
                 # LeadHistory.objects.create(lead=lead, user=current_user, previous_assigned_to=lead.current_assigned_to, current_assigned_to=lead.transfer_to, changes=changes)
 
 
-                LeadHistory.objects.create(lead=lead, user=current_user,  previous_assigned_to=lead.current_transfer, current_assigned_to=lead.transfer_to, changes=changes)
+                LeadHistory.objects.create(lead=lead, user=current_user,  previous_assigned_to=lead.current_transfer, current_assigned_to=lead.transfer_to, changes=changes, category='mention')
 
                 notification_message = f'You have new mention lead'
 
