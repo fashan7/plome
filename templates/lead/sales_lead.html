@@ -121,9 +121,15 @@
 
       <div class="row justify-content-center">
         <div class="col-12">
-          <h2 class="mb-2 page-title">Sales Lead table</h2>
+          <h2 class="mb-2 page-title">Sales Leads table</h2>
 
-       
+          
+          <!-- Add these buttons to your template -->
+          
+
+          <form method="GET" action="{% url 'sales_lead' %}">
+            <!-- filter for users  -->
+          
 
             <!-- filter for qualificaiton -->
             <label for="qualification_filter">Filter by Qualification:</label>
@@ -144,9 +150,164 @@
 
             <button type="submit">Apply Filters</button>
           </form>
-          
-          <!-- Modal -->
+          </form>
+
          
+          <!-- Use button tags for the export buttons -->
+          {% comment %} <button type="button" class="btn btn-danger mb-2" id="deleteLeadsBtn" data-toggle="modal"
+            data-target="#deleteModal">
+            Delete Leads
+          </button> {% endcomment %}
+
+          <!-- Modal -->
+          <div class="modal fade" id="defaultModal" tabindex="-1" role="dialog" aria-labelledby="defaultModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="defaultModalLabel">Add lead</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <div class="card shadow mb-4">
+                    <div class="card-body">
+                      <form class="needs-validation" method="POST" action="{% url 'lead_dashboard' %}" novalidate="">
+                        {% csrf_token %}
+                        <div class="form-row">
+                          <div class="col-md-6 mb-3">
+                            <label for="date_de_soumission">Date de Soumission</label>
+                            {% comment %} <input type="text" class="form-control" id="prenom" name="prenom" required>
+                            {% endcomment %}
+                            <input type="date" name="date_de_soumission" class="form-control" required>
+                            <div class="invalid-feedback">Please provide a valid Date.</div>
+                          </div>
+                          <div class="col-md-6 mb-3">
+                            <label for="nom_de_la_campagne">Nom de la Campagne</label>
+                            {% comment %} <input type="text" class="form-control" id="nom" name="nom" required>
+                            {% endcomment %}
+                            <input type="text" name="nom_de_la_campagne" class="form-control" maxlength="100" required>
+                            <div class="invalid-feedback">Please provide a valid nom.</div>
+                          </div>
+                          <div class="col-md-6 mb-3">
+                            <label for="avez_vous_travaille">Avez-vous travaillé</label>
+                            <input type="text" name="avez_vous_travaille" class="form-control" maxlength="100" required>
+                            <div class="invalid-feedback">Please provide a valid email.</div>
+                          </div>
+                          <div class="col-md-6 mb-3">
+                            <label for="telephone">Nom & Prenom</label>
+                            <input type="text" name="nom_prenom" class="form-control" maxlength="100" required>
+                            <div class="invalid-feedback">Please provide a valid telephone number.</div>
+                          </div>
+                          {% comment %} <div class="col-md-6 mb-3">
+                            <label for="date_de_soumission">Prénom</label>
+                            <input type="text" name="prenom" class="form-control" maxlength="100" required>
+                            <div class="invalid-feedback">Please provide a valid date de soumission.</div>
+                          </div> {% endcomment %}
+                          <div class="col-md-6 mb-3">
+                            <label for="Téléphone">Téléphone</label>
+                            <input type="text" name="telephone" class="form-control" maxlength="20" required>
+                            <div class="invalid-feedback">Please provide a valid nom de la campagne.</div>
+                          </div>
+                          <div class="form-group col-md-6 mb-3">
+                            <label for="qualification">Qualification</label>
+                              <select name="qualification" class="form-control" id="qualification" name="qualification"
+                                required>
+                                <option value="">--Select Qualification-- </option>
+                                <option value="nrp1">NRP1</option>
+                                <option value="nrp2">NRP2</option>
+                                <option value="nrp3">NRP3</option>
+                                <option value="en_cours">En cours</option>
+                                <option value="rappel">Rappel</option>
+                                <option value="faux_numero">Faux numéro</option>
+                                <option value="pas_de_budget">Pas de budget</option>
+                                <option value="pas_interesse">Pas intéressé</option>
+                                <option value="ne_pas_rappele">Ne pas rappeler</option>
+                                <option value="signe_pole_emploi">Signé Pôle Emploi</option>
+                                <option value="signe_cpf">Signé CPF</option>
+                              </select>
+                              <div class="invalid-feedback">Please select a qualification.</div>
+                          </div>
+                          <div class="form-group col-md-6 mb-3">
+                            <label for="Email">Email</label>
+                            <input type="email" name="email" class="form-control" required>
+                          </div>
+                          <div class="col-md-6 mb-3">
+                            <label for="Comments">Comments</label>
+                            <textarea name="comments" class="form-control" required></textarea>
+                            <div class="invalid-feedback">Please provide a valid nom de la campagne.</div>
+                          </div>
+                          
+
+                          <div class="col-md-12 mb-3">
+                            <button type="button" class="btn btn-secondary" onclick="addCustomField()">Add Custom
+                              Field</button>
+                          </div>
+
+                          <div class="col-md-12 mb-3" id="custom-fields-container">
+                            <!-- Custom Fields will be dynamically added here -->
+                          </div>
+                          <div class="col-md-6 mb-3">
+                            <button class="btn btn-primary" type="submit">Submit</button>
+                          </div>
+
+                      </form>
+                    </div> <!-- /.card-body -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- and Modal -->
+
+        <!-- Import Leads Modal -->
+        <div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-labelledby="importModalLabel"
+          aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="importModalLabel">Import Leads</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <form method="post" enctype="multipart/form-data" action="{% url 'import_leads' %}">
+                  {% csrf_token %}
+                  <div class="form-group">
+                    <label for="file">Select CSV or Excel File</label>
+                    <input type="file" name="file" id="file" class="form-control-file" required>
+                  </div>
+                  <button type="submit" class="btn btn-primary">Import</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal fade" id='showhsitory'>
+          <div class="modal-dialog modal-xl">
+
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">History Entries</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <div id="loadhistory"></div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="closeHistoryModel"
+                  data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Small table -->
         <div class="row my-2">
           <div class="col-md-12">
@@ -292,7 +453,7 @@
                                       <div class="form-group col-md-6">
                                         <label for="qualification">Qualification</label>
 
-                                        <select name="qualification" id="qualification" class="form-control" required>
+                                        <select name="qualification" id="qualification" class="form-control qualification-select" data-lead-id="{{ lead.id }}" required>
                                           <option value="" {% if not lead.select_qualification %}selected{% endif %}>
                                             --Select Qualification--</option>
                                           <option value="nrp1" {% if lead.qualification == 'nrp1' %} selected
@@ -332,7 +493,22 @@
                                         <textarea name="comments" id="comments" class="form-control"
                                           required>{{ lead.comments }}</textarea>
                                       </div>
-                                     
+                                      
+                                      <div class="form-group col-md-6" id="rappelappointment{{ lead.id }}" {% if lead.qualification == 'rappel' %} style="display:block;" {% else %} style="display:none;" {% endif %}>
+                                        <label for="appointment">Appointment Date & Time</label>
+                                        <div class="input-group mb-3">
+                                          <input type="text" class="form-control" name="appointmentStatDateTime" id="appointmentStatDateTime{{ lead.id }}" placeholder="Click Schedule" aria-label="Click Schedule" readonly  value="{{ lead.appointment_date_time }}" aria-describedby="button-addon2">
+                                          <div class="input-group-append">
+                                            <button class="btn btn-primary clicktoschedule" data-lead-id="{{ lead.id }}" type="button" id="button-addon2">Schedule New</button>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div class="form-group col-md-6" id="signecpfprice{{ lead.id }}" {% if lead.qualification == 'signe_cpf' %} style="display:block;" {% else %} style="display:none;" {% endif %}>
+                                        <label for="price">Price</label>
+                                          <input type="text" name="price" id="priceStat{{ lead.id }}" class="form-control"
+                                            placeholder="Price" value="{{ lead.price }}" required autocomplete="off">
+                                      </div>
+                                      <div id="loadBasedQualification{{ lead.id }}"></div>
                                       {% if lead.custom_fields %}
 
                                       {% for key, value in lead.custom_fields.items %}
@@ -361,8 +537,8 @@
                                               href="#doccument{{ lead.id }}">Documents</a>
                                           </li>
                                           <li class="nav-item">
-                                            <a class="nav-link" data-toggle="tab"
-                                              href="#history{{ lead.id }}">History</a>
+                                            <a class="nav-link  show-otherhistory-btn" data-lead-id="{{ lead.id }}" data-toggle="tab"
+                                              href="#history{{ lead.id }}" data-url="{% url 'lead_otherhistory' lead.id %}">History</a>
                                           </li>
                                           <li class="nav-item">
                                             <a class="nav-link  show-history-btn" data-toggle="tab"
@@ -436,48 +612,39 @@
 
                                       <div class="tab-pane fade" id="history{{ lead.id }}">
                                         <div class="row">
-                                          <div class="col-6">
-                                            <div class="card">
-                                              <div class="card-body mx-1" style="max-height: 300px; overflow-y: auto;">
-                                                <blockquote>
-                                                  <!-- added the log entry for history-->
-                                                  <div class="table-responsive">
-                                                    <table id="example" class="table table-bordered display nowrap"
-                                                      cellspacing="0" style="width:100%">
-                                                      <thead class="fw-bold">
-                                                        <tr>
-                                                          <th>ID</th>
-                                                          <th>User</th>
-                                                          <th>Action Time</th>
-                                                          <th>Change Message</th>
-                                                        </tr>
-                                                      </thead>
-                                                      <tbody>
-                                                        {% for log_entry in log_entries %}
-                                                        <tr>
-                                                          <td>{{ log_entry.id }}</td>
-                                                          <td>{{ log_entry.user }}</td>
-                                                          <td>{{ log_entry.action_time }}</td>
-                                                          <td>{{ log_entry.change_message }}</td>
-                                                        </tr>
-                                                        {% endfor %}
-                                                      </tbody>
-                                                    </table>
-                                                  </div>
-                                                </blockquote>
+                                          <div class="col-12" >
+                                            <div id="historyotherData{{ lead.id }}">
+                                              <div class="card" >
+                                                <div class="card-body mx-1" style="max-height: 300px; overflow-y: auto;">
+                                                  <blockquote>
+                                                    <!-- added the log entry for history-->
+                                                    <div class="table-responsive">
+                                                      <table id="example" class="table table-bordered display nowrap"
+                                                        cellspacing="0" style="width:100%">
+                                                        <thead class="fw-bold">
+                                                          <tr>
+                                                            <th>ID</th>
+                                                            <th>User</th>
+                                                            <th>Action Time</th>
+                                                            <th>Action Made</th>
+                                                          </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                          {% for entry in history_entries %}
+                                                          <tr>
+                                                            <td>{{ entry.id }}</td>
+                                                            <td>{{ entry.user.username }}</td>
+                                                            <td>{{ entry.timestamp }}</td>
+                                                            <td>{{ entry.changes }}</td>
+                                                          </tr>
+                                                          {% endfor %}
+                                                        </tbody>
+                                                      </table>
+                                                    </div>
+                                                  </blockquote>
+                                                </div>
+                                                <!-- /.card-body -->
                                               </div>
-                                              <!-- /.card-body -->
-                                            </div>
-                                          </div>
-                                          <div class="col-6">
-                                            <div class="card">
-                                              <div class="card-body mx-1" style="max-height: 300px; overflow-y: auto;">
-                                                <blockquote>
-                                                  <p>Contenu de la colonne 2 de l'onglet À propos laye
-                                                  </p>
-                                                </blockquote>
-                                              </div>
-                                              <!-- /.card-body -->
                                             </div>
                                           </div>
                                         </div>
@@ -620,70 +787,15 @@
   </div>
   </div> <!-- .container-fluid -->
 
-  <div class="modal fade modal-shortcut modal-slide" tabindex="-1" role="dialog" aria-labelledby="defaultModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="defaultModalLabel">Shortcuts</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body px-5">
-          <div class="row align-items-center">
-            <div class="col-6 text-center">
-              <div class="squircle bg-success justify-content-center">
-                <i class="fe fe-cpu fe-32 align-self-center text-white"></i>
-              </div>
-              <p>Control area</p>
-            </div>
-            <div class="col-6 text-center">
-              <div class="squircle bg-primary justify-content-center">
-                <i class="fe fe-activity fe-32 align-self-center text-white"></i>
-              </div>
-              <p>Activity</p>
-            </div>
-          </div>
-          <div class="row align-items-center">
-            <div class="col-6 text-center">
-              <div class="squircle bg-primary justify-content-center">
-                <i class="fe fe-droplet fe-32 align-self-center text-white"></i>
-              </div>
-              <p>Droplet</p>
-            </div>
-            <div class="col-6 text-center">
-              <div class="squircle bg-primary justify-content-center">
-                <i class="fe fe-upload-cloud fe-32 align-self-center text-white"></i>
-              </div>
-              <p>Upload</p>
-            </div>
-          </div>
-          <div class="row align-items-center">
-            <div class="col-6 text-center">
-              <div class="squircle bg-primary justify-content-center">
-                <i class="fe fe-users fe-32 align-self-center text-white"></i>
-              </div>
-              <p>Users</p>
-            </div>
-            <div class="col-6 text-center">
-              <div class="squircle bg-primary justify-content-center">
-                <i class="fe fe-settings fe-32 align-self-center text-white"></i>
-              </div>
-              <p>Settings</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
 </main> <!-- main -->
+
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
+
+<script>  
   $(document).ready(function() {
+   
     /*test */
     $(document).ready(function() {
       // Function to get all users from the server
@@ -888,9 +1000,197 @@
 <!-- Include Bootstrap JavaScript -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.min.js"></script>
 <!-- Include Bootstrap CSS -->
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
 <script>
   $(document).ready(function() {
+    /*var queryParams = new URLSearchParams(window.location.search);
+    var openModalLeadId = queryParams.get('openModal');
+
+    if (openModalLeadId) {
+      setTimeout(function() {
+        $('#editModal-277'+openModalLeadId).show();
+      }, 2000); 
+    }*/
+
+    
+    const rappelFields = $('#rappelFields');
+    const rappelDateInput = $('#rappel_date');
+
+    function getAccurateDataofQUalification(selectedV, leadID){
+      $.ajax({
+        type: 'POST',
+        url: '{% url "get_qualification_data" %}',
+        data: {
+            'lead_id': leadID,
+            'selectedValue':selectedV,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        dataType: 'json',
+        success: function(response) {
+          data = response.result
+          if (selectedV === 'rappel') {
+            $('#appointmentStatDateTime'+leadID).val(data);
+          } else {
+            $('#priceStat'+leadID).val(data);
+          }
+        }
+      });
+    }
+    $('.clicktoschedule').click(function() {
+      var leadId = $(this).data('lead-id');
+      $.confirm({
+          title: 'Set Appointment',
+          content: 'Provide the date and time for the appointment:',
+          buttons: {
+              confirm: function() {
+                  var selectedDate = $('#appointmentDate').val();
+                  var selectedTime = $('#appointmentTime').val();
+                  var formattedDateTime = selectedDate + ' ' + selectedTime;
+                  $('#appointmentStatDateTime'+leadId).val(formattedDateTime);
+              },
+              cancel: function() {
+              }
+          },
+          // Add form inputs for date and time
+          onContentReady: function() {
+              var self = this;
+              self.setContentAppend('<input type="date" class="form-control" id="appointmentDate" required><br>');
+              self.setContentAppend('<input type="time" class="form-control" id="appointmentTime" required>');
+          }
+      });
+    });
+
+    $(document).on('change', '.qualification-select', function() {
+        var selectedValue = $(this).val();
+        var leadId = $(this).data('lead-id');
+        $('#editModal-'+leadId).hide();
+
+        if (selectedValue === 'rappel') {
+          $("#rappelappointment"+leadId).css("display", "block");
+          $("#signecpfprice"+leadId).css("display", "none");
+          $.confirm({
+              title: 'Set Appointment',
+              content: 'Provide the date and time for the appointment:',
+              buttons: {
+                  confirm: function() {
+                      // Get the selected date and time values from the modal
+                      var selectedDate = $('#appointmentDate').val();
+                      var selectedTime = $('#appointmentTime').val();
+                      
+                      $.ajax({
+                        type: 'POST',
+                        url: '{% url "save_appointment" %}',
+                        data: {
+                            'lead_id': leadId,
+                            'appointment_date': selectedDate,
+                            'appointment_time': selectedTime,
+                            csrfmiddlewaretoken: '{{ csrf_token }}'
+                        },
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.success) {
+                              Swal.fire(
+                                'Success!',
+                                'Appointment Intiated',
+                                'success'
+                              ).then(function() {
+                                getAccurateDataofQUalification(selectedValue, leadId);
+                                $('#editModal-'+leadId).show();
+                              });
+                            } else {
+                              Swal.fire({
+                                icon: 'error',
+                                title: 'something went wrong!',
+                                text: error.error
+                              });
+                            }
+                        },
+                        error: function() {
+                          Swal.fire({
+                            icon: 'error',
+                            title: 'something went wrong!',
+                            text: error.error
+                          });
+                        }
+                    });
+                  },
+                  cancel: function() {
+                    $('#qualification').val('');
+                    $('#editModal-'+leadId).show();
+                  }
+              },
+              // Add form inputs for date and time
+              onContentReady: function() {
+                  var self = this;
+                  self.setContentAppend('<input type="date" class="form-control" id="appointmentDate" required><br>');
+                  self.setContentAppend('<input type="time" class="form-control" id="appointmentTime" required>');
+              }
+          });
+        } 
+        else if (selectedValue === 'signe_cpf') {
+          $("#rappelappointment"+leadId).css("display", "none");
+          $("#signecpfprice"+leadId).css("display", "block");
+          $.confirm({
+            title: 'Enter Price',
+            content: 'Provide the pricing',
+            buttons: {
+                confirm: function() {
+                    var price = $('#price').val();
+                    $.ajax({
+                      type: 'POST',
+                      url: '{% url "save_signe_cpf" %}',
+                      data: {
+                          'lead_id': leadId,
+                          'price': price,
+                          csrfmiddlewaretoken: '{{ csrf_token }}'
+                      },
+                      dataType: 'json',
+                      success: function(response) {
+                          if (response.success) {
+                            Swal.fire(
+                              'Success!',
+                              'Price Saved',
+                              'success'
+                            ).then(function() {
+                                getAccurateDataofQUalification(selectedValue, leadId);
+                                $('#editModal-'+leadId).show();
+                            });
+                          } else {
+                            Swal.fire({
+                              icon: 'error',
+                              title: 'something went wrong!',
+                              text: error.error
+                            });
+                          }
+                      },
+                      error: function() {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Something went wrong!',
+                            text: 'Failed to save price'
+                        }); 
+                      }
+                  });
+                },
+                close: function(){
+                  $('#qualification').val('');
+                  $('#editModal-'+leadId).show();
+                }
+            },
+            onContentReady: function() {
+              var self = this;
+              self.setContentAppend('<input type="text" class="form-control" id="price" placeholder="Enter price" focus required>');
+              $('#price').prop('disabled', false);
+          }
+        });
+      } else {
+        $('#editModal-'+leadId).show();
+        $("#rappelappointment"+leadId).css("display", "none");
+        $("#signecpfprice"+leadId).css("display", "none");
+      }
+    });
+
     $(document).on('click', '.show-history-btn', function(event) {
       event.preventDefault();
       var leadId = $(this).data('lead-id');
@@ -898,6 +1198,18 @@
       $.get(url, function(data) {
         // Append the lead history modal to the body
         $('#historymentionData' + leadId).html(data);
+        // Show the modal
+        //$('#showhsitory').modal('show');
+      });
+    });
+
+    $(document).on('click', '.show-otherhistory-btn', function(event) {
+      event.preventDefault();
+      var leadId = $(this).data('lead-id');
+      var url = $(this).data('url');
+      $.get(url, function(data) {
+        // Append the lead history modal to the body
+        $('#historyotherData' + leadId).html(data);
         // Show the modal
         //$('#showhsitory').modal('show');
       });
@@ -931,7 +1243,7 @@
         this.select(isChecked);
       });
     });
-    $('#assignButton').on('click', function() {
+    /*$('#assignButton').on('click', function() {
       var selectedLeads = [];
       var assignToUser = $('#assignToUser').val();
       table.rows({
@@ -943,17 +1255,10 @@
       order: [
         [1, 'asc']
       ]
-    });
+    });*/
   });
   // Handle "Select All" checkbox click
-  $('#selectAllCheckbox').on('click', function() {
-    var isChecked = this.checked;
-    table.rows({
-      page: 'current'
-    }).every(function() {
-      this.select(isChecked);
-    });
-  });
+  
   $('#assignButton').on('click', function() {
     var selectedLeads = [];
     var assignToUser = $('#assignToUser').val();
@@ -977,11 +1282,6 @@
       selectedLeads.push(lead);
     });
     if (selectedLeads.length > 0 && assignToUser) {
-      $.ajax({
-        type: 'POST',
-        url: '{% url "assign_leads" %}',
-        comments: rowData[9] || null,
-      });
       selectedLeads.push(lead)
     }
     if (selectedLeads.length > 0 && assignToUser) {
@@ -994,7 +1294,6 @@
           assign_to_user: assignToUser
         },
         success: function(response) {
-          location.reload();
           location.reload();
         },
         error: function(error) {
