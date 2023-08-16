@@ -1103,16 +1103,15 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
 <script>
-
   $(document).ready(function() {
-    var queryParams = new URLSearchParams(window.location.search);
+    /*var queryParams = new URLSearchParams(window.location.search);
     var openModalLeadId = queryParams.get('openModal');
 
     if (openModalLeadId) {
       setTimeout(function() {
-        $('#editModal-'+openModalLeadId).show();
+        $('#editModal-277'+openModalLeadId).show();
       }, 2000); 
-    }
+    }*/
 
     
     const rappelFields = $('#rappelFields');
@@ -1383,11 +1382,6 @@
       selectedLeads.push(lead);
     });
     if (selectedLeads.length > 0 && assignToUser) {
-      $.ajax({
-        type: 'POST',
-        url: '{% url "assign_leads" %}',
-        comments: rowData[9] || null,
-      });
       selectedLeads.push(lead)
     }
     if (selectedLeads.length > 0 && assignToUser) {
@@ -1400,7 +1394,6 @@
           assign_to_user: assignToUser
         },
         success: function(response) {
-          location.reload();
           location.reload();
         },
         error: function(error) {
