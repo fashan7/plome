@@ -162,3 +162,13 @@ class Attachment(models.Model):
 
     def __str__(self):
         return f"Attachment for Lead: {self.lead.nom_de_la_campagne}"
+    
+
+class PriceEntry(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    entry_date = models.DateField(auto_now_add=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    lead = models.ForeignKey(Lead, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.entry_date} - ${self.price}"

@@ -9,6 +9,7 @@ admin.site.register(Notification)
 admin.site.register(LogEntry)
 admin.site.register(FacebookLead)
 admin.site.register(LeadHistory)
+admin.site.register(PriceEntry)
 
 admin.site.register(Attachment)
 
