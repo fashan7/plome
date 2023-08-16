@@ -227,7 +227,7 @@ def lead_history_view(request, lead_id):
 
 def lead_otherhistory_view(request, lead_id):
     lead = get_object_or_404(Lead, id=lead_id)
-    lead_history = LeadHistory.objects.filter(lead=lead, category='other').order_by('-timestamp')[:10]
+    lead_history = LeadHistory.objects.filter(Q(lead=lead, category='other') | Q(lead=lead, category='assign')).order_by('-timestamp')[:10]
     return render(request, 'lead/lead_otherhistory.html', {'lead': lead, 'history_entries': lead_history})
 
 
@@ -434,9 +434,8 @@ def lead_edit(request, lead_id):
         changes = {}
 
         # Check if each field has been changed and update the changes dictionary
-        if lead.date_de_soumission != form_data['date_de_soumission']:
+        if str(lead.date_de_soumission) != form_data['date_de_soumission']:
             changes['Date de soumission'] = form_data['date_de_soumission']
-#avez_vous_travaille
 
         if lead.avez_vous_travaille != form_data['avez_vous_travaille']:
             changes['avez_vous_travaille'] = form_data['avez_vous_travaille']
@@ -1001,6 +1000,8 @@ def assign_leads(request):
                 notification_message = f'You have been assigned a new lead: {lead.nom_de_la_campagne}'
                 notification = Notification(user=assigned_user, lead=lead, message=notification_message)
                 notification.save()
+                changes = 'Assigned'
+                LeadHistory.objects.create(lead=lead, user=request.user,  changes=changes, category='assign')
 
             return JsonResponse({'success': True, 'message': 'Leads assigned successfully.'}, status=200)
         except Exception as e:

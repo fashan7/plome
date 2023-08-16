@@ -14,7 +14,6 @@ urlpatterns = [
     path('export_leads/<str:file_format>/', views.export_leads, name='export_leads'),
 
     path('sales_lead/',views.sales_lead,name="sales_lead"),
-    path('assign_leads/', views.assign_leads, name='assign_leads'),
     path('complete_leads/',views.complete_leads, name='complete_leads'),
     path('fetch_facebook_leads/', views.fetch_facebook_leads, name='fetch_facebook_leads'),
     path('filtered_lead_dashboard/<int:user_id>/', views.filtered_lead_dashboard, name='filtered_lead_dashboard'),
