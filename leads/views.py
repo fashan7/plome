@@ -434,11 +434,8 @@ def lead_edit(request, lead_id):
         changes = {}
 
         # Check if each field has been changed and update the changes dictionary
-        print(form_data)
-        print(lead.date_de_soumission)
         if str(lead.date_de_soumission) != form_data['date_de_soumission']:
             changes['Date de soumission'] = form_data['date_de_soumission']
-            print("Did i changed")
 
         if lead.avez_vous_travaille != form_data['avez_vous_travaille']:
             changes['avez_vous_travaille'] = form_data['avez_vous_travaille']
@@ -469,8 +466,6 @@ def lead_edit(request, lead_id):
 
         if lead.price != form_data['price'] and lead.price is not None:
             changes['Price'] = form_data['price']
-
-        print("Changes\n",changes)
 
         # if lead.
 
