@@ -20,7 +20,7 @@ import math
 import numpy as np
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .models import Lead
+from .models import Lead,PriceEntry
 
 from dateutil import parser
 
@@ -274,6 +274,8 @@ def save_signe_cpf(request):
             lead = Lead.objects.get(id=lead_id)
             lead.price = price
             lead.save()
+
+            PriceEntry.objects.create(user=request.user, price=price, lead=lead)
             return JsonResponse({'success': True})
         except Lead.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Lead not found'})
@@ -466,6 +468,13 @@ def lead_edit(request, lead_id):
 
         if lead.price != form_data['price'] and lead.price is not None:
             changes['Price'] = form_data['price']
+            price_entry = PriceEntry.objects.filter(lead=lead, entry_date=datetime.now(timezone.utc).date()).first()
+            if price_entry:
+                price_entry.price = form_data['price']
+                price_entry.save()
+            else:
+                PriceEntry.objects.create(user=request.user, entry_date=datetime.now(timezone.utc).date(), price=form_data['price'], lead=lead)
+
 
         # if lead.
 
@@ -493,6 +502,7 @@ def lead_edit(request, lead_id):
         price = form_data.get('price')
         if price != 'None':
             lead.price = price
+
 
         
 

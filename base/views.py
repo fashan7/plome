@@ -21,7 +21,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from django.contrib.auth.hashers import make_password
 
-from leads.models import Lead
+from leads.models import Lead,PriceEntry
 from django.contrib import messages
 from leads.models import Notification
 
@@ -37,10 +37,11 @@ from django.views.decorators.http import require_POST
 
 from django.utils.timezone import now
 from django.utils.timezone import make_aware
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.utils import timezone
 from leads.views import sales_lead
 from django.db.models import F
+from django.db.models import Sum
 
 
 @require_POST
@@ -410,3 +411,27 @@ def profile_settings(request):
 #     send_mail(subject, plain_message, from_email, [to_email], html_message=html_message)
 
 #     return render(request, 'base/sendemail.html')
+
+def fetch_price_data(request):
+    today = datetime.now(timezone.utc).date() #datetime.date.today()
+    start_of_week = today - timedelta(days=today.weekday())
+    end_of_week = start_of_week + timedelta(days=6)
+    user_prices = (
+        PriceEntry.objects.filter(entry_date__range=(start_of_week, end_of_week))
+        .values('user', 'entry_date', 'user__username')
+        .annotate(daily_price=Sum('price'))
+        .order_by('user', 'entry_date')
+    )
+
+    user_price_data = {}
+    for entry in user_prices:
+        user_id = entry['user']
+        username = entry['user__username']
+        entry_date = entry['entry_date'].strftime('%A')
+        daily_price = entry['daily_price']
+
+        if user_id not in user_price_data:
+            user_price_data[user_id] = {'username': username, 'prices': {}}
+        user_price_data[user_id]['prices'][entry_date] = daily_price
+
+    return JsonResponse(user_price_data)
