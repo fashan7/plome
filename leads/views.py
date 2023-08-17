@@ -296,6 +296,12 @@ def save_signe_cpf(request):
             lead.save()
 
             PriceEntry.objects.create(user=request.user, price=price, lead=lead)
+            LeadHistory.objects.create(
+                user=request.user,
+                lead=lead,
+                changes=f'{request.user.username} has added the Price of {price}',
+                category='other'
+            )
             return JsonResponse({'success': True})
         except Lead.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Lead not found'})
@@ -486,7 +492,7 @@ def lead_edit(request, lead_id):
             IsdateChange = True
             changes['Appointment Date Time'] = form_data['appointmentStatDateTime']
 
-        if lead.price != form_data['price'] and lead.price is not None:
+        if str(lead.price) != form_data['price'] and lead.price is not None:
             changes['Price'] = form_data['price']
             price_entry = PriceEntry.objects.filter(lead=lead, entry_date=datetime.now(timezone.utc).date()).first()
             if price_entry:
