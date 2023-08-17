@@ -492,6 +492,17 @@ def lead_edit(request, lead_id):
             IsdateChange = True
             changes['Appointment Date Time'] = form_data['appointmentStatDateTime']
 
+            #Adding the mail for scheduling the appointment, if the user ressheduled the date
+            send_mail(
+                'Appointment Scheduled',
+                f'Your appointment is scheduled on {lead.appointment_date_time}. ', #need to add the user name 
+                'sender@example.com',
+                [lead.email],
+                fail_silently=False,
+            )
+            
+            send_appointment_reminder(lead)
+
         if str(lead.price) != form_data['price'] and lead.price is not None:
             changes['Price'] = form_data['price']
             price_entry = PriceEntry.objects.filter(lead=lead, entry_date=datetime.now(timezone.utc).date()).first()
