@@ -269,7 +269,15 @@ def save_appointment(request):
             datetime.strptime(appointment_date, '%Y-%m-%d').date(),
             datetime.strptime(appointment_time, '%H:%M').time()
         )
+        lead.price = None 
         lead.save()
+
+        LeadHistory.objects.create(
+            user=request.user,
+            lead=lead,
+            changes=f'{request.user.username} has made an appointment on {appointment_date} @ {appointment_time}',
+            category='other'
+        )
         
         send_mail(
             'Appointment Scheduled',
@@ -280,6 +288,8 @@ def save_appointment(request):
         )
         
         send_appointment_reminder(lead)
+
+        
         
         return JsonResponse({'success': True})
         
@@ -293,6 +303,7 @@ def save_signe_cpf(request):
         try:
             lead = Lead.objects.get(id=lead_id)
             lead.price = price
+            lead.appointment_date_time = None 
             lead.save()
 
             PriceEntry.objects.create(user=request.user, price=price, lead=lead)
@@ -490,20 +501,10 @@ def lead_edit(request, lead_id):
         IsdateChange = False
         if lead.appointment_date_time != appointmentDT and lead.appointment_date_time is not None:
             IsdateChange = True
-            changes['Appointment Date Time'] = form_data['appointmentStatDateTime']
 
-            #Adding the mail for scheduling the appointment, if the user ressheduled the date
-            send_mail(
-                'Appointment Scheduled',
-                f'Your appointment is scheduled on {lead.appointment_date_time}. ', #need to add the user name 
-                'sender@example.com',
-                [lead.email],
-                fail_silently=False,
-            )
-            
-            send_appointment_reminder(lead)
-
-        if str(lead.price) != form_data['price'] and lead.price is not None:
+        IspriceChange = False
+        if str(lead.price) != str(form_data['price']) and lead.price is not None:
+            IspriceChange = True
             changes['Price'] = form_data['price']
             price_entry = PriceEntry.objects.filter(lead=lead, entry_date=datetime.now(timezone.utc).date()).first()
             if price_entry:
@@ -511,9 +512,6 @@ def lead_edit(request, lead_id):
                 price_entry.save()
             else:
                 PriceEntry.objects.create(user=request.user, entry_date=datetime.now(timezone.utc).date(), price=form_data['price'], lead=lead)
-
-
-        # if lead.
 
         # Repeat the above process for other fields
 
@@ -526,19 +524,48 @@ def lead_edit(request, lead_id):
         lead.email = form_data['email']
         lead.qualification = form_data['qualification']
         lead.comments = form_data['comments']
+        isDateReallyChanged = False
+        formatted_datetime = None
+
         if appointmentDT != 'None' and IsdateChange:
             try:
                 formatted_datetime = parser.parse(appointmentDT)
             except Exception as e:
                 formatted_datetime = appointmentDT
-            lead.appointment_date_time = formatted_datetime
+            if lead.appointment_date_time.strftime('%Y-%m-%d %H:%M:%S') != str(formatted_datetime):
+                isDateReallyChanged = True
         elif appointmentDT == 'None' and IsdateChange:
             formatted_datetime = parser.parse(appointmentDT)
+            if lead.appointment_date_time.strftime('%Y-%m-%d %H:%M:%S') != str(formatted_datetime):
+                isDateReallyChanged = True
+
+        if isDateReallyChanged and formatted_datetime is not None:
+            changes['Appointment Date Time'] = form_data['appointmentStatDateTime']
+            #Adding the mail for scheduling the appointment, if the user ressheduled the date
+            send_mail(
+                'Appointment Scheduled',
+                f'Your appointment is scheduled on {lead.appointment_date_time}. ', #need to add the user name 
+                'sender@example.com',
+                [lead.email],
+                fail_silently=False,
+            )
+            
+            send_appointment_reminder(lead)
             lead.appointment_date_time = formatted_datetime
        
         price = form_data.get('price')
         if price != 'None':
             lead.price = price
+
+        if isDateReallyChanged:
+            lead.price = None #if User selects rappel, price will be nulled
+
+        if IspriceChange:
+            lead.appointment_date_time = None #if User selects signe_cpf, appointmentdt will be nulled
+
+        if form_data['qualification'] != 'signe_cpf' and form_data['qualification'] != 'rappel':
+            lead.appointment_date_time = None
+            lead.price = None
 
 
         
