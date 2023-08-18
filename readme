@@ -1,0 +1,3 @@
+"C:\Program Files\Python39\python.exe" -m celery -A CRM worker --loglevel=info
+
+"C:\Program Files\Python39\python.exe" -m celery -A CRM beat -l info
