@@ -153,7 +153,7 @@ DEFAULT_FROM_EMAIL = 'default from email'
 
 # settings.py
 from kombu import Queue 
-
+from datetime import datetime, timedelta
 
 # CELERY_BROKER_URL = 'redis://localhost:6379/5'
 # CELERY_RESULT_BACKEND = 'redis://localhost:6379/5'
@@ -167,9 +167,17 @@ CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_DEFAULT_QUEUE = "CRM"
+CELERY_ACCEPT_CONTENT = ["json"]  # Add this line
 CELERY_TRACK_STARTED = True
 CELERY_QUEUES = (Queue("CRM", routing_key="task.#"),)
 CELERY_TIMEZONE = 'Europe/Paris'
+
+CELERY_BEAT_SCHEDULE = {
+    "send_appointment_reminder": {
+        "task": "send_appointment_reminder",
+        "schedule": timedelta(seconds=10),
+    },
+}
 
 LOGGING = {
     "version": 1,
