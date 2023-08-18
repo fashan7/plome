@@ -146,3 +146,77 @@ EMAIL_HOST_PASSWORD = 'blmcqarkyklglcwr' #past the key or password app here
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = 'default from email'
+
+
+
+# settings.py
+
+# settings.py
+from kombu import Queue 
+from datetime import datetime, timedelta
+
+# CELERY_BROKER_URL = 'redis://localhost:6379/5'
+# CELERY_RESULT_BACKEND = 'redis://localhost:6379/5'
+# CELERY_ACCEPT_CONTENT = ['json']
+# CELERY_TASK_SERIALIZER = 'json'
+# CELERY_RESULT_SERIALIZER = 'json'
+# CELERY_TIMEZONE = 'Europe/Paris'
+
+BROKER_URL = "redis://localhost:6379/0" 
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_DEFAULT_QUEUE = "CRM"
+CELERY_ACCEPT_CONTENT = ["json"]  # Add this line
+CELERY_TRACK_STARTED = True
+CELERY_QUEUES = (Queue("CRM", routing_key="task.#"),)
+CELERY_TIMEZONE = 'Europe/Paris'
+
+CELERY_BEAT_SCHEDULE = {
+    "send_appointment_reminder": {
+        "task": "send_appointment_reminder",
+        "schedule": timedelta(seconds=10),
+    },
+}
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "%(levelname)s %(asctime)s %(module)s %(lineno)d %(funcName)s %(message)s"
+        }
+    },
+    "filters": {
+        "require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}
+    },
+    "handlers": {
+        "error_handler": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR / "logs/error.log",
+            "formatter": "verbose",
+        },
+        "base_handler": {
+            "level": "DEBUG",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": BASE_DIR / "logs/request.log",
+            "maxBytes": 1024 * 1024 * 16,
+            "backupCount": 100,
+            "formatter": "verbose",
+        },
+        
+    },
+    "loggers": {
+        "error_logger": {
+            "handlers": ["error_handler"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+        "request_logger": {
+            "handlers": ["base_handler"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+    },
+}

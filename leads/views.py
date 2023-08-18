@@ -240,22 +240,6 @@ def lead_history(request, lead_id):
     history_entries = LeadHistory.objects.filter(lead=lead, category='mention')
     return render(request, 'lead/lead_history.html', {'lead': lead, 'history_entries': history_entries})
 
-def send_appointment_reminder(lead):
-    
-    reminder_time = lead.appointment_date_time - timedelta(minutes=15)
-    current_time = datetime.now()  # Use the current time
-
-    print("Current Time:", current_time)
-    print("Reminder Time:", reminder_time)
-
-    if current_time >= reminder_time:
-        send_mail(
-            'Reminder: Appointment Coming Up',
-            f'Your appointment is coming up in 15 minutes at {lead.appointment_date_time}.',  # You can customize the message
-            'sender@example.com',
-            [lead.email],
-            fail_silently=False,
-        )
 
 
 def save_appointment(request):
@@ -287,8 +271,6 @@ def save_appointment(request):
             fail_silently=False,
         )
         
-        send_appointment_reminder(lead)
-
         
         
         return JsonResponse({'success': True})
