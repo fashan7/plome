@@ -536,7 +536,7 @@
     function openLeadModal(leadId) {
       // Open the lead edit modal
       var currentUrl = window.location.href;
-      if (currentUrl.includes("lead_dashboard")) {
+      if (currentUrl.includes("lead_dashboard",)) {
         $('#editModal-' + leadId).modal('show');
       } else {
         window.location.href = '/lead/lead_dashboard/?openModal=' + leadId;

@@ -895,7 +895,6 @@
 
 <script>  
   $(document).ready(function() {
-   
     /*test */
     $(document).ready(function() {
       // Function to get all users from the server
@@ -1104,14 +1103,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
 <script>
   $(document).ready(function() {
-    /*var queryParams = new URLSearchParams(window.location.search);
+    var queryParams = new URLSearchParams(window.location.search);
     var openModalLeadId = queryParams.get('openModal');
-
+    console.log('open',openModalLeadId)
     if (openModalLeadId) {
       setTimeout(function() {
-        $('#editModal-277'+openModalLeadId).show();
+       $('#editModal-' + openModalLeadId).modal('show');
       }, 2000); 
-    }*/
+    }
 
     
     const rappelFields = $('#rappelFields');
@@ -1276,6 +1275,7 @@
                 close: function(){
                   $('#qualification').val('');
                   $('#editModal-'+leadId).show();
+                  
                 }
             },
             onContentReady: function() {
