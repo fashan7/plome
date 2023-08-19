@@ -1,0 +1,25 @@
+
+Fixed loopholes:
+
+1. After clicking on notificaton and the popup comes up the close button is not working
+2. Why the notification first need to go to lead dashboard and the pop up its better if the user click on it and instead of going to lead_dashboard
+it shows on the same current page.
+
+3. once we add the price in it and after if we want to change the qualification the price is still there so it shouldnt be there when we are changing 
+qualification. and appointment if we want to reschedule it it should send the mail again after rescheduling (completed, but in )
+
+4. Add new user: whiile inviting the new user the password field shows blank 
+5. Add new user : when we edit the user the user profile is not storing there in database its storing but not in radio buttons
+6. Assign to : In leads assign to button is not working 
+
+
+7. Qualification: When we are changing the qualification to rappel to something else after saving rappel, it should remove the rappel data which is in appoint
+ment and same for  the signe cpf and price (after saving the save button is not working)
+
+
+8.when we add the lead from adding lead and use the assign button and save its not working coming an error for the page 
+9.Notification: in notification page the sender name is not correct its not showing who is sending 
+10. in notification page, we see al the notifications but  we need when we click on notification it will open up the modal like the same thing which we did 
+for notification bell
+
+for now these are the errors which i saw if there is any please mention it

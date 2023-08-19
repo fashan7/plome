@@ -241,7 +241,6 @@ def lead_history(request, lead_id):
     return render(request, 'lead/lead_history.html', {'lead': lead, 'history_entries': history_entries})
 
 
-
 def save_appointment(request):
     if request.method == 'POST':
         lead_id = request.POST.get('lead_id')
@@ -532,7 +531,7 @@ def lead_edit(request, lead_id):
                 fail_silently=False,
             )
             
-            send_appointment_reminder(lead)
+            
             lead.appointment_date_time = formatted_datetime
        
         price = form_data.get('price')
