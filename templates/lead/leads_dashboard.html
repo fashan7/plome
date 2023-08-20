@@ -1356,53 +1356,52 @@
         [1, 'asc']
       ]
     });*/
+    $('#assignButton').on('click', function() {
+      var selectedLeads = [];
+      var assignToUser = $('#assignToUser').val();
+      table.rows({
+        selected: true
+      }).every(function() {
+        var rowData = this.data();
+        var rowNode = this.node();
+        var leadId = rowNode.querySelector('td:first-child').getAttribute('data-lead-id');
+        var lead = {
+          id: leadId,
+          date_de_soumission: rowData[1],
+          nom_de_la_campagne: rowData[2],
+          avez_vous_travaille: rowData[3],
+          nom_prenom: rowData[4],
+          telephone: rowData[5],
+          email: rowData[6],
+          qualification: rowData[8] || null,
+          comments: rowData[9] || null,
+        };
+        selectedLeads.push(lead);
+      });
+    
+      if (selectedLeads.length > 0 && assignToUser) {
+        $.ajax({
+          type: 'POST',
+          url: '{% url "assign_leads" %}',
+          data: {
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            selected_leads: JSON.stringify(selectedLeads),
+            assign_to_user: assignToUser
+          },
+          success: function(response) {
+            location.reload();
+          },
+          error: function(error) {
+            alert('When assigning User, something got wrong')
+          }
+        });
+      } else {
+        alert('Please select leads and choose a user to assign.');
+      }
+    });
   });
   // Handle "Select All" checkbox click
   
-  $('#assignButton').on('click', function() {
-    var selectedLeads = [];
-    var assignToUser = $('#assignToUser').val();
-    table.rows({
-      selected: true
-    }).every(function() {
-      var rowData = this.data();
-      var rowNode = this.node();
-      var leadId = rowNode.querySelector('td:first-child').getAttribute('data-lead-id');
-      var lead = {
-        id: leadId,
-        date_de_soumission: rowData[1],
-        nom_de_la_campagne: rowData[2],
-        avez_vous_travaille: rowData[3],
-        nom_prenom: rowData[4],
-        telephone: rowData[5],
-        email: rowData[6],
-        qualification: rowData[8] || null,
-        comments: rowData[9] || null,
-      };
-      selectedLeads.push(lead);
-    });
-    if (selectedLeads.length > 0 && assignToUser) {
-      selectedLeads.push(lead)
-    }
-    if (selectedLeads.length > 0 && assignToUser) {
-      $.ajax({
-        type: 'POST',
-        url: '{% url "assign_leads" %}',
-        data: {
-          csrfmiddlewaretoken: '{{ csrf_token }}',
-          selected_leads: JSON.stringify(selectedLeads),
-          assign_to_user: assignToUser
-        },
-        success: function(response) {
-          location.reload();
-        },
-        error: function(error) {
-          alert('When assigning User, something got wrong')
-        }
-      });
-    } else {
-      alert('Please select leads and choose a user to assign.');
-    }
-  });
+  
 </script>
 {% endblock %}
