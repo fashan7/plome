@@ -5,7 +5,7 @@ Fixed loopholes:
 2. Why the notification first need to go to lead dashboard and the pop up its better if the user click on it and instead of going to lead_dashboard
 it shows on the same current page.
 
-3. once we add the price in it and after if we want to change the qualification the price is still there so it shouldnt be there when we are changing 
+[fixed]3. once we add the price in it and after if we want to change the qualification the price is still there so it shouldnt be there when we are changing 
 qualification. and appointment if we want to reschedule it it should send the mail again after rescheduling (completed, but in )
 
 4. Add new user: whiile inviting the new user the password field shows blank 
