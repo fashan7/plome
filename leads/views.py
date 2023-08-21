@@ -166,9 +166,12 @@ def lead_dashboard(request, lead_id=None):
             lead.save()
            
             notification_message = f'You have been assigned a new lead: {lead.nom_de_la_campagne}'
+
+            url = reverse('filtered_lead_dashboard', args=[assigned_user.id])
+            url_with_notification = f'{url}?notification={notification_message}'
+    
             
-            
-            return HttpResponseRedirect(f'/filtered_lead_dashboard/{assigned_user.id}/?notification={notification_message}')
+            return HttpResponseRedirect(url_with_notification)
         else:
             return redirect('lead_dashboard')
     else:
