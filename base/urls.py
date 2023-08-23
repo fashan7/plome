@@ -1,5 +1,7 @@
 from django.urls import path, include
 from .views import *
+from django.urls import path
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('admin_dashboard/', admin_dashboard, name='admin_dashboard'),
@@ -20,6 +22,12 @@ urlpatterns = [
     path('clear_all_notifications/', clear_all_notifications, name='clear_all_notifications'),
     path('all_notifications/', all_notifications, name='all_notifications'),
     path('fetch_price_data', fetch_price_data, name='fetch_price_data'),
+    path('activate-user/<int:user_id>/', activate_user, name='activate-user'),
+    path('deactivate-user/<int:user_id>/', deactivate_user, name='deactivate-user'),
+    path('toggle_user/<int:user_id>/', toggle_user, name='toggle_user'),
+    path('activate-user/<int:user_id>/', activate_user, name='activate-user'),
+    path('deactivate-user/<int:user_id>/', deactivate_user, name='deactivate-user'),
+    path('deactivate_users/', deactivate_users, name='deactivate-users'),
     
 ]
 

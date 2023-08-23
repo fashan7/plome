@@ -7,6 +7,70 @@
     color: rgb(20, 95, 245);
     font-weight: bold;
   }
+  /* Add some background color to the form */
+.animated-form {
+  background-color: #f5f5f5;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Add a subtle animation to the form */
+.animated-form {
+  animation: fadeInUp 0.5s ease-in-out;
+}
+
+@keyframes fadeInUp {
+  0% {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Add some background color to the form */
+.animated-form {
+  background-color: #f5f5f5;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Add a subtle animation to the form */
+.animated-form {
+  animation: fadeInUp 0.5s ease-in-out;
+}
+
+@keyframes fadeInUp {
+  0% {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Style the animated icon */
+.animated-icon {
+  color: #3498db;
+  animation: rotate 1.5s linear infinite;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+
 </style>
 
 <main role="main" class="main-content">
@@ -20,42 +84,23 @@
               <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home"
                 aria-selected="true">Profile</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile"
-                aria-selected="false">Security</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact"
-                aria-selected="false">Notifications</a>
-            </li>
+            
           </ul>
-          <form method="post">
-            {% csrf_token %}
-            <div class="row mt-5 align-items-center">
-              <div class="col-md-3 text-center mb-5">
-                <div class="avatar avatar-xl">
-                  <img src="{% static 'assets/avatars/face-1.jpg' %}" alt="..." class="avatar-img rounded-circle">
-                </div>
-              </div>
-              <div class="col">
-                <div class="row align-items-center">
-                  <div class="col-md-7">
-                    <h4 class="mb-1">{{ user.first_name }}, {{ user.last_name }}</h4>
-                    <p class="small mb-3"><span class="badge badge-dark">New York, USA</span></p>
-                  </div>
-                </div>
-                <div class="row mb-4">
-                  <div class="col-md-7">
-                    <p class="text-muted">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris blandit nisl
-                      ullamcorper, rutrum metus in, congue lectus. In hac habitasse platea dictumst. Cras urna quam,
-                      malesuada vitae risus at, pretium blandit sapien.</p>
-                  </div>
-                  <div class="col">
-                    <p class="small mb-0 text-muted">Nec Urna Suscipit Ltd</p>
-                    <p class="small mb-0 text-muted">P.O. Box 464, 5975 Eget Avenue</p>
-                    <p class="small mb-0 text-muted">(537) 315-1481</p>
-                  </div>
-                </div>
+           <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+          <form method="post" class="animated-form">
+  {% csrf_token %}
+  <div class="row mt-5 align-items-center">
+    <div class="col-md-3 text-center mb-5">
+       <i class="fas fa-envelope fa-4x animated-icon"></i>
+      <!-- You can add an animated icon or background here -->
+    </div>
+    <div class="col">
+      <div class="row align-items-center">
+        <div class="col-md-7">
+          <h4 class="mb-1">{{ user.first_name }}, {{ user.last_name }}</h4>
+        </div>
+      </div>
+                
               </div>
             </div>
             <hr class="my-4">

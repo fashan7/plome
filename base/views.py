@@ -111,7 +111,12 @@ def mark_notification_read(request):
 def admin_dashboard(request):
     if request.user.is_authenticated:
         filtered_user = CustomUserTypes.objects.filter(username=request.user)
-        return render(request, 'base/admin_dashboard.html', locals())
+        user = request.user
+        context = {
+        'user': user
+        # ... other context variables ...
+        }
+        return render(request, 'base/admin_dashboard.html', context, locals())
     else:
         return render(request, '/login')
     
@@ -412,10 +417,27 @@ def profile_settings(request):
 
 #     return render(request, 'base/sendemail.html')
 
+
+from datetime import datetime, timedelta
+from django.utils import timezone
+from django.db.models import Sum
+from django.http import JsonResponse
+
+from django.db.models import Q
+#after making the list of the user avaliable for every week
+
 def fetch_price_data(request):
-    today = datetime.now(timezone.utc).date() #datetime.date.today()
-    start_of_week = today - timedelta(days=today.weekday())
+    # Get the week offset from the request (0 for this week, -1 for the previous week, etc.)
+    week_offset = int(request.GET.get('week_offset', 0))
+    
+    today = datetime.now(timezone.utc).date()
+    # Calculate the start and end dates of the requested week
+    start_of_week = (today - timedelta(days=today.weekday())) + timedelta(weeks=week_offset)
     end_of_week = start_of_week + timedelta(days=6)
+    
+    # Get all users
+    all_users = User.objects.all()
+    
     user_prices = (
         PriceEntry.objects.filter(entry_date__range=(start_of_week, end_of_week))
         .values('user', 'entry_date', 'user__username')
@@ -424,14 +446,124 @@ def fetch_price_data(request):
     )
 
     user_price_data = {}
+    for user in all_users:
+        user_id = user.id
+        username = user.username
+        user_price_data[user_id] = {'username': username, 'prices': {}}
+    
     for entry in user_prices:
         user_id = entry['user']
-        username = entry['user__username']
         entry_date = entry['entry_date'].strftime('%A')
         daily_price = entry['daily_price']
 
-        if user_id not in user_price_data:
-            user_price_data[user_id] = {'username': username, 'prices': {}}
         user_price_data[user_id]['prices'][entry_date] = daily_price
 
     return JsonResponse(user_price_data)
+
+#after adding css
+# def fetch_price_data(request):
+#     # Get the week offset from the request (0 for this week, -1 for the previous week, etc.)
+#     week_offset = int(request.GET.get('week_offset', 0))
+    
+#     today = datetime.now(timezone.utc).date()
+#     # Calculate the start and end dates of the requested week
+#     start_of_week = (today - timedelta(days=today.weekday())) + timedelta(weeks=week_offset)
+#     end_of_week = start_of_week + timedelta(days=6)
+    
+#     user_prices = (
+#         PriceEntry.objects.filter(entry_date__range=(start_of_week, end_of_week))
+#         .values('user', 'entry_date', 'user__username')
+#         .annotate(daily_price=Sum('price'))
+#         .order_by('user', 'entry_date')
+#     )
+
+#     user_price_data = {}
+#     for entry in user_prices:
+#         user_id = entry['user']
+#         username = entry['user__username']
+#         entry_date = entry['entry_date'].strftime('%A')
+#         daily_price = entry['daily_price']
+
+#         if user_id not in user_price_data:
+#             user_price_data[user_id] = {'username': username, 'prices': {}}
+#         user_price_data[user_id]['prices'][entry_date] = daily_price
+
+#     return JsonResponse(user_price_data)
+
+
+#old before adding css
+# def fetch_price_data(request):
+#     today = datetime.now(timezone.utc).date() #datetime.date.today()
+#     start_of_week = today - timedelta(days=today.weekday())
+#     end_of_week = start_of_week + timedelta(days=6)
+#     user_prices = (
+#         PriceEntry.objects.filter(entry_date__range=(start_of_week, end_of_week))
+#         .values('user', 'entry_date', 'user__username')
+#         .annotate(daily_price=Sum('price'))
+#         .order_by('user', 'entry_date')
+#     )
+
+#     user_price_data = {}
+#     for entry in user_prices:
+#         user_id = entry['user']
+#         username = entry['user__username']
+#         entry_date = entry['entry_date'].strftime('%A')
+#         daily_price = entry['daily_price']
+
+#         if user_id not in user_price_data:
+#             user_price_data[user_id] = {'username': username, 'prices': {}}
+#         user_price_data[user_id]['prices'][entry_date] = daily_price
+
+#     return JsonResponse(user_price_data)
+
+
+
+def activate_user(request, user_id):
+    user = get_object_or_404(CustomUserTypes, id=user_id)
+    print("*************Activated****************",user)
+    user.is_active = True
+    print("==========T  R  UR ==========",user.is_active)
+    user.save()
+    return JsonResponse({'success': True})
+
+def deactivate_user(request, user_id):
+    user = get_object_or_404(CustomUserTypes, id=user_id)
+    print("--------DeAvtivated-------",user)
+    user.is_active = False
+    print("=========F   ALL SE  ===========",user.is_active)
+    user.save()
+    return JsonResponse({'success': True})
+
+
+from django.http import JsonResponse
+from accounts.models import CustomUserTypes  # Assuming your custom user model is in 'accounts.models'
+
+def toggle_user(request, user_id):
+    try:
+        user = CustomUserTypes.objects.get(pk=user_id)  # Replace 'User' with 'CustomUserTypes'
+        user.is_active = not user.is_active
+        user.save()
+        return JsonResponse({'success': True})
+    except CustomUserTypes.DoesNotExist:  # Replace 'User.DoesNotExist' with 'CustomUserTypes.DoesNotExist'
+        return JsonResponse({'success': False})
+
+
+
+from django.shortcuts import render
+from accounts.models import CustomUserTypes  # Assuming your custom user model is in 'accounts.models'
+
+def deactivate_users(request):
+    # Fetch a list of deactivated users using the CustomUserTypes model
+    deactivated_users = CustomUserTypes.objects.filter(is_active=False)
+
+    # Your other logic related to the deactivate user page can go here...
+    # For example, you might perform additional queries, calculations, etc.
+
+    # Pass the list of deactivated users to the template for rendering
+    context = {
+        'deactivated_users': deactivated_users,
+    }
+
+    return render(request, 'base/deactivate_users.html', context)
+
+

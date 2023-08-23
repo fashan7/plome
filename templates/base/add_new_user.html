@@ -3,6 +3,35 @@
 {% load static %}
 
 {% block content %}
+<style>
+  .mention-textarea {
+    font-family: 'Arial';
+    color: rgb(20, 95, 245);
+    font-weight: bold;
+  }
+  @keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.greeting {
+  animation: fadeIn 1s ease-in-out;
+}
+
+.main-content {
+  animation: fadeIn 1s ease-in-out;
+}
+
+.table-header {
+    font-weight: bold;
+    background-color: #f8f9fa; /* Light gray background */
+    color: #333; /* Dark gray text color */
+}
+</style>
     <div class="wrapper">
         
 
@@ -11,7 +40,7 @@
                 <div class="row justify-content-center">
                     <div class="col-12">
                         {% for fu in filtered_user %}
-                        <h1 class="page-title">Hello {{fu}} ✌</h1>
+                        <h1 class="greeting">Hello {{fu}} ✌</h1>
                         {% endfor %}
                         <h2 class="mb-2 page-title">Users table</h2>
                         <p class="card-text">
@@ -152,26 +181,26 @@
                     };
                 }
             </script>
-            <div class="row my-4">
-                <!--	Small	table	-->
-                <div class="col-md-12">
-                    <div class="card shadow">
-                        <div class="card-body">
-                            <!--	table	-->
-                            <table class="table datatables" id="dataTable-1">
-                                <thead>
-                                    <tr>
-                                        <th></th>
-                                        <th>Sl No.</th>
-                                        <th>First Name</th>
-                                        <th>Last Name</th>
-                                        <th>User Name</th>
-                                        <th>Email</th>
-                                        <th>Address</th>
-                                        <th>Date Joined</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
+           <div class="row my-4">
+    <!-- Small table -->
+    <div class="col-md-12">
+        <div class="card shadow">
+            <div class="card-body">
+                <!-- Table -->
+                <table class="table datatables" id="dataTable-1">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th class="table-header">Sl No.</th>
+                            <th class="table-header">First Name</th>
+                            <th class="table-header">Last Name</th>
+                            <th class="table-header">User Name</th>
+                            <th class="table-header">Email</th>
+                            <th class="table-header">Address</th>
+                            <th class="table-header">Date Joined</th>
+                            <th class="table-header">Action</th>
+                        </tr>
+                    </thead>
                                 <tbody class="table-bordered">
                                     {% for vau in view_all_users %}
                                     <tr>
@@ -217,9 +246,9 @@
                                                     </button>
                                                     <div class="dropdown-menu dropdown-menu-right"
                                                         aria-labelledby="dr4">
-                                                        {% comment %} <a class="dropdown-item" href="javascript:void(0)"
+                                                        <!-- {% comment %} <a class="dropdown-item" href="javascript:void(0)"
                                                             onclick="send_cemail('{{ vau.id }}')">Invite</a>
-                                                        {% endcomment %}
+                                                        {% endcomment %} -->
                                                         <a class="dropdown-item" href="javascript:void(0)"
                                                             onclick="sendEmail('{{ vau.id }}')"
                                                             id="send-mail-{{ vau.id }}">Invite</a>
@@ -228,9 +257,63 @@
                                                             data-target="#editModal-{{ vau.id }}">Edit</a>
 
                                                         <a class="dropdown-item" href="javascript:void(0)"
-                                                            onclick="deleteUser('{{ vau.id }}')"
-                                                            id="delete-user-{{ vau.id }}"
-                                                            data-url="{% url 'delete-user' vau.id %}">Remove</a>
+                                                        onclick="toggleUserActivation('{{ vau.id }}', {{ vau.is_active|yesno:"true,false" }}, '{% url 'toggle_user' vau.id %}')"
+                                                        id="user-action-{{ vau.id }}"
+                                                        data-url="{% if vau.is_active %}{% url 'deactivate-user' vau.id %}{% else %}{% url 'activate-user' vau.id %}{% endif %}">
+                                                        {% if vau.is_active %}Deactivate{% else %}Activate{% endif %}
+                                                    </a>
+                                                    <script>
+                                                        function toggleUserActivation(userId, isActive, url) {
+                                                            // Send the AJAX request to activate or deactivate the user
+                                                            fetch(url, {
+                                                                    method: 'POST',
+                                                                    headers: {
+                                                                        'X-CSRFToken': getCookie(
+                                                                        'csrftoken'), // Replace 'csrftoken' with your CSRF token cookie name
+                                                                    }
+                                                                })
+                                                                .then(response => response.json())
+                                                                .then(data => {
+                                                                    if (data.success) {
+                                                                        // Update the button text and status based on the response
+                                                                        const button = document.querySelector(
+                                                                            `a[onclick="toggleUserActivation('${userId}', ${isActive}, '${url}')"]`
+                                                                            );
+                                                                        isActive = data
+                                                                        .is_active; // Update the isActive status based on the response
+                                                                        if (isActive) {
+                                                                            button.textContent = 'Deactivate';
+                                                                        } else {
+                                                                            button.textContent = 'Activate';
+                                                                        }
+                                                                        console.log(
+                                                                            'User status toggled successfully');
+                                                                        // Refresh the page after 2 seconds to reflect the updated status
+                                                                        setTimeout(() => {
+                                                                            window.location.reload();
+                                                                        }, 100);
+                                                                    } else {
+                                                                        console.error(
+                                                                            'Failed to toggle user status');
+                                                                    }
+                                                                })
+                                                                .catch(error => {
+                                                                    console.error(
+                                                                        'Error during user status toggle:',
+                                                                        error);
+                                                                });
+                                                        }
+                                                        // Function to get the CSRF token cookie value
+                                                        function getCookie(name) {
+                                                            const value = `; ${document.cookie}`;
+                                                            const parts = value.split(`; ${name}=`);
+                                                            if (parts.length === 2) return parts.pop().split(';')
+                                                            .shift();
+                                                        }
+                                                    </script>
+
+
+
                                                     </div>
                                                 </div>
 
