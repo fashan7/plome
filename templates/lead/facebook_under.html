@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<style>
+  /* Your existing styles here */
+
+  /* Additional styles for the Under Construction page */
+  .under-construction-container {
+    text-align: center;
+    padding: 20px;
+  }
+
+  .under-construction-icon {
+    font-size: 80px;
+    color: #e74c3c;
+    animation: spinWheel 3s linear infinite;
+    transition: color 0.3s ease;
+  }
+
+  .under-construction-title {
+    font-size: 24px;
+    margin-top: 10px;
+  }
+
+  .under-construction-message {
+    font-size: 16px;
+    color: #555;
+    margin-top: 10px;
+  }
+
+  @keyframes spinWheel {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  .under-construction-container:hover .under-construction-icon {
+    color: #f39c12; /* Change color on hover */
+    animation: spinWheel 1s linear infinite reverse; /* Change rotation speed on hover */
+  }
+</style>
+
+<main role="main" class="main-content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
+        <div class="under-construction-container">
+          <div class="under-construction-icon">
+            <i class="fe fe-settings"></i>
+          </div>
+          <div class="under-construction-title">Under Construction</div>
+          <div class="under-construction-message"><h1>We're working on something awesome. Stay tuned!<h1></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}
