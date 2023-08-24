@@ -497,67 +497,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
-                    <div class="list-group list-group-flush my-n3">
-                        <div class="list-group-item bg-transparent">
-                            <div class="row align-items-center">
-                                <div class="col-auto">
-                                    <span class="fe fe-box fe-24"></span>
-                                </div>
-                                <div class="col">
-                                    <small><strong>Package has uploaded successfull</strong></small>
-                                    <div class="my-0 text-muted small">
-                                        Package is zipped and uploaded
-                                    </div>
-                                    <small class="badge badge-pill badge-light text-muted">1m ago</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="list-group-item bg-transparent">
-                            <div class="row align-items-center">
-                                <div class="col-auto">
-                                    <span class="fe fe-download fe-24"></span>
-                                </div>
-                                <div class="col">
-                                    <small><strong>Widgets are updated successfull</strong></small>
-                                    <div class="my-0 text-muted small">
-                                        Just create new layout Index, form, table
-                                    </div>
-                                    <small class="badge badge-pill badge-light text-muted">2m ago</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="list-group-item bg-transparent">
-                            <div class="row align-items-center">
-                                <div class="col-auto">
-                                    <span class="fe fe-inbox fe-24"></span>
-                                </div>
-                                <div class="col">
-                                    <small><strong>Notifications have been sent</strong></small>
-                                    <div class="my-0 text-muted small">
-                                        Fusce dapibus, tellus ac cursus commodo
-                                    </div>
-                                    <small class="badge badge-pill badge-light text-muted">30m ago</small>
-                                </div>
-                            </div>
-                            <!--	/	.row	-->
-                        </div>
-                        <div class="list-group-item bg-transparent">
-                            <div class="row align-items-center">
-                                <div class="col-auto">
-                                    <span class="fe fe-link fe-24"></span>
-                                </div>
-                                <div class="col">
-                                    <small><strong>Link was attached to menu</strong></small>
-                                    <div class="my-0 text-muted small">
-                                        New layout has been attached to the menu
-                                    </div>
-                                    <small class="badge badge-pill badge-light text-muted">1h ago</small>
-                                </div>
-                            </div>
-                        </div>
-                        <!--	/	.row	-->
-                    </div>
+               
                     <!--	/	.list-group	-->
                 </div>
                 <div class="modal-footer">
@@ -568,62 +508,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade modal-shortcut modal-slide" tabindex="-1" role="dialog" aria-labelledby="defaultModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="defaultModalLabel">Shortcuts</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body px-5">
-                    <div class="row align-items-center">
-                        <div class="col-6 text-center">
-                            <div class="squircle bg-success justify-content-center">
-                                <i class="fe fe-cpu fe-32 align-self-center text-white"></i>
-                            </div>
-                            <p>Control area</p>
-                        </div>
-                        <div class="col-6 text-center">
-                            <div class="squircle bg-primary justify-content-center">
-                                <i class="fe fe-activity fe-32 align-self-center text-white"></i>
-                            </div>
-                            <p>Activity</p>
-                        </div>
-                    </div>
-                    <div class="row align-items-center">
-                        <div class="col-6 text-center">
-                            <div class="squircle bg-primary justify-content-center">
-                                <i class="fe fe-droplet fe-32 align-self-center text-white"></i>
-                            </div>
-                            <p>Droplet</p>
-                        </div>
-                        <div class="col-6 text-center">
-                            <div class="squircle bg-primary justify-content-center">
-                                <i class="fe fe-upload-cloud fe-32 align-self-center text-white"></i>
-                            </div>
-                            <p>Upload</p>
-                        </div>
-                    </div>
-                    <div class="row align-items-center">
-                        <div class="col-6 text-center">
-                            <div class="squircle bg-primary justify-content-center">
-                                <i class="fe fe-users fe-32 align-self-center text-white"></i>
-                            </div>
-                            <p>Users</p>
-                        </div>
-                        <div class="col-6 text-center">
-                            <div class="squircle bg-primary justify-content-center">
-                                <i class="fe fe-settings fe-32 align-self-center text-white"></i>
-                            </div>
-                            <p>Settings</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    
     </div>
     </div>
     </div>
@@ -633,98 +518,78 @@
 
 {% endblock %}
 <!-- and add user script -->
-{% block adduser %}
+{% block javascript %}
 <!-- Include Bootstrap and jQuery dependencies -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-    $(document).ready(function() {
-        $("#user-form").validate({
-            rules: {
-                Username: {
-                    required: true,
-                    remote: {
-                        url: $("#user-form").data("url"),
-                        type: 'POST',
-                        data: {
-                            Username: function() {
-                                return $("#Username").val();
-=======
-   
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        $(document).ready(function() {
-            $("#user-form").validate({
-                rules: {
-                    Username: {
-                        required: true,
-                        remote: {
-                            url: $("#user-form").data("url"),
-                            type: 'POST',
-                            data: {
-                                Username: function() {
-                                    return $("#Username").val();
-                                },
-
-                            },
-                        },
-                    },
-                },
-                password: {
-                    required: true,
-                    minlength: 5
-                },
-                confirm_password: {
-                    required: true,
-                    equalTo: "#password"
-                },
-                user_type: {
-                    required: true
+$(document).ready(function() {
+    $("#user-form").validate({
+        rules: {
+            Username: {
+                required: true,
+                remote: {
+                    url: $("#user-form").data("url"),
+                    type: 'POST',
+                    data: {
+                        Username: function() {
+                            return $("#Username").val();
+                        }
+                    }
                 }
             },
-            messages: {
-                Username: {
-                    required: "Please enter a username",
-                    remote: "Username already exists"
-                },
-                password: {
-                    required: "Please Fill the Empty Box",
-                    minlength: "Your password must be at least 5 characters long"
-                },
-                confirm_password: {
-                    required: "Please Fill the Empty Box",
-                    equalTo: "Password is Not Matched"
-                },
-                user_type: {
-                    required: "Please select a profile"
-                }
+            password: {
+                required: true,
+                minlength: 5
             },
-            errorPlacement: function(error, element) {
-                error.addClass("invalid-feedback");
-                element.closest(".form-group").append(error);
+            confirm_password: {
+                required: true,
+                equalTo: "#password"
             },
-            highlight: function(element, errorClass, validClass) {
-                $(element).addClass("is-invalid").removeClass("is-valid");
-            },
-            unhighlight: function(element, errorClass, validClass) {
-                $(element).removeClass("is-invalid").addClass("is-valid");
-            },
-            //https://sweetalert2.github.io (Need to explore more)
-            submitHandler: function(form) {
-                Swal.fire(
-                    'Good job!',
-                    'User Registerd!!!',
-                    'success'
-                ).then(function() {
-                    form.submit();
-                });
+            user_type: {
+                required: true
             }
-        });
-
+        },
+        messages: {
+            Username: {
+                required: "Please enter a username",
+                remote: "Username already exists"
+            },
+            password: {
+                required: "Please fill the empty box",
+                minlength: "Your password must be at least 5 characters long"
+            },
+            confirm_password: {
+                required: "Please fill the empty box",
+                equalTo: "Passwords do not match"
+            },
+            user_type: {
+                required: "Please select a profile"
+            }
+        },
+        errorPlacement: function(error, element) {
+            error.addClass("invalid-feedback");
+            element.closest(".form-group").append(error);
+        },
+        highlight: function(element, errorClass, validClass) {
+            $(element).addClass("is-invalid").removeClass("is-valid");
+        },
+        unhighlight: function(element, errorClass, validClass) {
+            $(element).removeClass("is-invalid").addClass("is-valid");
+        },
+        submitHandler: function(form) {
+            Swal.fire({
+                title: 'Good job!',
+                text: 'User Registered!!!',
+                icon: 'success'
+            }).then(function() {
+                form.submit();
+            });
+        }
     });
+});
 </script>
-
 {% endblock %}
+
 

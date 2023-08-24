@@ -317,7 +317,7 @@
                         <th data-toggle="select">Qualification</th>
                         <th data-toggle="select">Comments</th>
                         <th data-toggle="select">Assign to</th>
-                        <th data-toggle="select">Mentioned</th>
+                        <!-- <th data-toggle="select">Mentioned</th> -->
                         <!--<th data-toggle="select">Mention Action</th>-->
                         <th data-toggle="select">Action</th>
                       </tr>
@@ -338,15 +338,10 @@
                         <td>{{ lead.comments }}</td>
                         <td>{{ lead.assigned_to }}</td>
 
-                        <td>
+                        <!-- <td>
                           Mentioned to {{ lead.transfer_to }}
-                          <!-- <div id="user_mentions_list_{{ lead.id }}" class="user-mentions-list"></div>
-                          <textarea id="assign_comment_field_{{ lead.id }}" name="assign_comment"
-                            class="mention-textarea">{{ lead.assign_comment }}</textarea>
-                          <button class="transfer_button" data-lead-id="{{ lead.id }}"
-                            data-user-mentions="{{ lead.get_user_mentions_json }}">Mention</button> -->
-
-                        </td>
+                          
+                        </td> -->
 
                         <!--<td>
                         Mentioned to {{ lead.transfer_to }}
@@ -367,14 +362,6 @@
                               <span class="text-muted sr-only">Action</span>
                             </button>
                             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dr4">
-                              <a class="dropdown-item" href="{% url 'toggle_lead_status' lead.id %}">
-                                {% if lead.is_active %}
-                                Deactivate
-                                {% else %}
-                                Activate
-                                {% endif %}
-                              </a>
-
                               <a class="dropdown-item" href="javascript:void(0)" data-toggle="modal"
                                 data-target="#editModal-{{ lead.id }}">View</a>
 

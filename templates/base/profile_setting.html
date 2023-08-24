@@ -56,23 +56,28 @@
 }
 
 /* Style the animated icon */
-.animated-icon {
+/* .animated-icon {
   color: #3498db;
   animation: rotate 1.5s linear infinite;
-}
+} */
 
-@keyframes rotate {
-  0% {
-    transform: rotate(0);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
+ @keyframes heartbeat {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.2);
+      }
+    }
+    
+    .animated-icon {
+      animation: heartbeat 1s ease-in-out infinite;
+      color: #3498db;
+    }
 
 
 </style>
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <main role="main" class="main-content">
   <div class="container-fluid">
     <div class="row justify-content-center">
@@ -91,7 +96,7 @@
   {% csrf_token %}
   <div class="row mt-5 align-items-center">
     <div class="col-md-3 text-center mb-5">
-       <i class="fas fa-envelope fa-4x animated-icon"></i>
+       <i class="fas fa-user fa-4x animated-icon"></i>
       <!-- You can add an animated icon or background here -->
     </div>
     <div class="col">
@@ -138,17 +143,7 @@
                   <input type="password" name="inputPassword6" class="form-control">
                 </div>
               </div>
-              <div class="col-md-6">
-                <p class="mb-2">Password requirements</p>
-                <p class="small text-muted mb-2">To create a new password, you have to meet all of the following
-                  requirements:</p>
-                <ul class="small text-muted pl-4 mb-0">
-                  <li>Minimum 8 characters</li>
-                  <li>At least one special character</li>
-                  <li>At least one number</li>
-                  <li>Can't be the same as a previous password</li>
-                </ul>
-              </div>
+        
             </div>
             <button type="submit" class="btn btn-primary">Save Change</button>
           </form>

@@ -96,7 +96,11 @@
 }
 
 </style>
-
+   <div id="ticker">
+    <marquee behavior="scroll" direction="left" scrollamount="5">
+      <span id="ticker-content">Welcome to plome {{user.first_name}}</span>
+    </marquee>
+  </div>
 <main role="main" class="main-content">
   <div class="container-fluid">
     <div class="row justify-content-center">
@@ -219,6 +223,7 @@
                   <th>Friday</th>
                   <th>Saturday</th>
                   <th>Sunday</th>
+                  <th>Total</th>
                 </tr>
               </thead>
               <tbody>
@@ -232,7 +237,6 @@
   </div> <!-- .col-md-12 -->
 </div>
 
-
 </main> <!-- main -->
 </div> <!-- .wrapper -->
 {% endblock %}
@@ -244,26 +248,32 @@
 <script>
   var selectedWeek = 0; // Initialize the selected week offset
 
-  function updateTable(data) {
-    var tableBody = $('#priceTable tbody');
-    tableBody.empty();
+function updateTable(data) {
+  var tableBody = $('#priceTable tbody');
+  tableBody.empty();
 
-    var weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  var weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-    $.each(data, function(userId, userData) {
-      var row = $('<tr></tr>');
-      row.append($('<td></td>').text(userData.username));
+  $.each(data, function(userId, userData) {
+    var row = $('<tr></tr>');
+    row.append($('<td></td>').text(userData.username));
+    var total = 0;
 
-      for (var i = 0; i < weekdays.length; i++) {
-        var day = weekdays[i];
-        var price = userData.prices[day] || '0';
-        var roundedPrice = parseFloat(price).toFixed(2);
-        row.append($('<td></td>').text(roundedPrice));
-      }
+    for (var i = 0; i < weekdays.length; i++) {
+      var day = weekdays[i];
+      var price = userData.prices[day] || 0;
+      var roundedPrice = parseFloat(price).toFixed(2);
 
-      tableBody.append(row);
-    });
-  }
+      var formattedPrice = '€' + roundedPrice;
+      row.append($('<td></td>').text(formattedPrice));
+      total += parseFloat(price); // Accumulate total price
+    }
+    var formattedTotal = '€' + total.toFixed(2);
+    row.append($('<td></td>').text(formattedTotal)); // Add total to the row
+    tableBody.append(row);
+  });
+}
+
 
   function fetchAndPopulateData(weekOffset) {
     selectedWeek += weekOffset;

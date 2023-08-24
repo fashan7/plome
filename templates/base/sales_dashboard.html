@@ -93,9 +93,33 @@
   animation: fadeIn 1s ease-in-out;
 }
 
+   #ticker {
+      font-size: 14px;
+      background-color: #f0f0f0;
+      padding: 10px;
+    }
+
+    /* Custom styling for marquee content */
+    #ticker-content {
+      animation: ticker-move 10s linear infinite;
+      white-space: nowrap;
+    }
+
+    @keyframes ticker-move {
+      0% {
+        transform: translateX(100%);
+      }
+      100% {
+        transform: translateX(-100%);
+      }
+    }
 </style>
 
-
+   <div id="ticker">
+    <marquee behavior="scroll" direction="left" scrollamount="5">
+      <span id="ticker-content">Welcome to plome {{user.first_name}}</span>
+    </marquee>
+  </div>
 <main role="main" class="main-content">
   <div class="container-fluid">
     <div class="row justify-content-center">
@@ -123,6 +147,7 @@
               </div>
             </div>
           </div>
+       
           <div class="col-md-6 col-xl-3 mb-4">
             <div class="card shadow border-0">
               <div class="card-body">
@@ -223,6 +248,7 @@
                   <th>Friday</th>
                   <th>Saturday</th>
                   <th>Sunday</th>
+                  <th>Total</th>
                 </tr>
               </thead>
               <tbody>
@@ -248,26 +274,32 @@
 <script>
   var selectedWeek = 0; // Initialize the selected week offset
 
-  function updateTable(data) {
-    var tableBody = $('#priceTable tbody');
-    tableBody.empty();
+function updateTable(data) {
+  var tableBody = $('#priceTable tbody');
+  tableBody.empty();
 
-    var weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  var weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-    $.each(data, function(userId, userData) {
-      var row = $('<tr></tr>');
-      row.append($('<td></td>').text(userData.username));
+  $.each(data, function(userId, userData) {
+    var row = $('<tr></tr>');
+    row.append($('<td></td>').text(userData.username));
+    var total = 0;
 
-      for (var i = 0; i < weekdays.length; i++) {
-        var day = weekdays[i];
-        var price = userData.prices[day] || '0';
-        var roundedPrice = parseFloat(price).toFixed(2);
-        row.append($('<td></td>').text(roundedPrice));
-      }
+    for (var i = 0; i < weekdays.length; i++) {
+      var day = weekdays[i];
+      var price = userData.prices[day] || 0;
+      var roundedPrice = parseFloat(price).toFixed(2);
 
-      tableBody.append(row);
-    });
-  }
+      var formattedPrice = '€' + roundedPrice;
+      row.append($('<td></td>').text(formattedPrice));
+      total += parseFloat(price); // Accumulate total price
+    }
+    var formattedTotal = '€' + total.toFixed(2);
+    row.append($('<td></td>').text(formattedTotal)); // Add total to the row
+    tableBody.append(row);
+  });
+}
+
 
   function fetchAndPopulateData(weekOffset) {
     selectedWeek += weekOffset;

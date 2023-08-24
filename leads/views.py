@@ -703,6 +703,16 @@ def lead_edit(request, lead_id):
 
     return render(request, 'lead/lead_edit.html', {'lead': lead})
 
+from django.http import JsonResponse
+from .models import PriceEntry
+
+def get_latest_price_entry(request):
+    latest_entry = PriceEntry.objects.latest('entry_date')
+    entry_data = {
+        'user': latest_entry.user.username,
+        'price': str(latest_entry.price),
+    }
+    return JsonResponse(entry_data)
 
 #can be used in future 
 
@@ -981,84 +991,7 @@ def delete_leads(request):
     return JsonResponse({'success': False, 'message': 'Invalid request.'})
 
 
-import facebook
-from django.shortcuts import render
-from .models import Lead
 
-# def facebook_leads():
-#     # Replace 'YOUR_ACCESS_TOKEN' with your actual Facebook access token
-#     access_token = 'EAAKFt0cZC5JMBO4bgGrTOyZBZCcVUsZAU9IEzkv1HZBw4es9S7mpH2ezDBM0XcdFENsaHIZCjnYfNCGUCqwXjkIVEZBVYtrUY0ztmriTLCtCCWPD09WBuIVll18igE8Xrd44nvY4wVOGLE7SD5ea1icCEBoDZBcnTZBrueoXZC4CJDiVIpZAaZAMxeg0HM2jyBxJk76TEaQq85fwhIctNpoWfqMikgZDZD'
-
-#     # Create an instance of the Facebook object with your API keys
-#     graph = facebook.GraphAPI(access_token=access_token, version="3.0")
-
-#     # Replace 'YOUR_LEADGEN_FORM_ID' with the ID of your lead generation form
-#     leadgen_form_id = '314661597574782'
-
-#     # Specify the status parameter as 'all' to get all leads, including expired ones
-#     leads = graph.get_object(f"/{leadgen_form_id}/leads", fields='field_data,ad_id')
-
-#     # Process the retrieved leads and save them in your database
-#     for lead in leads['data']:
-#         date_de_soumission = None
-#         nom_de_la_campagne = None
-#         avez_vous_travaille = None
-#         nom_prenom = None
-#         telephone = None
-#         email = None
-#         qualification = None
-#         comments = None
-
-#         for field in lead['field_data']:
-#             if field['name'] == 'date_de_soumission':
-#                 date_de_soumission = field['values'][0]
-#             elif field['name'] == 'nom_de_la_campagne':
-#                 nom_de_la_campagne = field['values'][0]
-#             elif field['name'] == 'avez_vous_travaille':
-#                 avez_vous_travaille = field['values'][0]
-#             elif field['name'] == 'nom_prenom':
-#                 nom_prenom = field['values'][0]
-#             elif field['name'] == 'telephone':
-#                 telephone = field['values'][0]
-#             elif field['name'] == 'email':
-#                 email = field['values'][0]
-#             elif field['name'] == 'qualification':
-#                 qualification = field['values'][0]
-#             elif field['name'] == 'comments':
-#                 comments = field['values'][0]
-
-#         if 'ad_id' in lead:
-#             status = 'new'
-#         else:
-#             status = 'expired'
-
-#         # Save the lead to the database
-#         Lead.objects.create(
-#             date_de_soumission=date_de_soumission,
-#             nom_de_la_campagne=nom_de_la_campagne,
-#             avez_vous_travaille=avez_vous_travaille,
-#             nom_prenom=nom_prenom,
-#             telephone=telephone,
-#             email=email,
-#             qualification=qualification,
-#             comments=comments,
-#         )
-
-#     print("Leads retrieved and saved successfully.")
-
-# def facebook_leads_view(request):
-#     # Call the function to fetch leads from Facebook
-#     fetch_facebook_leads()
-
-#     # Retrieve all leads from the database
-#     leads = Lead.objects.all()
-
-#     # Pass the leads to the template context
-#     context = {
-#         'leads': leads
-#     }
-
-#     return render(request, 'lead/facebook_leads.html', context)
 
 
 import csv
@@ -1325,7 +1258,19 @@ def fetch_facebook_leads(request):
 
 
 def facebook_leads(request):
-    pass
+    if request.user.is_superuser:
+        base_template = 'base.html'
+    elif request.user.groups.filter(name='sales').exists():
+        base_template = 'sales_base.html'
+    else:
+        base_template = 'base.html'  # Default to base.html if not superuser or sales
+
+    context = {
+        'base_template': base_template
+    }
+
+    return render(request, 'lead/facebook_under.html', context)
+
 
 import os
 import pandas as pd
@@ -1662,3 +1607,83 @@ def transfer_leads(request):
 #         return JsonResponse({'success': True})
 
 #     return render(request, 'lead/lead_edit.html', {'lead': lead})
+
+
+import facebook
+from django.shortcuts import render
+from .models import Lead
+
+# def facebook_leads():
+#     # Replace 'YOUR_ACCESS_TOKEN' with your actual Facebook access token
+#     access_token = 'EAAKFt0cZC5JMBO4bgGrTOyZBZCcVUsZAU9IEzkv1HZBw4es9S7mpH2ezDBM0XcdFENsaHIZCjnYfNCGUCqwXjkIVEZBVYtrUY0ztmriTLCtCCWPD09WBuIVll18igE8Xrd44nvY4wVOGLE7SD5ea1icCEBoDZBcnTZBrueoXZC4CJDiVIpZAaZAMxeg0HM2jyBxJk76TEaQq85fwhIctNpoWfqMikgZDZD'
+
+#     # Create an instance of the Facebook object with your API keys
+#     graph = facebook.GraphAPI(access_token=access_token, version="3.0")
+
+#     # Replace 'YOUR_LEADGEN_FORM_ID' with the ID of your lead generation form
+#     leadgen_form_id = '314661597574782'
+
+#     # Specify the status parameter as 'all' to get all leads, including expired ones
+#     leads = graph.get_object(f"/{leadgen_form_id}/leads", fields='field_data,ad_id')
+
+#     # Process the retrieved leads and save them in your database
+#     for lead in leads['data']:
+#         date_de_soumission = None
+#         nom_de_la_campagne = None
+#         avez_vous_travaille = None
+#         nom_prenom = None
+#         telephone = None
+#         email = None
+#         qualification = None
+#         comments = None
+
+#         for field in lead['field_data']:
+#             if field['name'] == 'date_de_soumission':
+#                 date_de_soumission = field['values'][0]
+#             elif field['name'] == 'nom_de_la_campagne':
+#                 nom_de_la_campagne = field['values'][0]
+#             elif field['name'] == 'avez_vous_travaille':
+#                 avez_vous_travaille = field['values'][0]
+#             elif field['name'] == 'nom_prenom':
+#                 nom_prenom = field['values'][0]
+#             elif field['name'] == 'telephone':
+#                 telephone = field['values'][0]
+#             elif field['name'] == 'email':
+#                 email = field['values'][0]
+#             elif field['name'] == 'qualification':
+#                 qualification = field['values'][0]
+#             elif field['name'] == 'comments':
+#                 comments = field['values'][0]
+
+#         if 'ad_id' in lead:
+#             status = 'new'
+#         else:
+#             status = 'expired'
+
+#         # Save the lead to the database
+#         Lead.objects.create(
+#             date_de_soumission=date_de_soumission,
+#             nom_de_la_campagne=nom_de_la_campagne,
+#             avez_vous_travaille=avez_vous_travaille,
+#             nom_prenom=nom_prenom,
+#             telephone=telephone,
+#             email=email,
+#             qualification=qualification,
+#             comments=comments,
+#         )
+
+#     print("Leads retrieved and saved successfully.")
+
+# def facebook_leads_view(request):
+#     # Call the function to fetch leads from Facebook
+#     fetch_facebook_leads()
+
+#     # Retrieve all leads from the database
+#     leads = Lead.objects.all()
+
+#     # Pass the leads to the template context
+#     context = {
+#         'leads': leads
+#     }
+
+#     return render(request, 'lead/facebook_leads.html', context)
