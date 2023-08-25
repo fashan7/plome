@@ -31,8 +31,9 @@
                   {% for field, field_name in field_map.items %}
                   <div class="form-group">
                     <label for="{{ field }}">{{ field_name }}</label>
-                    <select  data-name="fields" id="{{ field }}" name="{{ field }}" class="form-control" required>
+                    <select data-name="fields" id="{{ field }}" name="{{ field }}" class="form-control" required>
                       <option value="">-- Select Field --</option>
+                      <option value="__empty__">-- Skip This Field --</option>
                       {% for header in headers %}
                       <option value="{{ header }}">{{ header }}</option>
                       {% endfor %}
@@ -144,7 +145,6 @@
       rules: {
         {% for field in field_map %}
           "{{ field }}": {
-            required: true,
             uniqueSelect: true
           },
         {% endfor %}
@@ -152,7 +152,6 @@
       messages: {
         {% for field in field_map %}
           "{{ field }}": {
-            required: "Please select a field.",
             uniqueSelect: "This field has already been selected by another dropdown."
           },
         {% endfor %}
@@ -161,9 +160,19 @@
         error.insertAfter(element);
       },
       submitHandler: function(form) {
-        form.submit();
+        // Iterate through selected fields and process mapping
+        $(form).find('select[data-name="fields"]').each(function() {
+          var selectedValue = $(this).val();
+          if (selectedValue !== "__empty__") {
+            // Process mapping for the selected field
+          } else {
+            // Skip mapping for this field
+          }
+        });
+        form.submit(); // Submit the form
       }
     });
+
     $('select[data-name]').each(function() {
       $(this).on('change', function() {
         $(this).valid();
@@ -174,7 +183,5 @@
       window.location.href = '{% url "lead_dashboard" %}'; 
     });
   });
-  </script>
-  
-  
+</script>
 {% endblock %}

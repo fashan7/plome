@@ -52,6 +52,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
 ]
 
 ROOT_URLCONF = 'CRM.urls'
@@ -82,10 +83,20 @@ WSGI_APPLICATION = 'CRM.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'admin',
+        'PORT': '5432'
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # Password validation
@@ -112,7 +123,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Paris'
 
 USE_I18N = True
 
@@ -149,74 +160,74 @@ DEFAULT_FROM_EMAIL = 'default from email'
 
 
 
-# settings.py
+# # settings.py
 
-# settings.py
-from kombu import Queue 
-from datetime import datetime, timedelta
+# # settings.py
+# from kombu import Queue 
+# from datetime import datetime, timedelta
 
-# CELERY_BROKER_URL = 'redis://localhost:6379/5'
-# CELERY_RESULT_BACKEND = 'redis://localhost:6379/5'
-# CELERY_ACCEPT_CONTENT = ['json']
-# CELERY_TASK_SERIALIZER = 'json'
-# CELERY_RESULT_SERIALIZER = 'json'
+# # CELERY_BROKER_URL = 'redis://localhost:6379/5'
+# # CELERY_RESULT_BACKEND = 'redis://localhost:6379/5'
+# # CELERY_ACCEPT_CONTENT = ['json']
+# # CELERY_TASK_SERIALIZER = 'json'
+# # CELERY_RESULT_SERIALIZER = 'json'
+# # CELERY_TIMEZONE = 'Europe/Paris'
+
+# BROKER_URL = "redis://localhost:6379/0" 
+# CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+# CELERY_TASK_SERIALIZER = "json"
+# CELERY_RESULT_SERIALIZER = "json"
+# CELERY_DEFAULT_QUEUE = "CRM"
+# CELERY_ACCEPT_CONTENT = ["json"]  # Add this line
+# CELERY_TRACK_STARTED = True
+# CELERY_QUEUES = (Queue("CRM", routing_key="task.#"),)
 # CELERY_TIMEZONE = 'Europe/Paris'
 
-BROKER_URL = "redis://localhost:6379/0" 
-CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
-CELERY_TASK_SERIALIZER = "json"
-CELERY_RESULT_SERIALIZER = "json"
-CELERY_DEFAULT_QUEUE = "CRM"
-CELERY_ACCEPT_CONTENT = ["json"]  # Add this line
-CELERY_TRACK_STARTED = True
-CELERY_QUEUES = (Queue("CRM", routing_key="task.#"),)
-CELERY_TIMEZONE = 'Europe/Paris'
+# CELERY_BEAT_SCHEDULE = {
+#     "send_appointment_reminder": {
+#         "task": "send_appointment_reminder",
+#         "schedule": timedelta(seconds=10),
+#     },
+# }
 
-CELERY_BEAT_SCHEDULE = {
-    "send_appointment_reminder": {
-        "task": "send_appointment_reminder",
-        "schedule": timedelta(seconds=10),
-    },
-}
-
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "verbose": {
-            "format": "%(levelname)s %(asctime)s %(module)s %(lineno)d %(funcName)s %(message)s"
-        }
-    },
-    "filters": {
-        "require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}
-    },
-    "handlers": {
-        "error_handler": {
-            "level": "DEBUG",
-            "class": "logging.FileHandler",
-            "filename": BASE_DIR / "logs/error.log",
-            "formatter": "verbose",
-        },
-        "base_handler": {
-            "level": "DEBUG",
-            "class": "logging.handlers.RotatingFileHandler",
-            "filename": BASE_DIR / "logs/request.log",
-            "maxBytes": 1024 * 1024 * 16,
-            "backupCount": 100,
-            "formatter": "verbose",
-        },
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": False,
+#     "formatters": {
+#         "verbose": {
+#             "format": "%(levelname)s %(asctime)s %(module)s %(lineno)d %(funcName)s %(message)s"
+#         }
+#     },
+#     "filters": {
+#         "require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}
+#     },
+#     "handlers": {
+#         "error_handler": {
+#             "level": "DEBUG",
+#             "class": "logging.FileHandler",
+#             "filename": BASE_DIR / "logs/error.log",
+#             "formatter": "verbose",
+#         },
+#         "base_handler": {
+#             "level": "DEBUG",
+#             "class": "logging.handlers.RotatingFileHandler",
+#             "filename": BASE_DIR / "logs/request.log",
+#             "maxBytes": 1024 * 1024 * 16,
+#             "backupCount": 100,
+#             "formatter": "verbose",
+#         },
         
-    },
-    "loggers": {
-        "error_logger": {
-            "handlers": ["error_handler"],
-            "level": "DEBUG",
-            "propagate": False,
-        },
-        "request_logger": {
-            "handlers": ["base_handler"],
-            "level": "DEBUG",
-            "propagate": False,
-        },
-    },
-}
+#     },
+#     "loggers": {
+#         "error_logger": {
+#             "handlers": ["error_handler"],
+#             "level": "DEBUG",
+#             "propagate": False,
+#         },
+#         "request_logger": {
+#             "handlers": ["base_handler"],
+#             "level": "DEBUG",
+#             "propagate": False,
+#         },
+#     },
+# }

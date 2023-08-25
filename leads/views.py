@@ -44,7 +44,7 @@ def is_superuser(user):
     return user.is_superuser
 
 # Decorator to restrict access to the view for non-superusers
-@user_passes_test(is_superuser, login_url='dashboard_sales')
+@user_passes_test(is_superuser, login_url='sales_dashboard')
 def admin_dashboard(request):
     # Count all leads
     all_leads_count = Lead.objects.count()
@@ -244,6 +244,14 @@ def lead_history(request, lead_id):
     return render(request, 'lead/lead_history.html', {'lead': lead, 'history_entries': history_entries})
 
 
+
+
+from datetime import datetime, timedelta
+from django.core.mail import send_mail
+import pytz
+from .models import Lead
+from django.conf import settings
+
 def save_appointment(request):
     if request.method == 'POST':
         lead_id = request.POST.get('lead_id')
@@ -251,33 +259,122 @@ def save_appointment(request):
         appointment_time = request.POST.get('appointment_time')
 
         lead = Lead.objects.get(pk=lead_id)
-        lead.appointment_date_time = datetime.combine(
+        appointment_datetime = datetime.combine(
             datetime.strptime(appointment_date, '%Y-%m-%d').date(),
             datetime.strptime(appointment_time, '%H:%M').time()
         )
-        lead.price = None 
+
+        # Convert to timezone-aware datetime using pytz (Europe/Paris timezone)
+        tz = pytz.timezone("Europe/Paris")
+        appointment_datetime = tz.localize(appointment_datetime)
+        
+        time_difference = timedelta(minutes=15)
+        
+        # Calculate reminder timestamp in Europe/Paris timezone
+        reminder_datetime = appointment_datetime - time_difference
+        print(reminder_datetime)
+
+        # Save the appointment and reminder timestamps
+        lead.appointment_date_time = appointment_datetime
+        lead.reminder_timestamp = reminder_datetime
         lead.save()
 
-        LeadHistory.objects.create(
-            user=request.user,
-            lead=lead,
-            changes=f'{request.user.username} has made an appointment on {appointment_date} @ {appointment_time}',
-            category='other'
-        )
-        
         send_mail(
             'Appointment Scheduled',
-            f'Your appointment is scheduled on {lead.appointment_date_time}. ', #need to add the user name 
+            # need to add the user name
+            f'Your appointment is scheduled on {lead.appointment_date_time}. ',
             'sender@example.com',
             [lead.email],
             fail_silently=False,
         )
-        
-        
-        
+
         return JsonResponse({'success': True})
-        
+
     return JsonResponse({'success': False})
+
+
+
+from datetime import timedelta
+from django.core.mail import send_mail
+import pytz
+from .models import Lead
+from django.conf import settings
+import time
+
+def send_reminder_emails():
+    # Create the timezone object
+    tz_europe_paris = pytz.timezone("Europe/Paris")
+
+    while True:
+        now = datetime.now(pytz.utc)  # Get the current time in UTC
+
+        leads_to_remind = Lead.objects.filter(
+            reminder_timestamp__lte=now,
+            is_complete=False,
+            is_active=True,
+            reminder_sent=False,
+        )
+
+        for lead in leads_to_remind:
+            # Convert lead's reminder timestamp to Europe/Paris timezone using pytz
+            reminder_datetime_utc = lead.reminder_timestamp.astimezone(pytz.utc)
+            reminder_datetime_paris = reminder_datetime_utc.astimezone(tz_europe_paris)
+            
+            local_now = now.astimezone(tz_europe_paris)
+
+            if reminder_datetime_paris <= local_now:
+                # Send reminder email
+                subject = 'Reminder: Your Appointment'
+                message = f"Don't forget, you have an appointment at {lead.appointment_date_time}."
+                sender_email = settings.EMAIL_HOST_USER
+                receiver_email = lead.email
+
+                send_mail(subject, message, sender_email, [receiver_email], fail_silently=False)
+
+                # Mark the reminder as sent
+                lead.reminder_sent = True
+                lead.save()
+
+       
+# Start the reminder function in a separate thread
+import threading
+reminder_thread = threading.Thread(target=send_reminder_emails)
+reminder_thread.start()
+
+# def save_appointment(request):
+#     if request.method == 'POST':
+#         lead_id = request.POST.get('lead_id')
+#         appointment_date = request.POST.get('appointment_date')
+#         appointment_time = request.POST.get('appointment_time')
+
+#         lead = Lead.objects.get(pk=lead_id)
+#         lead.appointment_date_time = datetime.combine(
+#             datetime.strptime(appointment_date, '%Y-%m-%d').date(),
+#             datetime.strptime(appointment_time, '%H:%M').time()
+#         )
+#         lead.price = None 
+#         lead.save()
+
+#         LeadHistory.objects.create(
+#             user=request.user,
+#             lead=lead,
+#             changes=f'{request.user.username} has made an appointment on {appointment_date} @ {appointment_time}',
+#             category='other'
+#         )
+        
+#         send_mail(
+#             'Appointment Scheduled',
+#             f'Your appointment is scheduled on {lead.appointment_date_time}. ', #need to add the user name 
+#             'sender@example.com',
+#             [lead.email],
+#             fail_silently=False,
+#         )
+        
+        
+        
+#         return JsonResponse({'success': True})
+        
+#     return JsonResponse({'success': False})
 
 def save_signe_cpf(request):
     if request.method == 'POST':
@@ -408,7 +505,7 @@ def attach_file_to_lead(request, lead_id):
 
             return redirect('lead_dashboard', lead_id=lead_id)  # Redirect to the lead detail page or another appropriate view
 
-    return render(request, 'lead_dashboard.html', {'lead': lead})
+    return render(request, 'lead/leads_dashboard.html', {'lead': lead})
 
 
 from django.http import FileResponse
@@ -474,7 +571,7 @@ def lead_edit(request, lead_id):
         
         if lead.email != form_data['email']:
             changes['Email'] = form_data['email']
-        
+
         if lead.qualification != form_data['qualification']:
             changes['Qualification'] = form_data['qualification']
             
@@ -606,6 +703,16 @@ def lead_edit(request, lead_id):
 
     return render(request, 'lead/lead_edit.html', {'lead': lead})
 
+from django.http import JsonResponse
+from .models import PriceEntry
+
+def get_latest_price_entry(request):
+    latest_entry = PriceEntry.objects.latest('entry_date')
+    entry_data = {
+        'user': latest_entry.user.username,
+        'price': str(latest_entry.price),
+    }
+    return JsonResponse(entry_data)
 
 #can be used in future 
 
@@ -836,7 +943,9 @@ def import_leads(request):
             for record in json.loads(df_records):
                 lead_data = {}
                 for header, field in mapping_data.items():
-                    if header == 'custom_fields':
+                    if field == '__empty__':
+                        value_holder = None  # Skip this field
+                    elif header == 'custom_fields':
                         custom_f = {}
                         for excess_key, excess_fields in field.items():
                             excess_value = record.get(excess_key)
@@ -882,84 +991,7 @@ def delete_leads(request):
     return JsonResponse({'success': False, 'message': 'Invalid request.'})
 
 
-import facebook
-from django.shortcuts import render
-from .models import Lead
 
-# def facebook_leads():
-#     # Replace 'YOUR_ACCESS_TOKEN' with your actual Facebook access token
-#     access_token = 'EAAKFt0cZC5JMBO4bgGrTOyZBZCcVUsZAU9IEzkv1HZBw4es9S7mpH2ezDBM0XcdFENsaHIZCjnYfNCGUCqwXjkIVEZBVYtrUY0ztmriTLCtCCWPD09WBuIVll18igE8Xrd44nvY4wVOGLE7SD5ea1icCEBoDZBcnTZBrueoXZC4CJDiVIpZAaZAMxeg0HM2jyBxJk76TEaQq85fwhIctNpoWfqMikgZDZD'
-
-#     # Create an instance of the Facebook object with your API keys
-#     graph = facebook.GraphAPI(access_token=access_token, version="3.0")
-
-#     # Replace 'YOUR_LEADGEN_FORM_ID' with the ID of your lead generation form
-#     leadgen_form_id = '314661597574782'
-
-#     # Specify the status parameter as 'all' to get all leads, including expired ones
-#     leads = graph.get_object(f"/{leadgen_form_id}/leads", fields='field_data,ad_id')
-
-#     # Process the retrieved leads and save them in your database
-#     for lead in leads['data']:
-#         date_de_soumission = None
-#         nom_de_la_campagne = None
-#         avez_vous_travaille = None
-#         nom_prenom = None
-#         telephone = None
-#         email = None
-#         qualification = None
-#         comments = None
-
-#         for field in lead['field_data']:
-#             if field['name'] == 'date_de_soumission':
-#                 date_de_soumission = field['values'][0]
-#             elif field['name'] == 'nom_de_la_campagne':
-#                 nom_de_la_campagne = field['values'][0]
-#             elif field['name'] == 'avez_vous_travaille':
-#                 avez_vous_travaille = field['values'][0]
-#             elif field['name'] == 'nom_prenom':
-#                 nom_prenom = field['values'][0]
-#             elif field['name'] == 'telephone':
-#                 telephone = field['values'][0]
-#             elif field['name'] == 'email':
-#                 email = field['values'][0]
-#             elif field['name'] == 'qualification':
-#                 qualification = field['values'][0]
-#             elif field['name'] == 'comments':
-#                 comments = field['values'][0]
-
-#         if 'ad_id' in lead:
-#             status = 'new'
-#         else:
-#             status = 'expired'
-
-#         # Save the lead to the database
-#         Lead.objects.create(
-#             date_de_soumission=date_de_soumission,
-#             nom_de_la_campagne=nom_de_la_campagne,
-#             avez_vous_travaille=avez_vous_travaille,
-#             nom_prenom=nom_prenom,
-#             telephone=telephone,
-#             email=email,
-#             qualification=qualification,
-#             comments=comments,
-#         )
-
-#     print("Leads retrieved and saved successfully.")
-
-# def facebook_leads_view(request):
-#     # Call the function to fetch leads from Facebook
-#     fetch_facebook_leads()
-
-#     # Retrieve all leads from the database
-#     leads = Lead.objects.all()
-
-#     # Pass the leads to the template context
-#     context = {
-#         'leads': leads
-#     }
-
-#     return render(request, 'lead/facebook_leads.html', context)
 
 
 import csv
@@ -1226,7 +1258,19 @@ def fetch_facebook_leads(request):
 
 
 def facebook_leads(request):
-    pass
+    if request.user.is_superuser:
+        base_template = 'base.html'
+    elif request.user.groups.filter(name='sales').exists():
+        base_template = 'sales_base.html'
+    else:
+        base_template = 'base.html'  # Default to base.html if not superuser or sales
+
+    context = {
+        'base_template': base_template
+    }
+
+    return render(request, 'lead/facebook_under.html', context)
+
 
 import os
 import pandas as pd
@@ -1563,3 +1607,83 @@ def transfer_leads(request):
 #         return JsonResponse({'success': True})
 
 #     return render(request, 'lead/lead_edit.html', {'lead': lead})
+
+
+import facebook
+from django.shortcuts import render
+from .models import Lead
+
+# def facebook_leads():
+#     # Replace 'YOUR_ACCESS_TOKEN' with your actual Facebook access token
+#     access_token = 'EAAKFt0cZC5JMBO4bgGrTOyZBZCcVUsZAU9IEzkv1HZBw4es9S7mpH2ezDBM0XcdFENsaHIZCjnYfNCGUCqwXjkIVEZBVYtrUY0ztmriTLCtCCWPD09WBuIVll18igE8Xrd44nvY4wVOGLE7SD5ea1icCEBoDZBcnTZBrueoXZC4CJDiVIpZAaZAMxeg0HM2jyBxJk76TEaQq85fwhIctNpoWfqMikgZDZD'
+
+#     # Create an instance of the Facebook object with your API keys
+#     graph = facebook.GraphAPI(access_token=access_token, version="3.0")
+
+#     # Replace 'YOUR_LEADGEN_FORM_ID' with the ID of your lead generation form
+#     leadgen_form_id = '314661597574782'
+
+#     # Specify the status parameter as 'all' to get all leads, including expired ones
+#     leads = graph.get_object(f"/{leadgen_form_id}/leads", fields='field_data,ad_id')
+
+#     # Process the retrieved leads and save them in your database
+#     for lead in leads['data']:
+#         date_de_soumission = None
+#         nom_de_la_campagne = None
+#         avez_vous_travaille = None
+#         nom_prenom = None
+#         telephone = None
+#         email = None
+#         qualification = None
+#         comments = None
+
+#         for field in lead['field_data']:
+#             if field['name'] == 'date_de_soumission':
+#                 date_de_soumission = field['values'][0]
+#             elif field['name'] == 'nom_de_la_campagne':
+#                 nom_de_la_campagne = field['values'][0]
+#             elif field['name'] == 'avez_vous_travaille':
+#                 avez_vous_travaille = field['values'][0]
+#             elif field['name'] == 'nom_prenom':
+#                 nom_prenom = field['values'][0]
+#             elif field['name'] == 'telephone':
+#                 telephone = field['values'][0]
+#             elif field['name'] == 'email':
+#                 email = field['values'][0]
+#             elif field['name'] == 'qualification':
+#                 qualification = field['values'][0]
+#             elif field['name'] == 'comments':
+#                 comments = field['values'][0]
+
+#         if 'ad_id' in lead:
+#             status = 'new'
+#         else:
+#             status = 'expired'
+
+#         # Save the lead to the database
+#         Lead.objects.create(
+#             date_de_soumission=date_de_soumission,
+#             nom_de_la_campagne=nom_de_la_campagne,
+#             avez_vous_travaille=avez_vous_travaille,
+#             nom_prenom=nom_prenom,
+#             telephone=telephone,
+#             email=email,
+#             qualification=qualification,
+#             comments=comments,
+#         )
+
+#     print("Leads retrieved and saved successfully.")
+
+# def facebook_leads_view(request):
+#     # Call the function to fetch leads from Facebook
+#     fetch_facebook_leads()
+
+#     # Retrieve all leads from the database
+#     leads = Lead.objects.all()
+
+#     # Pass the leads to the template context
+#     context = {
+#         'leads': leads
+#     }
+
+#     return render(request, 'lead/facebook_leads.html', context)

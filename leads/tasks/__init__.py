@@ -1,1 +1,1 @@
-from .reminder import * 
+# from .reminder import * 
