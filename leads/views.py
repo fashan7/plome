@@ -105,7 +105,7 @@ def delete_duplicate_leads():
     # Iterate through all leads
     for lead in all_leads:
         # Check if the telephone number is already in the set
-        if lead.telephone in unique_telephones:
+        if lead.telephone in unique_telephones and lead.telephone is not None:
             # Delete the duplicate lead
             lead.delete()
             duplicates_count += 1
@@ -912,7 +912,7 @@ def import_leads(request):
                 request.session['df'] = json_data #df.to_dict(orient='records', date_format='iso', date_unit='s', default_handler=str)
                 request.session['field_map'] = field_map
                
-                context = {'headers': filtered_headers, 'field_map': filtered_field_map, 'additional_headers': additional_headers}
+                context = {'headers': headers, 'field_map': field_map, 'additional_headers': additional_headers}
                 return render(request, 'lead/mapping_modal.html', context)
             except Exception as e:
                 messages.error(request, f'Error reading file: {str(e)}')
@@ -974,6 +974,7 @@ def import_leads(request):
                         
                         lead_data[header] = value_holder
                 leads.append(Lead(**lead_data))
+            print(len(leads))
             Lead.objects.bulk_create(leads)
             request.session.pop('df', None)
             request.session.pop('field_map', None)

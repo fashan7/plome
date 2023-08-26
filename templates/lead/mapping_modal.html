@@ -148,6 +148,13 @@
             uniqueSelect: true
           },
         {% endfor %}
+        {% for field in field_map %}
+          "{{ field }}": {
+            uniqueSelect: {
+              allowEmpty: true  // Allow selecting __empty__ more than once
+            }
+          },
+        {% endfor %}
       },
       messages: {
         {% for field in field_map %}
