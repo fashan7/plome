@@ -194,5 +194,23 @@
       window.location.href = '{% url "lead_dashboard" %}'; 
     });
   });
+
+  $(document).ready(function() {
+    $('select[data-name="fields"]').on('change', function() {
+      // Get the selected values from other dropdowns
+      var selectedValues = $('select[data-name="fields"]').not(this).map(function() {
+        return $(this).val();
+      }).get();
+      
+      // Update the options in the "Custom Fields" dropdown
+      $('#custom_fields option').each(function() {
+        if (selectedValues.includes($(this).val())) {
+          $(this).prop('disabled', true);
+        } else {
+          $(this).prop('disabled', false);
+        }
+      });
+    });
+  });
 </script>
 {% endblock %}
