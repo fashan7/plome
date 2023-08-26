@@ -29,7 +29,8 @@ class Lead(models.Model):
     avez_vous_travaille = models.CharField(max_length=100, null=True, blank=True)
     nom_prenom = models.CharField(max_length=100, null=True, blank=True)
     # prenom = models.CharField(max_length=100)
-    telephone = models.CharField(max_length=20, null=True, blank=True)
+    #telephone = models.CharField(max_length=20, null=True, blank=True)
+    telephone = models.CharField(max_length=50, null=True, blank=True)
     email = models.EmailField(null=True, blank=True)
     QUALIFICATION_CHOICES = (
         ('nrp1', 'NRP1'),
