@@ -132,14 +132,18 @@
       var selectedValues = $('select[data-name="' + fieldName + '"]').map(function() {
         return $(this).val();
       }).get();
-
-      var duplicateValues = selectedValues.filter(function(val, index, self) {
-        return self.indexOf(val) !== index;
-      });
-
-      return duplicateValues.length === 0; // If there are no duplicate values, it's unique
+    
+      if (value === "__empty__") {
+        return true;  // Allow selecting __empty__ multiple times
+      } else {
+        var duplicateValues = selectedValues.filter(function(val, index, self) {
+          return self.indexOf(val) !== index && val !== "__empty__";
+        });
+    
+        return duplicateValues.length === 0; // If there are no duplicate values (excluding __empty__), it's unique
+      }
     }, "This field has already been selected by another dropdown.");
-
+    
   
     $("#mappingform").validate({
       rules: {
