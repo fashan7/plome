@@ -337,9 +337,9 @@ def send_reminder_emails():
 
        
 # Start the reminder function in a separate thread
-import threading
-reminder_thread = threading.Thread(target=send_reminder_emails)
-reminder_thread.start()
+# import threading
+# reminder_thread = threading.Thread(target=send_reminder_emails)
+# reminder_thread.start()
 
 # def save_appointment(request):
 #     if request.method == 'POST':
@@ -900,16 +900,19 @@ def import_leads(request):
                     raise ValueError("Unsupported file format. Only CSV, XLS, and XLSX files are allowed.")
 
                 headers = [header.strip() for header in df.columns]
-                # print(headers)
+                field_map_normalized = {key.lower().replace(" ", "_"): value for key, value in field_map.items()}  # Normalize field_map keys
+                filtered_headers = [header for header in headers if header.lower() in field_map_normalized.values()]
                 
+                additional_headers = [header for header in headers if header.lower() not in field_map_normalized.values()]
+                filtered_headers_lower = [header.lower() for header in filtered_headers]
+                filtered_field_map = {key: value for key, value in field_map.items() if value in filtered_headers_lower}
 
-                additional_headers = [header for header in headers if header not in field_map]
                 df_dict = df.to_dict(orient='records')
                 json_data = json.dumps(df_dict, default=date_handler)
                 request.session['df'] = json_data #df.to_dict(orient='records', date_format='iso', date_unit='s', default_handler=str)
                 request.session['field_map'] = field_map
                
-                context = {'headers': headers, 'field_map': field_map, 'additional_headers': additional_headers}
+                context = {'headers': filtered_headers, 'field_map': filtered_field_map, 'additional_headers': additional_headers}
                 return render(request, 'lead/mapping_modal.html', context)
             except Exception as e:
                 messages.error(request, f'Error reading file: {str(e)}')
