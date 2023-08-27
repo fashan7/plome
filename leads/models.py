@@ -4,6 +4,10 @@ from accounts.models import User
 from accounts.models import CustomUserTypes
 from django.dispatch import receiver
 from django.db.models.signals import post_save
+from django.utils.text import slugify
+from django.db.models.signals import pre_save
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class LeadHistory(models.Model):
@@ -23,6 +27,9 @@ class LeadHistory(models.Model):
     class Meta:
         ordering = ['-timestamp']
 
+
+
+    
 class Lead(models.Model):
     date_de_soumission = models.DateField(null=True, blank=True)
     nom_de_la_campagne = models.CharField(max_length=100, null=True, blank=True)
@@ -63,7 +70,6 @@ class Lead(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     read_mail = models.BooleanField(default=False)
     _original_state = {}
-   
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -73,7 +79,6 @@ class Lead(models.Model):
     def __str__(self):
         return str(self.nom_de_la_campagne)
 
-    
         
     def add_user_mention(self, user_id, username):
         # Add a new user mention to the assign_comment field
@@ -91,7 +96,7 @@ class Lead(models.Model):
     def __str__(self):
          return str(self.nom_de_la_campagne)
     
-    
+
 # @receiver(post_save, sender=Lead)
 # def track_lead_changes(sender, instance, created, **kwargs):
 #     if created:
@@ -107,8 +112,7 @@ class Lead(models.Model):
 #         LeadHistory.objects.create(lead=instance, user=instance.last_modified_by, assigned_to=instance.assigned_to, changes=changes)
     
 # Register the signal receiver to create LeadHistory entries
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+
 @receiver(post_save, sender=Lead)
 def create_lead_history(sender, instance, created, **kwargs):
     if created:

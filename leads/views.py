@@ -1066,7 +1066,10 @@ from django.contrib import messages
 
 @login_required
 def sales_lead(request):    
-    user_leads = Lead.objects.filter(assigned_to=request.user, is_active=True, is_complete=False )
+    qualification_filter = request.GET.get('qualification')
+    user_leads = Lead.objects.filter(assigned_to=request.user, is_active=True, is_complete=False)
+    if qualification_filter:
+        user_leads = user_leads.filter(qualification=qualification_filter)
     return render(request, 'lead/sales_lead.html', {'leads': user_leads})
 
 
