@@ -649,16 +649,21 @@ def lead_edit(request, lead_id):
             lead.price = None
 
 
-        
-
         custom_fields_data = {}
         for key, value in form_data.items():
             if key.startswith('custom_fields.'):
                 custom_field_key = key.split('.', 1)[1]
                 custom_fields_data[custom_field_key] = value
-        lead.custom_fields = custom_fields_data
+        
 
-    
+        custom_field_names = request.POST.getlist('custom_field_name[]')
+        custom_field_values = request.POST.getlist('custom_field_value[]')
+        custom_fields_ = dict(zip(custom_field_names, custom_field_values))
+        if len(custom_fields_) > 0:
+            custom_fields_data.update(custom_fields_)
+            lead.custom_fields = json.dumps(custom_fields_data)
+        else:
+            lead.custom_fields = json.dumps(custom_fields_data)
 
         # Set the last_modified_by field to the current user
         lead.last_modified_by = request.user
