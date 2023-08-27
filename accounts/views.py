@@ -18,13 +18,13 @@ class CustomPasswordResetConfirmView(PasswordResetConfirmView):
 
 def redirect_user_dashboard(user):
     if user.is_superuser:
-        return redirect('lead/admin_dashboard')
+        return redirect('/lead/admin_dashboard')
     elif user.is_sales:
-        return redirect('lead/sales_dashboard')
+        return redirect('/lead/sales_dashboard')
     elif user.is_advisor:
-        return redirect('base/advisor_dashboard')
+        return redirect('/base/advisor_dashboard')
     elif user.is_admin:
-        return redirect('base/sadmin_dashboard')
+        return redirect('/base/sadmin_dashboard')
     
 
 def redirect_link_dashboard(user):
@@ -122,6 +122,11 @@ def signup(request):
 def signout(request):
     logout(request)
     return redirect('/')
+
+def logout_view(request):
+    logout(request)
+    return redirect('/signin') 
+
 # def signout(request):
 #     logout(request)
 #     return render(request,'accounts/auth-login.html')

@@ -107,7 +107,7 @@ def mark_notification_read(request):
     except Notification.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Notification not found'})
 
-# @login_required
+@login_required
 def admin_dashboard(request):
     if request.user.is_authenticated:
         filtered_user = CustomUserTypes.objects.filter(username=request.user)
@@ -120,7 +120,7 @@ def admin_dashboard(request):
     else:
         return render(request, '/login')
     
-
+@login_required
 def add_new_user(request):
     if request.user.is_authenticated:
         filtered_user = CustomUserTypes.objects.filter(username=request.user)
@@ -207,11 +207,11 @@ def save_user(request):
             return redirect('add_new_user')
     return redirect('add_new_user')
 
-
+@login_required
 def advisor_dashboard(request):
     return render(request, 'base/advisor_dashboard.html')
 
-
+@login_required
 def sales_dashboard(request):
     user_leads = Lead.objects.filter(assigned_to=request.user)
 
@@ -233,6 +233,7 @@ def sales_dashboard(request):
 
     return render(request, 'base/sales_dashboard.html', context)
 
+@login_required
 def sadmin_dashboard(request):
     return render(request, 'base/sadmin_dashboard.html')
 
@@ -332,11 +333,13 @@ def sendemail(request):
     plain_message = strip_tags(html_message)
     from_email = 'your-email@gmail.com'
     to_email = user.email
-    send_mail(subject, plain_message, from_email, [to_email], html_message=html_message)
+    print(html_message)
+    # send_mail(subject, plain_message, from_email, [to_email], html_message=html_message)
 
     return render(request, 'base/sendemail.html')
 
 
+@login_required
 def profile(request):
     # Check if the user is authenticated (logged in)
     if request.user.is_authenticated:
