@@ -80,8 +80,8 @@
       <script>
         var customFieldCounter = 0;
 
-        function addCustomField() {
-          var container = document.getElementById('custom-fields-container');
+        function addCustomField(htmlid) {
+          var container = document.getElementById(htmlid);
           var customFieldDiv = document.createElement('div');
           customFieldDiv.className = 'form-row';
           var fieldNameDiv = document.createElement('div');
@@ -273,7 +273,7 @@
                           </div>
 
                           <div class="col-md-12 mb-3">
-                            <button type="button" class="btn btn-secondary" onclick="addCustomField()">Add Custom
+                            <button type="button" class="btn btn-secondary" onclick="addCustomField('custom-fields-container')">Add Custom
                               Field</button>
                           </div>
 
@@ -558,7 +558,14 @@
                                       {% endfor %}
 
                                       {% endif %}
-                                      
+                                      <div class="col-md-12 mb-3">
+                                        <button type="button" class="btn btn-secondary" onclick="addCustomField('custom-fields-container-edit-{{ lead.id }}')">Add Custom
+                                          Field</button>
+                                      </div>
+            
+                                      <div class="col-md-12 mb-3" id="custom-fields-container-edit-{{ lead.id }}">
+                                        <!-- Custom Fields will be dynamically added here -->
+                                      </div>
 
                                     </div>
                                   </form>
