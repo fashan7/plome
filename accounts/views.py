@@ -8,6 +8,12 @@ from accounts.EmailBackEnd import EmailBackEnd
 from .models import CustomUserTypes
 from django.contrib.auth import logout
 from django.http import HttpResponse,HttpResponseNotAllowed
+from django.contrib.auth.views import PasswordResetConfirmView
+from django.urls import reverse_lazy
+
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    success_url = reverse_lazy('signin') 
 
 
 def redirect_user_dashboard(user):
@@ -65,6 +71,8 @@ def signin(request):
     
     return render(request, 'accounts/auth-login.html')
     
+
+
 
 def login_request(request):
     if request.method == 'POST':

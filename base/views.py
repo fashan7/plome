@@ -312,12 +312,23 @@ def delete_user(request, user_id):
     return JsonResponse({'error': 'Invalid request.'})
 
 
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.views import PasswordResetView
+from django.urls import reverse
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+
 def sendemail(request):
     user_id = request.GET.get('user_id')  # Get the user_id from the query parameters
     user = User.objects.get(id=user_id)  # Retrieve the user based on the user_id
 
-    subject = 'Login Details'
-    html_message = render_to_string('base/email_template.html', {'user': user})
+    # Generate a one-time use link for password reset
+    uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+    password_reset_confirm_url = reverse('password_reset_confirm', kwargs={'uidb64': uidb64, 'token': token})
+
+    subject = 'Password Reset'
+    html_message = render_to_string('base/email_template.html', {'user': user, 'password_reset_confirm_url': password_reset_confirm_url})
     plain_message = strip_tags(html_message)
     from_email = 'your-email@gmail.com'
     to_email = user.email
