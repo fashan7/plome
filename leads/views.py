@@ -44,6 +44,7 @@ def is_superuser(user):
     return user.is_superuser
 
 # Decorator to restrict access to the view for non-superusers
+@login_required
 @user_passes_test(is_superuser, login_url='sales_dashboard')
 def admin_dashboard(request):
     # Count all leads
@@ -123,6 +124,7 @@ from django.shortcuts import render, redirect
 from django.db.models import Q
 from .models import Lead, CustomUserTypes
 
+@login_required
 def filtered_lead_dashboard(request, user_id):
     # Fetch active leads for the selected user
     active_leads = Lead.objects.filter(is_active=True, assigned_to__id=user_id).order_by('-date_de_soumission')
@@ -139,6 +141,7 @@ from .models import Lead, CustomUserTypes
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 
+@login_required
 def lead_dashboard(request, lead_id=None):
     if request.method == 'POST':
         # Retrieve form data and create a new lead instance
@@ -223,21 +226,25 @@ def lead_dashboard(request, lead_id=None):
 #this function is used for history of mention 
 from .models import *
 
+@login_required
 def lead_history_view(request, lead_id):
     lead = get_object_or_404(Lead, id=lead_id)
     lead_history = LeadHistory.objects.filter(lead=lead, category='mention').order_by('-timestamp')[:10]
     return render(request, 'lead/lead_history.html', {'lead': lead, 'history_entries': lead_history})
 
+@login_required
 def lead_otherhistory_view(request, lead_id):
     lead = get_object_or_404(Lead, id=lead_id)
     lead_history = LeadHistory.objects.filter(Q(lead=lead, category='other') | Q(lead=lead, category='assign')).order_by('-timestamp')[:10]
     return render(request, 'lead/lead_otherhistory.html', {'lead': lead, 'history_entries': lead_history})
 
 
+@login_required
 def lead_list(request):
     leads = Lead.objects.all()
     return render(request, 'lead/lead_list.html', {'leads': leads})
 
+@login_required
 def lead_history(request, lead_id):
     lead = get_object_or_404(Lead, id=lead_id)
     history_entries = LeadHistory.objects.filter(lead=lead, category='mention')
@@ -521,7 +528,7 @@ def download_attachment(request, attachment_id, attachment_name):
     
     return response
 
-from django.http import JsonResponse\
+from django.http import JsonResponse
     
 def delete_attachment(request, attachment_id):
     attachment = get_object_or_404(Attachment, id=attachment_id)
@@ -771,6 +778,7 @@ def deactivated_leads(request):
     leads = Lead.objects.filter(is_active=False)
     return render(request, 'lead/deactivated_lead.html', {'leads': leads})
 
+@login_required
 def toggle_saleslead_status(request, lead_id):
     lead = get_object_or_404(Lead, id=lead_id)
     lead.is_complete = not lead.is_complete  # Toggle the status
@@ -781,6 +789,7 @@ def toggle_saleslead_status(request, lead_id):
     else:
         return redirect('sales_lead')
 
+@login_required
 def complete_leads(request):
     leads = Lead.objects.filter(is_complete=True)
     return render(request, 'lead/complete_leads.html', {'leads': leads})
@@ -1072,7 +1081,7 @@ from django.contrib import messages
 @login_required
 def sales_lead(request):    
     qualification_filter = request.GET.get('qualification')
-    user_leads = Lead.objects.filter(assigned_to=request.user, is_active=True, is_complete=False)
+    user_leads = Lead.objects.filter(Q(assigned_to=request.user) | Q(transfer_to=request.user), is_active=True, is_complete=False)
     if qualification_filter:
         user_leads = user_leads.filter(qualification=qualification_filter)
     return render(request, 'lead/sales_lead.html', {'leads': user_leads})
@@ -1194,6 +1203,7 @@ from django.shortcuts import render, HttpResponse
 import json
 import facebook
 
+@login_required
 def fetch_facebook_leads(request):
     if request.method == 'POST':
         user = request.POST.get('user')
@@ -1268,7 +1278,7 @@ def fetch_facebook_leads(request):
 
 
 
-
+@login_required
 def facebook_leads(request):
     if request.user.is_superuser:
         base_template = 'base.html'
@@ -1333,6 +1343,7 @@ def gsheet(request):
 
 
 from django.http import JsonResponse
+
 
 def get_all_users(request):
     # Fetch all users from the database

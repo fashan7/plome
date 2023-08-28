@@ -40,7 +40,7 @@
                     <label class="custom-control-label" for="{{ notification.id }}"></label>
                   </div>
                 </td>
-               <td>{{ notification.lead.assigned_to }}</td>
+               <td>{{ notification.user }}</td>
                     <td>{{ notification.timestamp }}</td>
                     <td>{{ notification.message }}</td>
                     <td>{% if notification.is_read %}Yes{% else %}No{% endif %}</td>

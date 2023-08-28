@@ -326,15 +326,17 @@ def sendemail(request):
     # Generate a one-time use link for password reset
     uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
     token = default_token_generator.make_token(user)
+    domain = request.get_host()  # Get the domain from the request
     password_reset_confirm_url = reverse('password_reset_confirm', kwargs={'uidb64': uidb64, 'token': token})
+    password_reset_confirm_url = f'http://{domain}{password_reset_confirm_url}'  # Construct the complete URL
+    # password_reset_confirm_url = reverse('password_reset_confirm', kwargs={'uidb64': uidb64, 'token': token})
 
     subject = 'Password Reset'
     html_message = render_to_string('base/email_template.html', {'user': user, 'password_reset_confirm_url': password_reset_confirm_url})
     plain_message = strip_tags(html_message)
     from_email = 'your-email@gmail.com'
     to_email = user.email
-    print(html_message)
-    # send_mail(subject, plain_message, from_email, [to_email], html_message=html_message)
+    send_mail(subject, plain_message, from_email, [to_email], html_message=html_message)
 
     return render(request, 'base/sendemail.html')
 
