@@ -78,6 +78,7 @@ def sales_dashboard(request):
         'signe_cpf_leads_count': signe_cpf_leads_count,
         'conversion_rate': conversion_rate, # Add the count for "Signé CPF" leads
     }
+    
     return render(request, 'base/sales_dashboard.html', context)
 
 
@@ -196,6 +197,9 @@ def lead_dashboard(request, lead_id=None):
         selected_user_id = request.GET.get('user_id')
         selected_qualification = request.GET.get('qualification')
 
+        
+        page_names = FacebookPage.objects.values_list('page_name', flat=True).distinct()
+
         if selected_user_id:
             try:
                 selected_user = CustomUserTypes.objects.get(id=selected_user_id)
@@ -219,7 +223,14 @@ def lead_dashboard(request, lead_id=None):
         else:
             pass
 
-        return render(request, 'lead/leads_dashboard.html', {'leads': filtered_leads, 'users': users, 'sections': nav_data})
+
+
+        # Check if the user applied the page name filter
+        selected_page_name = request.GET.get('page_name')
+        if selected_page_name:
+            filtered_leads = filtered_leads.filter(facebook_page__page_name=selected_page_name)
+
+        return render(request, 'lead/leads_dashboard.html', {'leads': filtered_leads, 'users': users, 'sections': nav_data,'page_names': page_names})
 
 
 
@@ -343,11 +354,10 @@ def send_reminder_emails():
                 lead.save()
 
        
-# Start the reminder function in a separate thread
-# import threading
-# reminder_thread = threading.Thread(target=send_reminder_emails)
-# reminder_thread.start()
-
+import threading
+reminder_thread = threading.Thread(target=send_reminder_emails)
+reminder_thread.daemon = True
+reminder_thread.start()
 # def save_appointment(request):
 #     if request.method == 'POST':
 #         lead_id = request.POST.get('lead_id')
@@ -726,6 +736,35 @@ def get_latest_price_entry(request):
     }
     return JsonResponse(entry_data)
 
+
+from django.http import JsonResponse
+
+def save_custom_field(request, lead_id):
+    if request.method == 'POST':
+        lead = get_object_or_404(Lead, id=lead_id)
+        field_name = request.POST.get('field_name')
+        field_value = request.POST.get('field_value')
+
+        # Update custom_fields data and save the lead
+        custom_fields_data = json.loads(lead.custom_fields)
+        custom_fields_data[field_name] = field_value
+        lead.custom_fields = json.dumps(custom_fields_data)
+        lead.save()
+
+        return JsonResponse({'success': True})
+
+    return JsonResponse({'success': False})
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import Notification
+
+@login_required
+def notification_count(request):
+    unread_notification_count = Notification.objects.filter(user=request.user, is_read=False).count()
+    return  {'unread_notification_count': unread_notification_count}
+
+
 #can be used in future 
 
 # def lead_edit(request, lead_id):
@@ -1009,9 +1048,6 @@ def delete_leads(request):
     return JsonResponse({'success': False, 'message': 'Invalid request.'})
 
 
-
-
-
 import csv
 import pandas as pd
 from django.http import HttpResponse
@@ -1121,176 +1157,154 @@ def assign_leads(request):
     return JsonResponse({'success': False, 'message': 'Invalid request.'}, status=400)
 
 
-    # users = CustomUserTypes.objects.all()
-    # nav_data = navigation_data(request.user.id)
-    # return render(request, 'lead/sales_lead.html', {'leads': user_leads})
+# views.py
+from django.http import HttpResponse
+from django.shortcuts import render
+from .models import FacebookPage
+
+def save_facebook_form_ids(request):
+    if request.method == 'POST' and 'save_facebook_form_ids' in request.POST:
+        # Define a list of Facebook form IDs and their associated page names
+        form_ids = [
+            {'form_id': '1316143499002088', 'page_name': 'Bruno'},
+            # Add more form IDs and page names as needed
+        ]
+
+        for form_data in form_ids:
+            form_id = form_data['form_id']
+            page_name = form_data['page_name']
+
+            # Create a FacebookPage instance or get an existing one
+            facebook_page, created = FacebookPage.objects.get_or_create(form_id=form_id)
+            facebook_page.page_name = page_name
+            facebook_page.save()
+
+        return HttpResponse("Facebook form IDs and page names saved successfully.")
+
+    return HttpResponse("not saved successfully.")  # Replace 'your_template.html' with your actual template name
+
+
 
 
 # views.py
-
-
-# from django.shortcuts import render, HttpResponse
-# import json
-# import facebook
-# from .models import Lead, FacebookLead, CustomUserTypes
-
-# def fetch_facebook_leads(request):
-#     print("Fetching Facebook leads...")
-#     # Retrieve all users from the database
-#     users = CustomUserTypes.objects.all()
-
-#     if request.method == 'POST':
-#         user_id = request.POST.get('user_id')
-
-#         # Check if a user with the provided user_id exists
-#         try:
-#             selected_user = CustomUserTypes.objects.get(pk=user_id)
-#         except CustomUserTypes.DoesNotExist:
-#             return HttpResponse(json.dumps({'error': 'Selected user does not exist.'}), content_type='application/json')
-
-#         # Get the Facebook lead generation form ID associated with the selected user
-#         if selected_user.Username == 'Jatin':
-#             leadgen_form_id = '314661597574782'
-#         # elif selected_user.username == 'fashan':
-#         #     leadgen_form_id = 'YOUR_LEADGEN_FORM_ID_FOR_FASHAN'
-#         else:
-#             # Handle the case where the user is not selected or not found
-#             return HttpResponse(json.dumps({'error': 'Invalid selected user.'}), content_type='application/json')
-
-#         # Replace 'YOUR_ACCESS_TOKEN' with your actual Facebook access token
-#         access_token = 'EAAKFt0cZC5JMBO6FUZB1kXfNLkw0xcZAjm1fAsK1rZBtEKf67H6wwFA40pC7SZBKf5zrrmyEcD0OoyOunHK824hyQ0pse0rEVsbMYesOXAL5Cw0ZBmPo5gQx6AfMALSzwJ9Id0dFnJ28SDj258fz8uxFIJLddiipOxh6fjJdr9cURhQJvnLkpCwQoFEv6KwKfxaBkjwEWKmJ11f2aigzrT'
-
-#         # Create an instance of the Facebook object with your API keys
-#         graph = facebook.GraphAPI(access_token=access_token, version="3.0")
-
-#         # Specify the status parameter as 'all' to get all leads, including expired ones
-#         leads = graph.get_object(f"/{leadgen_form_id}/leads", fields='field_data,ad_id')
-
-#         # Process the retrieved leads and create a list of leads
-#         leads_list = []
-#         for lead in leads['data']:
-#             lead_data = {
-#                 'user': selected_user,
-#                 'ad_id': lead.get('ad_id'),
-#             }
-
-#             for field in lead['field_data']:
-#                 field_name = field['name']
-#                 field_value = field['values'][0]
-#                 lead_data[field_name] = field_value
-
-#             leads_list.append(lead_data)
-
-#         # Save the leads to the database
-#         FacebookLead.objects.bulk_create([FacebookLead(**data) for data in leads_list])
-
-#         # You can also do additional processing or filtering of leads based on the user if needed
-#         # leads_list = [lead for lead in leads_list if lead['user'] == selected_user]
-
-#         return HttpResponse(json.dumps(leads_list), content_type='application/json')
-
-#     # If it's a GET request, render the template with the list of users
-#     context = {
-#         'users': users,
-#     }
-#     return render(request, 'lead/facebook.html', context)
+from django.http import HttpResponse, HttpResponseRedirect
+from django.urls import reverse
+from .models import FacebookPage, Lead
 
 
 
+from .models import FacebookPage, Lead
 
-
-from django.shortcuts import render, HttpResponse
-import json
-import facebook
-
-@login_required
 def fetch_facebook_leads(request):
-    if request.method == 'POST':
-        user = request.POST.get('user')
+    if request.method == 'POST' and 'fetch_facebook_leads' in request.POST:
+        # Get the selected page name from the form
+        selected_page_name = request.POST.get('page_name')
 
-        # Replace 'YOUR_ACCESS_TOKEN' with your actual Facebook access token
-        access_token = 'EAAKFt0cZC5JMBO6FUZB1kXfNLkw0xcZAjm1fAsK1rZBtEKf67H6wwFA40pC7SZBKf5zrrmyEcD0OoyOunHK824hyQ0pse0rEVsbMYesOXAL5Cw0ZBmPo5gQx6AfMALSzwJ9Id0dFnJ28SDj258fz8uxFIJLddiipOxh6fjJdr9cURhQJvnLkpCwQoFEv6KwKfxaBkjwEWKmJ11f2aigzrT'
+        # Use the selected page name to fetch the associated form ID
+        try:
+            facebook_page = FacebookPage.objects.get(page_name=selected_page_name)
+            form_id = facebook_page.form_id
+        except FacebookPage.DoesNotExist:
+            return HttpResponse("Selected Facebook page not found.")
 
-        # Create an instance of the Facebook object with your API keys
+        # Fetch data from Facebook using the retrieved form ID
+        access_token = 'EAAKFt0cZC5JMBOyP8LLKH9MWVpyz2xh5EGj1tliMmmpacycb0ekyZAYDVF6dPIDM4nPygOoV5FOiPF7HASWQ86ecbtiwCV0VZAEraToVUgfyhRclonmD5Rup8qxaHsV0fuT4vVeXU1ZBKkvxvQZCIRBpZCGsQQVZAAuhcXp7isQAXujAvZBabSa2VsPmMZBBG4UDOocs5sPPe24pcocaJhDADGHvywgZDZD'  # Replace with your access token
         try:
             graph = facebook.GraphAPI(access_token=access_token, version="3.0")
         except facebook.GraphAPIError as e:
-            print(f"Error connecting to Facebook Graph API: {e}")
-            return
+            return HttpResponse(f"Error connecting to Facebook Graph API: {e}")
 
-        # Replace 'YOUR_LEADGEN_FORM_ID' with the ID of your lead generation form
-        leadgen_form_id = '314661597574782'
-        # Specify the status parameter as 'all' to get all leads, including expired ones
-        try:
-            leads = graph.get_object(f"/{leadgen_form_id}/leads", fields='field_data,ad_id')
-        except facebook.GraphAPIError as e:
-            print(f"Error retrieving leads: {e}")
-            return
+        leads = []
+        cursor = None
 
-        # Process the retrieved leads and create a list of leads
-        leads_list = []
-        for lead in leads['data']:
-            campaign_name = None
-            avez_vous_travaille = None
-            form_name = None
-            name = None
-            email = None
-            phone = None
-            created_time = None
+        while True:
+            try:
+                params = {'fields': 'field_data,ad_id', 'limit': 100}  # Adjust the limit as needed
+                if cursor:
+                    params['after'] = cursor
+                response = graph.get_object(f"/{form_id}/leads", **params)
+                leads.extend(response['data'])
+                if 'paging' in response and 'cursors' in response['paging']:
+                    cursor = response['paging']['cursors']['after']
+                else:
+                    break
+            except facebook.GraphAPIError as e:
+                return HttpResponse(f"Error retrieving leads: {e}")
 
-            for field in lead['field_data']:
-                if field['name'] == 'full_name':
-                    name = field['values'][0]
-                elif field['name'] == 'email':
-                    email = field['values'][0]
-                elif field['name'] == 'phone_number':
-                    phone = field['values'][0]
-                elif field['name'] == 'nom_de_la_campagne':
-                    campaign_name = field['values'][0]
-                elif field['name'] == 'avez_vous_travaille':
-                    avez_vous_travaille = field['values'][0]
-                elif field['name'] == 'form_name':
-                    form_name = field['values'][0]
-                
+        # Process and save the fetched leads to the Lead model
+        for lead_data in leads:
+            lead = Lead(
+                #date_de_soumission=lead_data.get('created_time', ''),
+                nom_de_la_campagne=lead_data.get('nom_de_la_campagne', ''),
+                avez_vous_travaille=lead_data.get('avez_vous_travaille', ''),
+                nom_prenom=lead_data.get('full_name', ''),
+                telephone=lead_data.get('phone_number', ''),
+                email=lead_data.get('email', ''),
+                qualification=None,  # Set qualification if available
+                comments=None,  # Set comments if available
+                assigned_to=None,  # Set the assigned user if available
+            )
+            lead.facebook_page = facebook_page  # Associate the lead with the Facebook page
+            duplicates_deleted = delete_duplicate_leads()
+           
+            lead.save()
 
-            if 'ad_id' in lead:
-                status = 'new'
-            else:
-                status = 'expired'
+        # Fetch all leads after saving the Facebook leads
+        filtered_leads = Lead.objects.all()
 
-            leads_list.append({
-                'campaign_name': campaign_name,
-                'vous_avez_travaille': avez_vous_travaille,
-                'name': name,
-                'email': email,
-                'phone': phone,
-                'form_name' : form_name,
-                'status': status,
-            })
+        return render(request, 'lead/leads_dashboard.html', {'fetched_leads': filtered_leads, 'duplicates_deleted':duplicates_deleted})
 
-        # Pass the leads list to the template
-        context = {
-            'leads': leads_list
-        }
-        return render(request, 'lead/facebook.html', context)
+    return HttpResponse("No action taken.")
 
-    return render(request, 'lead/facebook.html')
 
+# views.py
+from django.shortcuts import render
+from .models import Lead
+
+def filtered_lead_dashboard(request, page_name=None):
+    # Get leads associated with the selected Facebook page
+    if page_name:
+        leads = Lead.objects.filter(facebook_page__page_name=page_name)
+    else:
+        leads = Lead.objects.all()
+
+    # You can add more logic here to filter and customize the leads display
+
+    return render(request, 'lead/filtered_lead_dashboard.html', {'leads': leads})
+
+
+
+from django.shortcuts import render
+from django.http import HttpResponse
+from . import facebook_script
+
+def fetch_leads(request):
+    leads = []  # Initialize an empty list to store the leads
+    if request.method == 'POST':
+        leads = facebook_script.fetch_leads()  # Call the function from your script to fetch leads
+
+    context = {'leads': leads}
+    return render(request, 'lead/fetch_leads.html', context)
 
 
 @login_required
 def facebook_leads(request):
-    if request.user.is_superuser:
-        base_template = 'base.html'
-    elif request.user.groups.filter(name='sales').exists():
+    user = request.user
+    is_sales = user.groups.filter(name='sales').exists()
+    is_super_admin = user.is_superuser
+
+    # Determine the base template based on user role
+    if is_sales:
         base_template = 'sales_base.html'
+    elif is_super_admin:
+        base_template = 'base.html'
     else:
-        base_template = 'base.html'  # Default to base.html if not superuser or sales
+        base_template = 'sales_base.html'
 
     context = {
-        'base_template': base_template
+        'base_template': base_template,
     }
-
+    
     return render(request, 'lead/facebook_under.html', context)
 
 

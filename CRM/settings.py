@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'leads',
     'pagesallocation',
     'clearcache',
+    'multi_company',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

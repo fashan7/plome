@@ -15,7 +15,7 @@ urlpatterns = [
 
     path('sales_lead/',views.sales_lead,name="sales_lead"),
     path('complete_leads/',views.complete_leads, name='complete_leads'),
-    path('fetch_facebook_leads/', views.fetch_facebook_leads, name='fetch_facebook_leads'),
+   # path('fetch_facebook_leads/', views.fetch_facebook_leads, name='fetch_facebook_leads'),
     path('filtered_lead_dashboard/<int:user_id>/', views.filtered_lead_dashboard, name='filtered_lead_dashboard'),
     path('lead_list/', views.lead_list, name='lead_list'),
     #path('lead_history/<int:lead_id>/', views.lead_history, name='lead_history'),
@@ -40,6 +40,12 @@ urlpatterns = [
     path('save_signe_cpf/', views.save_signe_cpf, name='save_signe_cpf'),
     path('view_notifications/', views.view_notifications, name='view_notifications'),
     path('get_qualification_data/', views.get_qualification_data, name='get_qualification_data'),
+    path('<int:lead_id>/save_custom_field/', views.save_custom_field, name='save_custom_field'),
+    path('notification/count/', views.notification_count, name='notification_count'),
+    path('fetch-facebook-leads/', views.fetch_facebook_leads, name='fetch-facebook-leads'),
+    path('fetch-leads/',views.fetch_leads, name='fetch-leads'),
+    path('save_facebook_form_ids/', views.save_facebook_form_ids, name='save_facebook_form_ids'),
+    path('filtered_lead_dashboard/', views.filtered_lead_dashboard, name='filtered_lead_dashboard'),
 
 ]
 

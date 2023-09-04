@@ -12,5 +12,7 @@ admin.site.register(LeadHistory)
 admin.site.register(PriceEntry)
 
 admin.site.register(Attachment)
+admin.site.register(FacebookPage)
+
 
 
