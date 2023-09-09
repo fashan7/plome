@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 
+
 urlpatterns = [
     # Other URL patterns
     path('lead_dashboard/', views.lead_dashboard, name='lead_dashboard'),
@@ -42,10 +43,20 @@ urlpatterns = [
     path('get_qualification_data/', views.get_qualification_data, name='get_qualification_data'),
     path('<int:lead_id>/save_custom_field/', views.save_custom_field, name='save_custom_field'),
     path('notification/count/', views.notification_count, name='notification_count'),
-    path('fetch-facebook-leads/', views.fetch_facebook_leads, name='fetch-facebook-leads'),
+    path('fetch_facebook_leads/', views.fetch_facebook_leads, name='fetch_facebook_leads'),
     path('fetch-leads/',views.fetch_leads, name='fetch-leads'),
     path('save_facebook_form_ids/', views.save_facebook_form_ids, name='save_facebook_form_ids'),
     path('filtered_lead_dashboard/', views.filtered_lead_dashboard, name='filtered_lead_dashboard'),
+    path('update_access_token/', views.update_access_token, name='update_access_token'),
+    path('map_facebook_pages/', views.map_facebook_pages_to_users, name='map_facebook_pages'),
+    path('fetch_sales_leads/', views.fetch_sales_leads, name='fetch_sales_leads'),
+   # path('update_user_permissions/', views.update_user_permissions, name='update_user_permissions'),
+   
+    
+  
+   
+
+
 
 ]
 

@@ -324,6 +324,57 @@
     </div>
     <button type="submit" class="btn apply-button">Apply Filters</button>
   </form>
+
+
+<!-- <div class="form-group">
+    <label for="page_filter">Filter by Facebook Page:</label>
+    <select name="page_name" id="page_filter">
+        <option value="">All</option>
+        {% for name in page_names %}
+            <option value="{{ name }}">{{ name }}</option>
+        {% endfor %}
+    </select>
+</div> -->
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    // Fetch leads when the page loads
+    $.ajax({
+        type: "POST",
+        url: "{% url 'fetch_sales_leads' %}",
+        data: {
+            csrfmiddlewaretoken: "{{ csrf_token }}",
+            page_name: "",  // You can specify a specific page name if needed
+        },
+        success: function(data) {
+            // Handle the response data, e.g., display a success message
+            console.log(data.message);
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            // Handle errors
+            console.log("Error:", errorThrown);
+        }
+    });
+});
+</script>
+
+<!-- <form method="post" action="{% url 'fetch_sales_leads' %}">
+    {% csrf_token %}
+    <label for="page_filter">Filter by Page Name:</label>
+    <select name="page_name" id="page_filter">
+        <option value="">All</option>
+        {% for name in page_names %}
+            <option value="{{ name }}">{{ name }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit" name="fetch_sales_leads">Fetch Leads</button>
+</form> -->
+
+
+
+
 </div>
 
 

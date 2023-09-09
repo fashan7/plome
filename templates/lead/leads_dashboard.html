@@ -296,6 +296,8 @@
     </form>
   </div>
 
+  
+
   <div class="filter custom-dropdown">
     <label for="assignToUser">Assign to:</label>
     <select id="assignToUser">
@@ -311,19 +313,42 @@
     Form ID's :
     <button type="submit" name="save_facebook_form_ids">Save</button>
 </form>
-<!-- lead_dashboard.html -->
-<!-- lead_dashboard.html -->
-<form method="post" action="{% url 'fetch-facebook-leads' %}">
+
+
+
+<form method="post" action="{% url 'fetch_facebook_leads' %}">
     {% csrf_token %}
-    <label for="page_filter">Filter by Page Name:</label>
-    <select name="page_name" id="page_filter">
-        <option value="">All</option>
-        {% for name in page_names %}
-            <option value="{{ name }}">{{ name }}</option>
-        {% endfor %}
-    </select>
-    <button type="submit" name="fetch_facebook_leads">Fetch Leads</button>
+    <div class="form-group">
+        <label for="page_filter">Filter by Facebook Page:</label>
+        <select name="page_name" id="page_filter">
+            <option value="">All</option>
+            {% for name in page_names %}
+                <option value="{{ name }}">{{ name }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" name="fetch_facebook_leads">Fetch Leads</button>
+    </div>
 </form>
+
+
+
+
+
+
+<!-- Your HTML template for adding or updating access tokens -->
+<form method="post" action="{% url 'update_access_token' %}">
+    {% csrf_token %}
+    
+    <br>
+    <label for="access_token">Access Token:</label>
+    <input type="text" name="access_token" id="access_token">
+    <br>
+    <input type="submit" name="update_access_token" value="Update Access Token">
+</form>
+
+
+
+
 
 </div>
 

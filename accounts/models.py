@@ -13,6 +13,8 @@ class CustomUserTypes(AbstractUser):
     is_advisor = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
     company = models.OneToOneField(Company, on_delete=models.CASCADE, null=True, blank=True)
+    #can_fetch = models.BooleanField(default=False)
+    
 
 
 

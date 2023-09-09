@@ -2,7 +2,7 @@ import facebook
 
 def fetch_leads():
     # Replace 'YOUR_ACCESS_TOKEN' with your actual Facebook access token
-    access_token = 'EAAKFt0cZC5JMBOyEicP20LyES4jk7iQV1Q4l6ZCpQKv2PRbNV7o5VuPMEhZBP3gmUVhPsQHmi306n2BQ6AZBz9gJ9Y0GZBlKtZB39nayDgPjwRHkmGDZBfpj978vONwmXDodHq8f0Amxlc9GUnUxx0YE3OAUaNH9RehEEv8BxfHRYxTChmxTThv62CaBJViMFZBQhRSM0vQXbsivN6UZD'
+    access_token = 'EAAKFt0cZC5JMBO2IqboZAxN01Qx7XbRUwfTA68E4I8kPg4VZA0tQKCaKNyXXq2q9iiZAeeUbhnNEVhnN7NruzZAvZAHx0ttyqrSRnqpQh9HAHLzGvB29N9zt3U65Xg9HE6vM8GfPCDE8hP3Fwt6Asd0Lj7UFokt3yeQBTARpDR4ZClJWF0ZClzJc4muRoiZAHvrh6PZACabUNBDwr8PKZCt0JnKrvvt'
 
     # Create an instance of the Facebook object with your API keys
     try:
