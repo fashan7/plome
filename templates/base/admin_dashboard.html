@@ -174,22 +174,23 @@
             </div>
           </div>
           <div class="col-md-6 col-xl-3 mb-4">
-            <div class="card shadow border-0">
-              <div class="card-body">
-                <div class="row align-items-center">
-                  <div class="col-3 text-center">
+    <div class="card shadow border-0">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-3 text-center">
                     <span class="circle circle-sm bg-primary">
-                      <i class="fe fe-16 fe-activity text-white mb-0"></i>
+                        <i class="fe fe-16 fe-activity text-white mb-0"></i>
                     </span>
-                  </div>
-                  <div class="col">
-                    <p class="small text-muted mb-0">AVG Orders</p>
-                    <span class="h3 mb-0">$80</span>
-                  </div>
                 </div>
-              </div>
+                <div class="col">
+                    <p class="small text-muted mb-0">Notifications</p>
+                    <span class="h3 mb-0">{{ unread_notification_count|default:"0" }}</span>
+                </div>
             </div>
-          </div>
+        </div>
+    </div>
+</div>
+
         </div> <!-- end section -->
         <div class="row">
   <!-- Price Table Section -->
@@ -223,7 +224,8 @@
                   <th>Friday</th>
                   <th>Saturday</th>
                   <th>Sunday</th>
-                  <th>Total</th>
+                  <th>Week Total</th>
+                  <th>Month Total</th>
                 </tr>
               </thead>
               <tbody>
@@ -245,35 +247,45 @@
 <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/select/1.3.1/css/select.bootstrap.css" />
 <script src="https://cdn.datatables.net/select/1.3.1/js/dataTables.select.min.js"></script>
+
 <script>
   var selectedWeek = 0; // Initialize the selected week offset
-
-function updateTable(data) {
-  var tableBody = $('#priceTable tbody');
-  tableBody.empty();
-
   var weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-  $.each(data, function(userId, userData) {
-    var row = $('<tr></tr>');
-    row.append($('<td></td>').text(userData.username));
-    var total = 0;
+  function updateTable(data) {
+    var tableBody = $('#priceTable tbody');
+    tableBody.empty();
 
-    for (var i = 0; i < weekdays.length; i++) {
-      var day = weekdays[i];
-      var price = userData.prices[day] || 0;
-      var roundedPrice = parseFloat(price).toFixed(2);
+    $.each(data, function(userId, userData) {
+      var row = $('<tr></tr>');
+      row.append($('<td></td>').text(userData.username));
+      var total = 0;
 
-      var formattedPrice = '€' + roundedPrice;
-      row.append($('<td></td>').text(formattedPrice));
-      total += parseFloat(price); // Accumulate total price
-    }
-    var formattedTotal = '€' + total.toFixed(2);
-    row.append($('<td></td>').text(formattedTotal)); // Add total to the row
-    tableBody.append(row);
-  });
-}
+      for (var i = 0; i < weekdays.length; i++) {
+        var day = weekdays[i];
+        var price = userData.prices[day] || 0;
+        var roundedPrice = parseFloat(price).toFixed(2);
 
+        var formattedPrice = '€' + roundedPrice;
+        row.append($('<td></td>').text(formattedPrice));
+        total += parseFloat(price); // Accumulate total price
+      }
+      var formattedTotal = '€' + total.toFixed(2);
+      row.append($('<td></td>').text(formattedTotal)); // Add weekly total to the row
+
+      // Calculate monthly total
+      var monthTotal = 0;
+      for (var i = 0; i < weekdays.length; i++) {
+        var day = weekdays[i];
+        var price = userData.prices[day] || 0;
+        monthTotal += parseFloat(price);
+      }
+      var formattedMonthTotal = '€' + monthTotal.toFixed(2);
+      row.append($('<td></td>').text(formattedMonthTotal)); // Add monthly total to the row
+
+      tableBody.append(row);
+    });
+  }
 
   function fetchAndPopulateData(weekOffset) {
     selectedWeek += weekOffset;
@@ -312,10 +324,10 @@ function updateTable(data) {
       fetchAndPopulateData(1);
     });
 
-     $('#nextWeek').click(function() {
-    fetchAndPopulateData(-1);
-  });
-  
+    $('#nextWeek').click(function() {
+      fetchAndPopulateData(-1);
+    });
+
     $('#presentWeek').click(function() {
       selectedWeek = 0;
       fetchAndPopulateData(0);

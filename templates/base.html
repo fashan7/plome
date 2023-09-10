@@ -16,6 +16,11 @@
     .btn-primary:hover {
         transform: scale(1.1);
     }
+
+      .dropdown-menu.no-box {
+        box-shadow: none;
+        border: none;
+    }
 </style>
   <link rel="stylesheet" href="{%static 'css/feather.css' %}">
   <!-- Date Range Picker CSS -->
@@ -124,6 +129,7 @@
             </ul>
           </li>
         </ul>
+        
         <ul class="navbar-nav flex-fill w-100 mb-2">
           <li class="nav-item dropdown">
             <a href="#user" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
@@ -132,7 +138,7 @@
             </a>
             <ul class="collapse list-unstyled pl-4 w-100" id="user">
               <a class="nav-link pl-3" href="{% url 'add_new_user' %}"><span class="ml-1">Add new users</span></a>
-              <a class="nav-link pl-3" href="#"><span class="ml-1">Deactivate users</span></a>
+              <!-- <a class="nav-link pl-3" href="{% url 'deactivate-users' %}"><span class="ml-1">Deactivate users</span></a> -->
 
             </ul>
           </li>
@@ -147,10 +153,16 @@
                 <a class="nav-link pl-3" href="{% url 'lead_dashboard' %}"><span class="ml-1 item-text">Add
                     leads</span></a>
               </li>
-              <li class="nav-item">
-                <a class="nav-link pl-3" href="{% url 'facebook_leads' %}"><span class="ml-1 item-text">Facebook
-                    leads</span></a>
-              </li>
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle pl-3" href="#" id="facebookLeadsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <span class="ml-1 item-text">Facebook leads</span>
+    </a>
+    <div class="dropdown-menu no-box" aria-labelledby="facebookLeadsDropdown">
+        <a class="dropdown-item" href="{% url 'map_facebook_pages' %}">Mapping</a>
+    </div>
+</li>
+
+
               <li class="nav-item">
                 <a class="nav-link pl-3" href="{% url 'deactivated_leads' %}"><span class="ml-1 item-text">Deactivate
                     Leads</span></a>

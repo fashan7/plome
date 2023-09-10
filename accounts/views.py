@@ -127,6 +127,3 @@ def logout_view(request):
     logout(request)
     return redirect('/signin') 
 
-# def signout(request):
-#     logout(request)
-#     return render(request,'accounts/auth-login.html')

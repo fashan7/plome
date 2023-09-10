@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+<main role="main" class="main-content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
+        <h1>Facebook Leads</h1>
+        <form method="post" action="{% url 'fetch-leads' %}">
+            {% csrf_token %}
+            <button type="submit">Fetch Leads</button>
+        </form>
+
+        {% if leads %}
+            <table id="leadsTable" class="display" border="1">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Nom de la Campagne</th>
+                        <th>Avez-vous travaillé</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lead in leads %}
+                        <tr>
+                            <td>{{ lead.Name }}</td>
+                            <td>{{ lead.Email }}</td>
+                            <td>{{ lead.Phone }}</td>
+                            <td>{{ lead.Nom_de_la_campagne }}</td>
+                            <td>{{ lead.Avez_vous_travaille }}</td>
+                            <td>{{ lead.Status }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+    $(document).ready(function() {
+        $('#leadsTable').DataTable();
+    });
+</script>
+{% endblock %}
+
+
+

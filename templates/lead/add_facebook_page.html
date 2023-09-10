@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Facebook Page</title>
+</head>
+<body>
+    <h1>Add Facebook Page</h1>
+    <form id="addFacebookPageForm">
+        <label for="form_id">Form ID:</label>
+        <input type="text" id="form_id" name="form_id" required><br><br>
+
+        <label for="page_name">Page Name:</label>
+        <input type="text" id="page_name" name="page_name" required><br><br>
+
+        <button type="button" onclick="addFacebookPage()">Add Page</button>
+    </form>
+
+    <div id="message"></div>
+
+    <script>
+        function addFacebookPage() {
+            var formId = document.getElementById("form_id").value;
+            var pageName = document.getElementById("page_name").value;
+
+            // Create a JSON object with the data
+            var data = {
+                "form_id": formId,
+                "page_name": pageName
+            };
+
+            // Send a POST request to your Django view to save the data
+            fetch("{% url 'add_facebook_page' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken") // Include CSRF token
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display the response message
+                document.getElementById("message").innerHTML = data.message;
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        }
+
+        // Function to get the CSRF token from cookies
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== "") {
+                var cookies = document.cookie.split(";");
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+<main role="main" class="main-content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
+        <table id="leadsTable" class="display" border="1">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Campaign Name</th>
+              <th>Have You Worked</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for lead in fetched_leads %}
+              <tr>
+                <td>{{ lead.nom_prenom }}</td>
+                <td>{{ lead.email }}</td>
+                <td>{{ lead.telephone }}</td>
+                <td>{{ lead.nom_de_la_campagne }}</td>
+                <td>{{ lead.avez_vous_travaille }}</td>
+                <td>{{ lead.status }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  $(document).ready(function() {
+    $('#leadsTable').DataTable();
+  });
+</script>

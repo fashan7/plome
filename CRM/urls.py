@@ -27,5 +27,6 @@ urlpatterns = [
     path('', include('accounts.urls')),
     path('lead/',include('leads.urls')),
     path('settings/', include('pagesallocation.urls')),
+    path('multi_company/', include('multi_company.urls')), 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

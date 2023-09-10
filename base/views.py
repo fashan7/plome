@@ -39,7 +39,7 @@ from django.utils.timezone import now
 from django.utils.timezone import make_aware
 from datetime import timedelta, datetime
 from django.utils import timezone
-from leads.views import sales_lead
+#from leads.views import sales_lead
 from django.db.models import F
 from django.db.models import Sum
 
@@ -381,7 +381,7 @@ def profile_settings(request):
             user.set_password(new_password)
 
         user.save()
-        return redirect('profile_settings')
+        return redirect('/')
 
     # Determine the base template based on user role
     if is_sales:

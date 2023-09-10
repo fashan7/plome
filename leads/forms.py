@@ -1,4 +1,11 @@
 from django import forms
+from.models import * 
+class FacebookPageMappingForm(forms.ModelForm):
+    class Meta:
+        model = FacebookPage
+        fields = ['users']
 
-class GoogleSheetForm(forms.Form):
-    sheet_link = forms.URLField(label='Google Sheets Link', max_length=200)
+    users = forms.ModelMultipleChoiceField(
+        queryset=CustomUserTypes.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+    )
