@@ -82,39 +82,75 @@ def sales_dashboard(request):
     return render(request, 'base/sales_dashboard.html', context)
 
 
+def normalize_phone_number(phone_number):
+    # Check if the number starts with '0' and does not have a country code
+    if phone_number.startswith('0') and not phone_number.startswith('33'):
+        normalized_number = '+33' + phone_number[1:]
+    else:
+        normalized_number = phone_number
+    
+    return normalized_number
 
 
 def delete_duplicate_leads():
     # Get all leads ordered by id (to keep the latest lead for each unique telephone number and email)
     all_leads = Lead.objects.order_by('id')
 
-    # Create sets to store unique telephone numbers and email addresses
+    # Create a set to store unique normalized telephone numbers
     unique_telephones = set()
-    unique_emails = set()
 
     duplicates_count = 0
 
     # Iterate through all leads
     for lead in all_leads:
-        # Check if the telephone number is already in the set
-        if lead.telephone in unique_telephones and lead.telephone is not None:
-            # Delete the duplicate lead
-            lead.delete()
-            duplicates_count += 1
-        else:
-            # If the telephone number is not in the set, add it to the set
-            unique_telephones.add(lead.telephone)
+        # Normalize the phone number
+        normalized_phone = normalize_phone_number(lead.telephone)
 
-        # Check if the email address is already in the set
-        if lead.email in unique_emails and lead.email is not None:
+        # Check if the normalized phone number is already in the set
+        if normalized_phone in unique_telephones and normalized_phone != "":
             # Delete the duplicate lead
             lead.delete()
             duplicates_count += 1
         else:
-            # If the email address is not in the set, add it to the set
-            unique_emails.add(lead.email)
+            # If the normalized phone number is not in the set, add it
+            unique_telephones.add(normalized_phone)
 
     return duplicates_count
+
+
+
+
+# def delete_duplicate_leads():
+#     # Get all leads ordered by id (to keep the latest lead for each unique telephone number and email)
+#     all_leads = Lead.objects.order_by('id')
+
+#     # Create sets to store unique telephone numbers and email addresses
+#     unique_telephones = set()
+#     unique_emails = set()
+
+#     duplicates_count = 0
+
+#     # Iterate through all leads
+#     for lead in all_leads:
+#         # Check if the telephone number is already in the set
+#         if lead.telephone in unique_telephones and lead.telephone is not None:
+#             # Delete the duplicate lead
+#             lead.delete()
+#             duplicates_count += 1
+#         else:
+#             # If the telephone number is not in the set, add it to the set
+#             unique_telephones.add(lead.telephone)
+
+#         # Check if the email address is already in the set
+#         if lead.email in unique_emails and lead.email is not None:
+#             # Delete the duplicate lead
+#             lead.delete()
+#             duplicates_count += 1
+#         else:
+#             # If the email address is not in the set, add it to the set
+#             unique_emails.add(lead.email)
+
+#     return duplicates_count
 
 
 # #deleting the duplicates only if there numbers are same
@@ -266,11 +302,23 @@ def lead_history_view(request, lead_id):
     lead_history = LeadHistory.objects.filter(lead=lead, category='mention').order_by('-timestamp')[:10]
     return render(request, 'lead/lead_history.html', {'lead': lead, 'history_entries': lead_history})
 
+
 @login_required
 def lead_otherhistory_view(request, lead_id):
     lead = get_object_or_404(Lead, id=lead_id)
     lead_history = LeadHistory.objects.filter(Q(lead=lead, category='other') | Q(lead=lead, category='assign')).order_by('-timestamp')[:10]
-    return render(request, 'lead/lead_otherhistory.html', {'lead': lead, 'history_entries': lead_history})
+    attachment_history = LeadHistory.objects.filter(lead=lead, category='attachment').order_by('-timestamp')[:10]
+
+    # Combine both history types into a single list
+    history_entries = list(lead_history) + list(attachment_history)
+
+    return render(request, 'lead/lead_otherhistory.html', {'lead': lead, 'history_entries': history_entries})
+
+# @login_required
+# def lead_otherhistory_view(request, lead_id):
+#     lead = get_object_or_404(Lead, id=lead_id)
+#     lead_history = LeadHistory.objects.filter(Q(lead=lead, category='other') | Q(lead=lead, category='assign')).order_by('-timestamp')[:10]
+#     return render(request, 'lead/lead_otherhistory.html', {'lead': lead, 'history_entries': lead_history})
 
 
 @login_required
@@ -524,8 +572,10 @@ def view_notifications(request):
 #     return render(request, 'lead/leads_dashboard.html', {'leads': active_leads, 'users': users,'sections': nav_data})
 
 #attachement function which has been used
+
+
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Lead, Attachment
+from .models import Lead, Attachment, LeadHistory
 
 def attach_file_to_lead(request, lead_id):
     lead = get_object_or_404(Lead, id=lead_id)
@@ -543,9 +593,40 @@ def attach_file_to_lead(request, lead_id):
                 # Add other fields for attachment metadata as needed
             )
 
+            # Create a LeadHistory entry for the attachment
+            LeadHistory.objects.create(
+                user=request.user,
+                lead=lead,
+                changes=f'{request.user.username} has added an attachment: {attachment.title}',
+                category='attachment'
+            )
+
             return redirect('lead_dashboard', lead_id=lead_id)  # Redirect to the lead detail page or another appropriate view
 
     return render(request, 'lead/leads_dashboard.html', {'lead': lead})
+
+# from django.shortcuts import render, redirect, get_object_or_404
+# from .models import Lead, Attachment
+
+# def attach_file_to_lead(request, lead_id):
+#     lead = get_object_or_404(Lead, id=lead_id)
+
+#     if request.method == 'POST':
+#         attached_file = request.FILES.get('attachment')
+#         title = request.POST.get('title')  # Retrieve the title from the form data
+
+#         if attached_file:
+#             # Create an Attachment instance and link it to the lead
+#             attachment = Attachment.objects.create(
+#                 lead=lead,
+#                 file=attached_file,  # Save the file directly, Django handles file storage
+#                 title=title
+#                 # Add other fields for attachment metadata as needed
+#             )
+
+#             return redirect('lead_dashboard', lead_id=lead_id)  # Redirect to the lead detail page or another appropriate view
+
+#     return render(request, 'lead/leads_dashboard.html', {'lead': lead})
 
 
 from django.http import FileResponse
@@ -1558,30 +1639,60 @@ def fetch_sales_leads(request):
     return JsonResponse(response_data)
 
 @login_required
-def sales_lead(request):
+def sales_lead(request):    
     qualification_filter = request.GET.get('qualification')
-
+    
     # Filter the list of Facebook pages based on the currently logged-in user
     user_facebook_pages = FacebookPage.objects.filter(user=request.user)
 
     # Get leads associated with the user's Facebook pages
     user_leads = Lead.objects.filter(
         Q(assigned_to=request.user) | Q(transfer_to=request.user),
-        facebook_page__in=user_facebook_pages,  # Filter by the user's Facebook pages
+          # Filter by the user's Facebook pages
         is_active=True,
         is_complete=False
     )
+    facebook_page__in=user_facebook_pages,
 
     if qualification_filter:
         user_leads = user_leads.filter(qualification=qualification_filter)
 
-    # Fetch Facebook leads here
-    response_data = fetch_sales_leads(request)
+    return render(request, 'lead/sales_lead.html', {'leads': user_leads, 'page_names': user_facebook_pages})
 
-    # You can access data fetched by fetch_sales_leads through the 'response_data' dictionary
-    fetched_message = response_data.get('message', '')  # Access the 'message' key
 
-    return render(request, 'lead/sales_lead.html', {'leads': user_leads, 'fetched_message': fetched_message, 'page_names': user_facebook_pages})
+# @login_required
+# def sales_lead(request):    
+#     qualification_filter = request.GET.get('qualification')
+#     user_leads = Lead.objects.filter(Q(assigned_to=request.user) | Q(transfer_to=request.user), is_active=True, is_complete=False)
+#     if qualification_filter:
+#         user_leads = user_leads.filter(qualification=qualification_filter)
+#     return render(request, 'lead/sales_lead.html', {'leads': user_leads})
+
+# @login_required
+# def sales_lead(request):
+#     qualification_filter = request.GET.get('qualification')
+
+#     # Filter the list of Facebook pages based on the currently logged-in user
+#     user_facebook_pages = FacebookPage.objects.filter(user=request.user)
+
+#     # Get leads associated with the user's Facebook pages
+#     user_leads = Lead.objects.filter(
+#         Q(assigned_to=request.user) | Q(transfer_to=request.user),
+#         facebook_page__in=user_facebook_pages,  # Filter by the user's Facebook pages
+#         is_active=True,
+#         is_complete=False
+#     )
+
+#     if qualification_filter:
+#         user_leads = user_leads.filter(qualification=qualification_filter)
+
+#     # Fetch Facebook leads here
+#     response_data = fetch_sales_leads(request)
+
+#     # You can access data fetched by fetch_sales_leads through the 'response_data' dictionary
+#     fetched_message = response_data.get('message', '')  # Access the 'message' key
+
+#     return render(request, 'lead/sales_lead.html', {'leads': user_leads, 'fetched_message': fetched_message, 'page_names': user_facebook_pages})
 
 
 
