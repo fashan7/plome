@@ -28,6 +28,9 @@ from dateutil import parser
 def assign_user_to_lead(lead, user_id):
     assigned_user = CustomUserTypes.objects.get(id=user_id)
     lead.assigned_to = assigned_user
+    update_lead_qualification(lead)
+    
+    
     lead.save()
       #Increment the lead count for the assigned user
     assigned_user.lead_count += 1
@@ -176,6 +179,28 @@ def delete_duplicate_leads():
 
 #     return duplicates_count
 
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+from .models import Lead
+
+#called the function everytime after lead.assigned_to
+def update_lead_qualification(lead):
+    # Check if the qualification is one of NRP1, NRP2, or NRP3
+    nrp_qualifications = ['nrp1', 'nrp2', 'nrp3']
+    if lead.qualification in nrp_qualifications:
+        # Set the qualification to None
+        lead.qualification = 'None'
+        lead.save()
+
+# # Define a signal handler to update lead qualification
+# @receiver(pre_save, sender=Lead)
+# def update_lead_qualification(sender, instance, **kwargs):
+#     # Check if the qualification is one of NRP1, NRP2, or NRP3
+#     nrp_qualifications = ['nrp1', 'nrp2', 'nrp3']
+#     if instance.qualification in nrp_qualifications:
+#         # Set the qualification to None
+#         instance.qualification = 'NONE'
+
 
 
 from .models import Notification
@@ -226,6 +251,8 @@ def lead_dashboard(request, lead_id=None):
         if assigned_to_id:
             assigned_user = CustomUserTypes.objects.get(id=assigned_to_id)
             lead.assigned_to = assigned_user
+            update_lead_qualification(lead)
+            
             lead.save()
            
             notification_message = f'You have been assigned a new lead: {lead.nom_de_la_campagne}'
@@ -667,7 +694,8 @@ def lead_edit(request, lead_id):
         if assigned_user_id:
             try:
                 assigned_user = CustomUserTypes.objects.get(id=assigned_user_id)
-                lead.assigned_to = assigned_user  # Set the assigned user for the lead
+                lead.assigned_to = assigned_user 
+                update_lead_qualification(lead)
             except CustomUserTypes.DoesNotExist:
                 # Handle the case when the selected user does not exist (optional)
                 messages.error(request, 'Invalid user ID selected for assignment.')
@@ -1306,6 +1334,8 @@ def assign_leads(request):
 
                 lead = Lead.objects.get(id=lead_id)
                 lead.assigned_to = assigned_user
+                update_lead_qualification(lead)
+               
                 lead.save()
 
                 notification_message = f'You have been assigned a new lead: {lead.nom_de_la_campagne}'
