@@ -414,7 +414,7 @@
                           </div>
                           <div class="form-group col-md-6 mb-3">
                             <label for="qualification">Qualification</label>
-                              <select name="qualification" class="form-control" id="qualification" name="qualification"
+                              <select name="qualification" class="form-control" id="qualification" 
                                 required>
                                 <option value="">--Select Qualification-- </option>
                                 <option value="nrp1">NRP1</option>
@@ -707,6 +707,7 @@
                                           </option>
                                           {% endfor %}
                                         </select>
+                                        
                                       </div>
                                       <div class="form-group col-md-6" id="rappelappointment{{ lead.id }}" {% if lead.qualification == 'rappel' %} style="display:block;" {% else %} style="display:none;" {% endif %}>
                                         <label for="appointment">Appointment Date & Time</label>
