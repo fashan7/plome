@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<main role="main" class="main-content">
+  <div class="container-fluid">
+    <h1>Doisser</h1>
+
+    <!-- Import button -->
+    <form method="post" action="{% url 'import_doisser_leads' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="file">Import Excel File:</label>
+        <input type="file" name="file" accept=".xls, .xlsx" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Import</button>
+    </form>
+
+    <!-- DataTable to display imported data -->
+    <div class="table-responsive mt-4">
+      <table id="doisserTable" class="table table-bordered table-striped">
+        <thead>
+          <tr>
+            <th>Date d'inscription</th>
+            <th>Numéro EDOF</th>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th>Téléphone</th>
+            <th>E-mail</th>
+            <th>Address Postal</th>
+            <th>Statut EDOF</th>
+            <th>Challenge</th>
+            <th>Colis à préparer</th>
+            <th>Prix Net</th>
+            <th>Conseiller</th>
+            <th>Équipes</th>
+            <th>Critères com</th>
+            <th>Date prévue d'entrée en formation</th>
+            <th>Date prévue de fin de formation</th>
+            <!-- Add table headers for AppelEffectueLe, RdvConfirme, and InscriptionVisioEntree fields -->
+            <th>Date/Heure de l'appel effectué</th>
+            <th>Motifs de l'appel effectué</th>
+            <th>Date/Heure du RDV confirmé</th>
+            <th>Confirmateur du RDV</th>
+            <th>Statut du service du confirmateur du RDV</th>
+            <th>Audio lors de l'inscription à la visio</th>
+            <th>Niveau de relance lors de l'inscription à la visio</th>
+            <th>Somme facturée lors de l'inscription à la visio</th>
+            <th>Date de facturation lors de l'inscription à la visio</th>
+            <th>Date d'encaissement lors de l'inscription à la visio</th>
+            <th>Facture lors de l'inscription à la visio</th>
+            <th>Numéro de facture lors de l'inscription à la visio</th>
+            <th>Date de colis à envoyer lors de l'inscription à la visio</th>
+            <th>Numéro de suivi vers le point relais lors de l'inscription à la visio</th>
+            <th>Commentaires lors de l'inscription à la visio</th>
+            <th>Statut du colis lors de l'inscription à la visio</th>
+           
+          </tr>
+        </thead>
+        <tbody>
+          {% for record in records %}
+          <tr>
+            <td>{{ record.date_dinscription }}</td>
+            <td>{{ record.numero_edof }}</td>
+            <td>{{ record.nom }}</td>
+            <td>{{ record.prenom }}</td>
+            <td>{{ record.telephone }}</td>
+            <td>{{ record.mail }}</td>
+            <td>{{ record.address_postal }}</td>
+            <td>{{ record.statut_edof }}</td>
+            <td>{{ record.challenge }}</td>
+            <td>{{ record.colis_a_preparer }}</td>
+            <td>{{ record.prix_net }}</td>
+            <td>{{ record.conseiller }}</td>
+            <td>{{ record.equipes }}</td>
+            <td>{{ record.criteres_com }}</td>
+            <td>{{ record.date_prevue_d_entree_en_formation }}</td>
+            <td>{{ record.date_prevue_de_fin_de_formation }}</td>
+            <!-- Add table data for AppelEffectueLe, RdvConfirme, and InscriptionVisioEntree fields -->
+            <td>{{ record.appel_effectue_le_date_time }}</td>
+            <td>{{ record.appel_effectue_le_motifs }}</td>
+            <td>{{ record.rdv_confirme_dateandtime }}</td>
+            <td>{{ record.rdv_confirme_confirmateur }}</td>
+            <td>{{ record.rdv_confirme_statut_service_confirmateur }}</td>
+            <td>{{ record.inscription_visio_entree_audio }}</td>
+            <td>{{ record.inscription_visio_entree_niveau_de_relance }}</td>
+            <td>{{ record.inscription_visio_entree_somme_facturee }}</td>
+            <td>{{ record.inscription_visio_entree_date_de_facturation }}</td>
+            <td>{{ record.inscription_visio_entree_date_d_encaissement }}</td>
+            <td>{{ record.inscription_visio_entree_facture }}</td>
+            <td>{{ record.inscription_visio_entree_num_facture }}</td>
+            <td>{{ record.inscription_visio_entree_colis_a_envoyer_le }}</td>
+            <td>{{ record.inscription_visio_entree_numero_de_suivi_vers_point_relais }}</td>
+            <td>{{ record.inscription_visio_entree_commentaires }}</td>
+            <td>{{ record.inscription_visio_entree_statut_colis }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
+<script>
+  $(document).ready(function() {
+    $('#doisserTable').DataTable({
+      "paging": true,
+      "lengthChange": false,
+      "searching": true,
+      "ordering": true,
+      "info": true,
+      "autoWidth": false,
+      "order": [], // Disable initial sorting
+      "columnDefs": [
+        {
+          "targets": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], // Define columns to be sortable
+          "orderable": true,
+        },
+        {
+          "targets": [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31], // Define columns to be not sortable
+          "orderable": false,
+        },
+      ],
+    });
+  });
+</script>
+{% endblock %}
