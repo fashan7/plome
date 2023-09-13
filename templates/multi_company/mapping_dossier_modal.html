@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<main role="main" class="main-content">
+  <div class="container-fluid">
+    <div class="container-fluid">
+      {% if messages %}
+      <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" role="alert">
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+          
+      <div class="row justify-content-center">
+        <div class="col-12">
+          <h2 class="mb-2 page-title">Form Mapping</h2>
+
+          <!-- Form for field mapping -->
+          <form method="post" action="{% url 'import_doisser_leads' %}">
+            {% csrf_token %}
+            
+            <!-- Field mapping section -->
+            <div class="card shadow">
+              <div class="card-body">
+                <h5 class="card-title">Field Mapping</h5>
+                <p class="card-text">Map the columns from the file to the fields in your models.</p>
+                
+                <!-- Field mapping dropdowns -->
+                {% for field, field_name in field_map.items %}
+                <div class="form-group">
+                  <label for="{{ field }}">{{ field_name }}</label>
+                  <select id="{{ field }}" name="{{ field }}" class="form-control" required>
+                    <option value="">-- Select Field --</option>
+                    <option value="__empty__">-- Skip This Field --</option>
+                    {% for header in headers %}
+                    <option value="{{ header }}">{{ header }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                {% endfor %}
+                
+                <!-- Custom Fields section -->
+                <div class="form-group">
+                  <label for="custom_fields">Custom Fields</label>
+                  <select id="custom_fields" name="custom_fields" class="form-control" multiple>
+                    {% for header in additional_headers %}
+                    <option value="{{ header }}">{{ header }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                
+                <!-- Submit buttons -->
+                <button type="submit" name="mapping" class="btn btn-primary">Submit Mapping</button>
+                <button name="skip" id="skip" class="btn btn-warning">Skip Excel</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+
+
+<script>
+  $(document).ready(function() {
+    // Add custom validation method for uniqueSelect
+    $.validator.addMethod("uniqueSelect", function(value, element) {
+      var fieldName = $(element).attr('name');
+      var selectedValues = $('select[name="' + fieldName + '"]').map(function() {
+        return $(this).val();
+      }).get();
+    
+      if (value === "__empty__") {
+        return true;  // Allow selecting __empty__ multiple times
+      } else {
+        var duplicateValues = selectedValues.filter(function(val, index, self) {
+          return self.indexOf(val) !== index && val !== "__empty__";
+        });
+    
+        return duplicateValues.length === 0; // If there are no duplicate values (excluding __empty__), it's unique
+      }
+    }, "This field has already been selected by another dropdown.");
+    
+    // Function to disable selected custom fields
+    function disableCustomFields() {
+      $('select[name="custom_fields"] option').prop('disabled', false);
+      $('select').each(function() {
+        var selectedValue = $(this).val();
+        if (selectedValue !== "__empty__") {
+          $('select[name="custom_fields"] option[value="' + selectedValue + '"]').prop('disabled', true);
+        }
+      });
+    }
+
+    // Validate the mapping form
+    $("#mappingform").validate({
+      rules: {
+        {% for field in field_map %}
+          "{{ field }}": {
+            uniqueSelect: true
+          },
+        {% endfor %}
+        {% for field in field_map %}
+          "{{ field }}": {
+            uniqueSelect: {
+              allowEmpty: true  // Allow selecting __empty__ more than once
+            }
+          },
+        {% endfor %}
+      },
+      messages: {
+        {% for field in field_map %}
+          "{{ field }}": {
+            uniqueSelect: "This field has already been selected by another dropdown."
+          },
+        {% endfor %}
+      },
+      errorPlacement: function(error, element) {
+        error.insertAfter(element);
+      },
+      submitHandler: function(form) {
+        // Iterate through selected fields and process mapping
+        $(form).find('select').each(function() {
+          var selectedValue = $(this).val();
+          if (selectedValue !== "__empty__") {
+            // Process mapping for the selected field
+          } else {
+            // Skip mapping for this field
+          }
+        });
+        form.submit(); // Submit the form
+      }
+    });
+
+    // Validate the mapping form when dropdowns change
+    $('select').on('change', function() {
+      $(this).valid();
+      // Disable selected custom fields
+      disableCustomFields();
+    });
+
+    // Initialize disabled custom fields
+    disableCustomFields();
+
+    // Handle the "Skip Excel" button click
+    $('#skip').click(function() {
+      window.location.href = '{% url "doisser" %}'; 
+    });
+    
+  });
+</script>
+{% endblock %}
+
+
