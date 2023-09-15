@@ -1035,8 +1035,7 @@ def parse_date_with_format(date_string):
     
 
 def parse_date(date_string):
-    try:
-        # Try using dateutil.parser.parse to automatically parse the date
+         # Try using dateutil.parser.parse to automatically parse the date
         if isinstance(date_string, float):
             return datetime.now()
         
@@ -1045,8 +1044,6 @@ def parse_date(date_string):
             return date_obj
         else:
             return datetime.now()
-    except ValueError:
-        return None
 
 
 

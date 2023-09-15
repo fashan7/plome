@@ -7,14 +7,12 @@
     <h1>Doisser</h1>
 
     <!-- Import button -->
-    <form method="post" action="{% url 'import_doisser_leads' %}" enctype="multipart/form-data">
-      {% csrf_token %}
-      <div class="form-group">
-        <label for="file">Import Excel File:</label>
-        <input type="file" name="file" accept=".xls, .xlsx" required>
-      </div>
-      <button type="submit" class="btn btn-primary">Import</button>
-    </form>
+  <form method="post" enctype="multipart/form-data" action="{% url 'import_doisser_leads' %}">
+                {% csrf_token %}
+                <input type="file" name="excel_file" accept=".csv">
+                <button type="submit">Upload</button>
+            </form>
+
 
     <!-- DataTable to display imported data -->
     <div class="table-responsive mt-4">

@@ -161,7 +161,6 @@ DEFAULT_FROM_EMAIL = 'default from email'
 
 
 
-# # settings.py
 
 # # settings.py
 # from kombu import Queue 
