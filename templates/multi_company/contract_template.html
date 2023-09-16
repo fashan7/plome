@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contract Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .contract-content {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .signature-container {
+            text-align: center;
+        }
+
+        .signature-field {
+            border: 1px solid #ccc;
+            height: 150px;
+            margin-top: 20px;
+        }
+
+        .btn-submit {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: #fff;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Page break styles */
+        .page-break {
+            page-break-before: always;
+        }
+
+        .added-signature {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 20px;
+        }
+
+        /* Additional styles for the "Add" button */
+        .btn-add {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Contract Form</h1>
+        <div class="contract-content">
+            <!-- Replace the content below with your actual contract text -->
+            <p>This is a sample contract text. Please read it carefully:</p>
+            <p>and provide your signature below:</p>
+        </div>
+
+        <div class="signature-container">
+            <label for="user_signature">Your Signature:</label>
+            <div class="signature-field" contenteditable="true" id="user_signature" name="user_signature"></div>
+            <button type="button" class="btn-add" onclick="addSignature()">Add</button>
+        </div>
+
+        <!-- Container for displaying the added signature -->
+        <div class="added-signature">
+            <label>Added Signature:</label>
+            <div id="added_signature"></div>
+        </div>
+
+        <!-- Page break -->
+        <div class="page-break"></div>
+
+        <div class="contract-content">
+            <!-- Additional content on the next page (if needed) -->
+        </div>
+<form method="post" action="{% url 'generate_pdf' %}">
+    {% csrf_token %} <!-- Include the CSRF token here -->
+    <button type="submit" class="btn-submit">Generate PDF</button>
+</form>
+
+    <script>
+        function addSignature() {
+            // Get the user's signature from the contenteditable div
+            var userSignature = document.getElementById('user_signature').innerText;
+
+            // Display the user's signature in the "added_signature" div
+            var addedSignatureDiv = document.getElementById('added_signature');
+            addedSignatureDiv.innerHTML = userSignature;
+        }
+    </script>
+</body>
+</html>
+
+

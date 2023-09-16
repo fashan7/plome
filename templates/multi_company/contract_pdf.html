@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contract Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .contract-content {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .signature-container {
+            text-align: center;
+        }
+
+        .signature-field {
+            border: 1px solid #ccc;
+            height: 150px;
+            margin-top: 20px;
+        }
+
+        .btn-submit {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: #fff;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Contract Form</h1>
+        <div class="contract-content">
+            <!-- Replace the content below with your actual contract text -->
+            <p>This is a sample contract text. Please read it carefully and provide your signature below:</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam eget ante sit amet lorem scelerisque tempor.</p>
+            <p>By signing below, you agree to the terms and conditions of this contract.</p>
+        </div>
+        <form method="post">
+            {% csrf_token %}
+            <div class="signature-container">
+                <label for="user_signature">Your Signature:</label>
+                <div class="signature-field" contenteditable="true" id="user_signature" name="user_signature"></div>
+                <!-- Add a hidden input field to capture the user's signature -->
+                <input type="hidden" id="hidden_signature" name="hidden_signature" value="">
+            </div>
+            
+        </form>
+        
+        <!-- Add the "Generate PDF" link here -->
+        <a href="#" class="btn-submit" id="generate_pdf_button">Generate PDF</a>
+
+        <script>
+            document.getElementById('generate_pdf_button').addEventListener('click', function (event) {
+                // Prevent the default link behavior
+                event.preventDefault();
+
+                // Get the user's signature from the contenteditable field
+                var userSignature = document.getElementById('user_signature').textContent;
+
+                // Set the user's signature in the hidden input field
+                document.getElementById('hidden_signature').value = userSignature;
+
+                // Submit the form to generate the PDF
+                document.forms[0].submit();
+            });
+        </script>
+    </div>
+</body>
+</html>
